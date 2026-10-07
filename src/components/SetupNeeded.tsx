@@ -3,8 +3,8 @@ export function SetupNeeded() {
     <div className="wrap page narrow">
       <h1>Connect Supabase to finish setup</h1>
       <p>
-        This build has no Supabase connection. In the GitHub repository, open Settings, then Secrets and variables, then
-        Actions, then the Variables tab, and add two repository variables:
+        This build was made without a Supabase connection. Add these two build variables where the site is built (Cloudflare,
+        or the GitHub repository variables if you deploy with GitHub Pages), then build and deploy again:
       </p>
       <ul>
         <li>
@@ -14,7 +14,7 @@ export function SetupNeeded() {
           <code>VITE_SUPABASE_ANON_KEY</code> - your anon (publishable) key
         </li>
       </ul>
-      <p>Then re-run the "Deploy site" workflow. The README has the full checklist.</p>
+      <p>The values are read at build time, so a rebuild is needed after changing them. The README has the full checklist.</p>
     </div>
   );
 }
