@@ -158,6 +158,14 @@ export async function fetchSavedIds(): Promise<string[]> {
   return ((data ?? []) as { listing_id: string }[]).map((r) => r.listing_id);
 }
 
+export async function fetchListingsByIds(ids: string[]): Promise<ListingSummary[]> {
+  if (!ids.length) return [];
+  const { data, error } = await supabase.from('listings').select(SUMMARY_COLUMNS).in('id', ids);
+  fail(error);
+  const rows = (data ?? []) as ListingSummary[];
+  return ids.map((id) => rows.find((row) => row.id === id)).filter((row): row is ListingSummary => Boolean(row));
+}
+
 export async function fetchSavedListings(): Promise<ListingSummary[]> {
   const { data, error } = await supabase
     .from('saved_listings')
