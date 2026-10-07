@@ -91,6 +91,7 @@ export function AccountPage() {
       <section className="panel stack" aria-labelledby="acc-links">
         <h2 id="acc-links">Your activity</h2>
         <ul className="plain-list">
+          <li><Link to="/seller-dashboard">Seller dashboard</Link></li>
           <li><Link to="/my-listings">My listings</Link></li>
           <li><Link to="/saved">Saved listings</Link></li>
           <li><Link to="/messages">Messages</Link></li>
