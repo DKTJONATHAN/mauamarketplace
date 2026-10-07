@@ -21,7 +21,7 @@ async function call<T>(action: string, init: RequestInit): Promise<T> {
   return body;
 }
 
-/** Uploads one prepared image. The edge function commits it to the media branch on GitHub. */
+/** Uploads one prepared image through Supabase Storage. No GitHub token is required. */
 export async function uploadImage(blob: Blob): Promise<string> {
   const { path } = await call<{ path: string }>('upload', { headers: { 'Content-Type': blob.type }, body: blob });
   return path;
