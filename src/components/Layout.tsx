@@ -61,7 +61,7 @@ function HeaderSearch() {
 }
 
 function Header({ unread }: { unread: number }) {
-  const { user } = useAuth();
+  const { user, isAnonymous } = useAuth();
   return (
     <header className="site-header">
       <div className="wrap header-row">
@@ -75,7 +75,7 @@ function Header({ unread }: { unread: number }) {
             <MessageCircle aria-hidden />
             {unread > 0 && <span className="badge">{unread > 9 ? '9+' : unread}</span>}
           </Link>
-          {user ? (
+          {user && !isAnonymous ? (
             <Link to="/account" className="icon-link" aria-label="Your account">
               <CircleUser aria-hidden />
             </Link>
@@ -157,9 +157,9 @@ function BottomNav({ unread }: { unread: number }) {
         </span>
         <span>Chats</span>
       </NavLink>
-      <NavLink to={user ? '/account' : '/login'}>
+      <NavLink to={user && !isAnonymous ? '/account' : '/login'}>
         <CircleUser aria-hidden />
-        <span>{user ? 'Account' : 'Log in'}</span>
+        <span>{user && !isAnonymous ? 'Account' : 'Log in'}</span>
       </NavLink>
     </nav>
   );
