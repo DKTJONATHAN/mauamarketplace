@@ -9,6 +9,10 @@ import { supabase } from '../lib/supabase';
 import { displayNameSchema, emailSchema, passwordSchema } from '../lib/validation';
 import { useDocumentTitle } from '../hooks';
 
+function confirmationRedirect(): string {
+  return `${siteUrl()}#/auth/confirm`;
+}
+
 export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
   const signup = mode === 'signup';
   useDocumentTitle(signup ? 'Create an account' : 'Log in');
@@ -53,12 +57,15 @@ export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
         const { data, error } = await supabase.auth.signUp({
           email: em.data,
           password: pw.data,
-          options: { emailRedirectTo: siteUrl(), data: name.trim() ? { display_name: name.trim() } : {} },
+          options: {
+            emailRedirectTo: confirmationRedirect(),
+            data: name.trim() ? { display_name: name.trim() } : {},
+          },
         });
         if (error) {
           setErrors({ form: error.message });
         } else if (!data.session) {
-          setSentTo(em.data); // email confirmation is on: the person must click the link we sent
+          setSentTo(em.data);
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: em.data, password: pw.data });
@@ -77,7 +84,6 @@ export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
     }
   }
 
-
   async function guest() {
     setBusy(true);
     try {
@@ -93,7 +99,11 @@ export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
 
   async function resend() {
     if (!sentTo) return;
-    const { error } = await supabase.auth.resend({ type: 'signup', email: sentTo, options: { emailRedirectTo: siteUrl() } });
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: sentTo,
+      options: { emailRedirectTo: confirmationRedirect() },
+    });
     if (error) toast.error('Could not resend the email yet. Wait a minute and try again.');
     else toast.success('Confirmation email sent again.');
   }
