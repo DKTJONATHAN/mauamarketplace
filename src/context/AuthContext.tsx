@@ -14,6 +14,8 @@ interface AuthState {
   loading: boolean;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
+  isAnonymous: boolean;
+  continueAsGuest: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -28,8 +30,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let active = true;
     void supabase.auth.getSession().then(({ data }) => {
       if (!active) return;
-      setSession(data.session);
-      setLoading(false);
+      if (data.session) {
+        setSession(data.session);
+        setLoading(false);
+        return;
+      }
+      try {
+        const { data: guest, error } = await supabase.auth.signInAnonymously();
+        if (!active) return;
+        if (!error) setSession(guest.session);
+      } finally {
+        if (active) setLoading(false);
+      }
     });
     const { data } = supabase.auth.onAuthStateChange((event, next) => {
       // Keep this callback synchronous: calling Supabase from inside it can deadlock.
@@ -73,11 +85,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setProfile(null);
+    setSession(null);
+  }, []);
+
+  const continueAsGuest = useCallback(async () => {
+    const { data, error } = await supabase.auth.signInAnonymously();
+    if (error) throw error;
+    setSession(data.session);
   }, []);
 
   const value = useMemo<AuthState>(
-    () => ({ session, user: session?.user ?? null, profile, loading, refreshProfile, signOut }),
-    [session, profile, loading, refreshProfile, signOut],
+    () => ({ session, user: session?.user ?? null, profile, loading, refreshProfile, signOut, isAnonymous: Boolean(session?.user?.is_anonymous), continueAsGuest }),
+    [session, profile, loading, refreshProfile, signOut, continueAsGuest],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
