@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Clock, Copy, Flag, MapPin, MessageCircle, Phone, Share2, TriangleAlert } from 'lucide-react';
@@ -15,7 +15,7 @@ import { defaultNotice } from '../config/categories';
 import { fetchContactPhone, fetchListing, startConversation } from '../lib/api';
 import { formatPrice, isNewMember, memberSince, timeAgo } from '../lib/format';
 import { conditionLabels } from '../lib/types';
-import { useDocumentTitle, useGoToLogin } from '../hooks';
+import { rememberRecentlyViewed, useDocumentTitle, useGoToLogin } from '../hooks';
 
 export function ListingPage() {
   const { id = '' } = useParams();
@@ -28,6 +28,7 @@ export function ListingPage() {
 
   const query = useQuery({ queryKey: ['listing', id], queryFn: () => fetchListing(id) });
   const listing = query.data;
+  useEffect(() => { if (listing?.id) rememberRecentlyViewed(listing.id); }, [listing?.id]);
   useDocumentTitle(listing?.title);
 
   const message = useMutation({
