@@ -135,7 +135,7 @@ function Footer() {
 }
 
 function BottomNav({ unread }: { unread: number }) {
-  const { user } = useAuth();
+  const { user, isAnonymous } = useAuth();
   return (
     <nav className="bottom-nav" aria-label="Main">
       <NavLink to="/" end>
@@ -241,4 +241,3 @@ export function Layout() {
     </>
   );
 }
-
