@@ -28,23 +28,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    void supabase.auth.getSession().then(({ data }) => {
-      if (!active) return;
-      if (data.session) {
-        setSession(data.session);
-        setLoading(false);
-        return;
-      }
+
+    async function initializeAuth() {
       try {
+        const { data } = await supabase.auth.getSession();
+        if (!active) return;
+
+        if (data.session) {
+          setSession(data.session);
+          return;
+        }
+
         const { data: guest, error } = await supabase.auth.signInAnonymously();
         if (!active) return;
         if (!error) setSession(guest.session);
       } finally {
         if (active) setLoading(false);
       }
-    });
+    }
+
+    void initializeAuth();
+
     const { data } = supabase.auth.onAuthStateChange((event, next) => {
-      // Keep this callback synchronous: calling Supabase from inside it can deadlock.
       setSession(next);
       setLoading(false);
       if (event === 'PASSWORD_RECOVERY') navigate('/reset-password', { replace: true });
@@ -56,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     });
+
     return () => {
       active = false;
       data.subscription.unsubscribe();
@@ -64,7 +70,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const userId = session?.user.id;
 
-  // Carry guest favourites into the new permanent account after signup/login.
   useEffect(() => {
     if (!userId || session?.user?.is_anonymous) return;
     let active = true;
@@ -117,9 +122,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AuthState>(
-    () => ({ session, user: session?.user ?? null, profile, loading, refreshProfile, signOut, isAnonymous: Boolean(session?.user?.is_anonymous), continueAsGuest }),
+    () => ({
+      session,
+      user: session?.user ?? null,
+      profile,
+      loading,
+      refreshProfile,
+      signOut,
+      isAnonymous: Boolean(session?.user?.is_anonymous),
+      continueAsGuest,
+    }),
     [session, profile, loading, refreshProfile, signOut, continueAsGuest],
   );
+
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
