@@ -7,7 +7,7 @@ import { site } from '../config/site';
 import { CategoryDirectory } from '../components/CategoryDirectory';
 import { ListingGrid } from '../components/ListingGrid';
 import { countActiveListings, fetchListings } from '../lib/api';
-import { useDocumentTitle } from '../hooks';
+import { getRecentlyViewed, useDocumentTitle } from '../hooks';
 import type { BrowseFilters } from '../lib/types';
 
 const latestFilters: BrowseFilters = { q: '', cat: '', min: '', max: '', cond: '', loc: '', sort: 'new' };
@@ -19,6 +19,8 @@ export function HomePage() {
   const [cat, setCat] = useState('');
 
   const latest = useQuery({ queryKey: ['latest'], queryFn: () => fetchListings(latestFilters, 0) });
+  const recentIds = getRecentlyViewed();
+  const recent = useQuery({ queryKey: ['recent-listings', recentIds.join(',')], queryFn: () => import('../lib/api').then(({ fetchListingsByIds }) => fetchListingsByIds(recentIds)), enabled: recentIds.length > 0 });
   const count = useQuery({ queryKey: ['active-count'], queryFn: countActiveListings, staleTime: 120_000 });
 
   function search(e: FormEvent) {
@@ -115,6 +117,16 @@ export function HomePage() {
           }
         />
       </section>
+
+      {recent.data && recent.data.length > 0 && (
+        <section className="wrap section" aria-labelledby="recent-title">
+          <div className="section-head">
+            <h2 id="recent-title">Recently viewed</h2>
+            <Link to="/browse">Browse more</Link>
+          </div>
+          <ListingGrid listings={recent.data.slice(0, 6)} loading={false} empty={null} />
+        </section>
+      )}
 
       <section className="wrap section" aria-labelledby="cats-title">
         <div className="section-head">
