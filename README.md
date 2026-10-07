@@ -5,7 +5,7 @@ inside the app. The site never handles money and never verifies anyone, so it sh
 
 - React 19 + TypeScript + Vite, deployed to GitHub Pages
 - Supabase for accounts (email and Google), listings, messages and Row Level Security
-- Listing photos are committed to the `media` branch of this repository by a Supabase edge function, so everyone can see them
+- Listing photos are stored in a public Supabase Storage bucket; uploads are authenticated server-side and require no GitHub token or image-storage secret in the website
 - See `specs/marketplace_design.md` for the design decisions
 
 ## What members get
@@ -67,13 +67,12 @@ Repository > Settings > Secrets and variables > Actions.
 ### 5. Turn on Pages and deploy
 
 1. Settings > Pages > Source: **GitHub Actions**.
-2. Actions tab > **Supabase (database + functions)** > Run workflow. This creates the tables, stores the token and deploys the two edge functions.
+2. The Supabase database migration creates the marketplace tables, security policies, Storage bucket, and image service.
 3. Actions tab > **Deploy site** > Run workflow (it also runs on every push to `main`).
 
-Your site is then live at `https://dktjonathan.github.io/mauamarketplace/`. The first photo upload creates the `media` branch automatically.
+Your site is then live at `https://dktjonathan.github.io/mauamarketplace/`. Photos are stored in Supabase Storage; no GitHub media branch is created.
 
-Prefer to do step 5.2 by hand? Paste `supabase/migrations/20261007000000_init.sql` into the Supabase SQL editor, then run
-`supabase secrets set GH_MEDIA_TOKEN=... && supabase functions deploy` with the Supabase CLI.
+The browser only needs `VITE_SUPABASE_URL` and the publishable/anon key. The image function uses Supabase's built-in server credentials; no custom upload secret is required.
 
 ## Local development
 
@@ -88,7 +87,7 @@ npm test && npm run build
 
 - **Custom domain:** build with `VITE_BASE=/` and set the function secret `ALLOWED_ORIGINS` to your domain (comma-separated list).
 - **Moderating:** reported listings hide themselves at five reports. To remove anything yourself, use the Supabase dashboard (Table editor > `listings`, set `status` to `hidden`, or delete the row). Only the database owner can unhide a listing.
-- **Photo storage:** photos are resized to at most 1280px and compressed, typically 100 to 400 KB each. GitHub recommends keeping repositories well under a few GB, so watch the size of the `media` branch. Deleted photos disappear from the site but remain in git history. To purge history, recreate the `media` branch from scratch (this deletes every photo, so only do it deliberately).
+- **Photo storage:** photos are resized to at most 1280px and compressed, typically 100 to 400 KB each, then stored in Supabase Storage. Deleted photos are removed from the Storage bucket.
 - **Rules and privacy text:** `src/pages/RulesPage.tsx` and `SafetyPage.tsx` are drafts written for this build. Have a Kenyan lawyer review them, and check whether you need to register with the Office of the Data Protection Commissioner. Set `contactEmail` in `src/config/site.ts` so people can request removals.
 - **Launching Meru later:** copy the project, change `src/config/site.ts` (place, locations, media repo) and deploy it against its own Supabase project.
 - **Link previews:** because the site is a static single-page app, WhatsApp shows the same preview for every listing link.
