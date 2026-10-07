@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { site } from './config/site';
@@ -29,10 +29,15 @@ export function useSaved() {
   const qc = useQueryClient();
   const toast = useToast();
   const goToLogin = useGoToLogin();
+  const localKey = 'mm.guest-saved';
+  const isAnonymous = Boolean(user?.is_anonymous);
   const key = useMemo(() => ['saved-ids', user?.id], [user?.id]);
 
-  const query = useQuery({ queryKey: key, queryFn: fetchSavedIds, enabled: Boolean(user) });
-  const ids = useMemo(() => new Set(query.data ?? []), [query.data]);
+  const query = useQuery({ queryKey: key, queryFn: fetchSavedIds, enabled: Boolean(user && !isAnonymous) });
+  const [guestIds, setGuestIds] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(localKey) ?? '[]') as string[]; } catch { return []; }
+  });
+  const ids = useMemo(() => new Set(isAnonymous ? guestIds : (query.data ?? [])), [isAnonymous, guestIds, query.data]);
 
   const mutation = useMutation({
     mutationFn: ({ id, saved }: { id: string; saved: boolean }) => setSaved(id, saved),
@@ -52,12 +57,27 @@ export function useSaved() {
   const toggle = useCallback(
     (id: string) => {
       if (!user) return goToLogin();
+      if (isAnonymous) {
+        setGuestIds((prev) => { const next = ids.has(id) ? prev.filter((x) => x !== id) : [...prev, id]; localStorage.setItem(localKey, JSON.stringify(next)); return next; });
+        return;
+      }
       mutation.mutate({ id, saved: !ids.has(id) });
     },
-    [user, goToLogin, mutation, ids],
+    [user, isAnonymous, goToLogin, mutation, ids],
   );
 
   return { ids, toggle };
+}
+
+export function rememberRecentlyViewed(id: string): void {
+  try {
+    const previous = JSON.parse(localStorage.getItem('mm.recent') ?? '[]') as string[];
+    localStorage.setItem('mm.recent', JSON.stringify([id, ...previous.filter((x) => x !== id)].slice(0, 12)));
+  } catch { /* storage may be unavailable */ }
+}
+
+export function getRecentlyViewed(): string[] {
+  try { return JSON.parse(localStorage.getItem('mm.recent') ?? '[]') as string[]; } catch { return []; }
 }
 
 /** Unread message count, kept fresh by a Realtime subscription. Call once, in the layout. */
