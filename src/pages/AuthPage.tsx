@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, Navigate, useLocation } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, MailCheck } from 'lucide-react';
 import { GoogleButton } from '../components/GoogleButton';
 import { NEXT_KEY, useAuth } from '../context/AuthContext';
@@ -15,7 +15,9 @@ export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
   const { user, loading, isAnonymous, continueAsGuest } = useAuth();
   const toast = useToast();
   const location = useLocation();
+  const navigate = useNavigate();
   const from = (location.state as { from?: string } | null)?.from ?? sessionStorage.getItem(NEXT_KEY) ?? '/';
+  const accountOnlyTarget = /^\/(sell|messages|account|my-listings)(\/|$)/.test(from);
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -81,6 +83,7 @@ export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
     try {
       sessionStorage.setItem(NEXT_KEY, from);
       await continueAsGuest();
+      if (accountOnlyTarget) navigate('/', { replace: true });
     } catch {
       setErrors({ form: 'Guest access is not available yet. Please use an account or try again.' });
     } finally {
@@ -116,7 +119,7 @@ export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
           : 'Browse listings without an account. You only need credentials when you want to contact a seller or sell something.'}
       </p>
 
-      {!signup && (
+      {!signup && !accountOnlyTarget && (
         <button type="button" className="btn btn-quiet btn-block" onClick={guest} disabled={busy}>
           Continue as guest
         </button>
