@@ -18,6 +18,7 @@ const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then((m
 const RulesPage = lazy(() => import('./pages/RulesPage').then((m) => ({ default: m.RulesPage })));
 const SafetyPage = lazy(() => import('./pages/SafetyPage').then((m) => ({ default: m.SafetyPage })));
 const SavedPage = lazy(() => import('./pages/SavedPage').then((m) => ({ default: m.SavedPage })));
+const SellerDashboardPage = lazy(() => import('./pages/SellerDashboardPage').then((m) => ({ default: m.SellerDashboardPage })));
 const SellPage = lazy(() => import('./pages/SellPage').then((m) => ({ default: m.SellPage })));
 const SellerPage = lazy(() => import('./pages/SellerPage').then((m) => ({ default: m.SellerPage })));
 
@@ -46,6 +47,7 @@ export function App() {
           <Route path="my-listings" element={<MyListingsPage />} />
           <Route path="messages/:id" element={<ConversationPage />} />
           <Route path="account" element={<AccountPage />} />
+          <Route path="seller-dashboard" element={<SellerDashboardPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>
