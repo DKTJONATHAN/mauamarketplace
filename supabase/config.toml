@@ -1,0 +1,9 @@
+project_id = "mauamarketplace"
+
+# These functions check the caller's session themselves (see _shared/auth.ts),
+# so the gateway's JWT check is switched off to keep browser preflight requests simple.
+[functions.listing-media]
+verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = false
