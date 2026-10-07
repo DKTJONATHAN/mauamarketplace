@@ -33,15 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const { data } = await supabase.auth.getSession();
         if (!active) return;
-
-        if (data.session) {
-          setSession(data.session);
-          return;
-        }
-
-        const { data: guest, error } = await supabase.auth.signInAnonymously();
-        if (!active) return;
-        if (!error) setSession(guest.session);
+        setSession(data.session);
       } finally {
         if (active) setLoading(false);
       }
@@ -116,9 +108,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const continueAsGuest = useCallback(async () => {
-    const { data, error } = await supabase.auth.signInAnonymously();
-    if (error) throw error;
-    setSession(data.session);
+    // Guest browsing deliberately uses no Supabase session. This keeps public
+    // browsing independent of the Anonymous Sign-Ins provider setting.
+    setSession(null);
+    setProfile(null);
   }, []);
 
   const value = useMemo<AuthState>(
@@ -129,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       refreshProfile,
       signOut,
-      isAnonymous: Boolean(session?.user?.is_anonymous),
+      isAnonymous: false,
       continueAsGuest,
     }),
     [session, profile, loading, refreshProfile, signOut, continueAsGuest],
