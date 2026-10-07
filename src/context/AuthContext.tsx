@@ -63,6 +63,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [navigate]);
 
   const userId = session?.user.id;
+
+  // Carry guest favourites into the new permanent account after signup/login.
+  useEffect(() => {
+    if (!userId || session?.user?.is_anonymous) return;
+    let active = true;
+    void (async () => {
+      try {
+        const raw = localStorage.getItem('mm.guest-saved');
+        const ids = raw ? JSON.parse(raw) as string[] : [];
+        if (!ids.length) return;
+        const rows = ids.filter((id): id is string => typeof id === 'string').map((listing_id) => ({ listing_id }));
+        if (rows.length) {
+          await supabase.from('saved_listings').upsert(rows, { onConflict: 'user_id,listing_id', ignoreDuplicates: true });
+        }
+        if (active) localStorage.removeItem('mm.guest-saved');
+      } catch {
+        // Keep guest favourites if the migration cannot complete yet.
+      }
+    })();
+    return () => { active = false; };
+  }, [userId, session?.user?.is_anonymous]);
+
   useEffect(() => {
     if (!userId) {
       setProfile(null);
