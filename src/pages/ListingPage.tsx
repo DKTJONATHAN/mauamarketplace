@@ -21,7 +21,7 @@ export function ListingPage() {
   const { id = '' } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
-  const { user } = useAuth();
+  const { user, isAnonymous } = useAuth();
   const goToLogin = useGoToLogin();
   const [reporting, setReporting] = useState(false);
   const [phoneStep, setPhoneStep] = useState<'closed' | 'warn' | 'shown'>('closed');
@@ -81,7 +81,7 @@ export function ListingPage() {
   }
 
   function showPhone() {
-    if (!user) return goToLogin();
+    if (!user || isAnonymous) return goToLogin();
     setPhoneStep('warn');
   }
 
@@ -137,7 +137,7 @@ export function ListingPage() {
                   <button
                     type="button"
                     className="btn btn-primary btn-block"
-                    onClick={() => (user ? message.mutate() : goToLogin())}
+                    onClick={() => (user && !isAnonymous ? message.mutate() : goToLogin())}
                     disabled={message.isPending}
                   >
                     <MessageCircle aria-hidden /> {message.isPending ? 'Opening chat...' : 'Message seller'}
@@ -154,7 +154,7 @@ export function ListingPage() {
                 <button type="button" className="btn btn-quiet" onClick={share}>
                   <Share2 aria-hidden /> Share
                 </button>
-                <button type="button" className="btn btn-quiet" onClick={() => (user ? setReporting(true) : goToLogin())}>
+                <button type="button" className="btn btn-quiet" onClick={() => (user && !isAnonymous ? setReporting(true) : goToLogin())}>
                   <Flag aria-hidden /> Report
                 </button>
               </div>
