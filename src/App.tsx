@@ -7,6 +7,7 @@ const AuthPage = lazy(() => import('./pages/AuthPage').then((m) => ({ default: m
 const BrowsePage = lazy(() => import('./pages/BrowsePage').then((m) => ({ default: m.BrowsePage })));
 const CategoriesPage = lazy(() => import('./pages/CategoriesPage').then((m) => ({ default: m.CategoriesPage })));
 const ConversationPage = lazy(() => import('./pages/ConversationPage').then((m) => ({ default: m.ConversationPage })));
+const ConfirmEmailPage = lazy(() => import('./pages/ConfirmEmailPage').then((m) => ({ default: m.ConfirmEmailPage })));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })));
 import { HomePage } from './pages/HomePage';
 const ListingPage = lazy(() => import('./pages/ListingPage').then((m) => ({ default: m.ListingPage })));
@@ -34,6 +35,7 @@ export function App() {
         <Route path="messages" element={<MessagesPage />} />
         <Route path="login" element={<AuthPage mode="login" />} />
         <Route path="signup" element={<AuthPage mode="signup" />} />
+        <Route path="auth/confirm" element={<ConfirmEmailPage />} />
         <Route path="forgot-password" element={<ForgotPasswordPage />} />
         <Route path="reset-password" element={<ResetPasswordPage />} />
         <Route path="safety" element={<SafetyPage />} />
