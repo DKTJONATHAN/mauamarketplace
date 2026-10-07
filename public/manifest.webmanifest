@@ -1,0 +1,12 @@
+{
+  "name": "Maua Marketplace",
+  "short_name": "Maua Market",
+  "description": "Buy and sell with people in Maua, Meru County.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f7f2",
+  "theme_color": "#0a4a31",
+  "icons": [
+    { "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
