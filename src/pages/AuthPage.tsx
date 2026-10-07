@@ -12,7 +12,7 @@ import { useDocumentTitle } from '../hooks';
 export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
   const signup = mode === 'signup';
   useDocumentTitle(signup ? 'Create an account' : 'Log in');
-  const { user, loading } = useAuth();
+  const { user, loading, isAnonymous, continueAsGuest } = useAuth();
   const toast = useToast();
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from ?? sessionStorage.getItem(NEXT_KEY) ?? '/';
@@ -25,7 +25,7 @@ export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
   const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string; form?: string }>({});
   const [sentTo, setSentTo] = useState<string | null>(null);
 
-  if (!loading && user) {
+  if (!loading && user && !isAnonymous) {
     sessionStorage.removeItem(NEXT_KEY);
     return <Navigate to={from} replace />;
   }
@@ -75,6 +75,19 @@ export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
     }
   }
 
+
+  async function guest() {
+    setBusy(true);
+    try {
+      sessionStorage.setItem(NEXT_KEY, from);
+      await continueAsGuest();
+    } catch {
+      setErrors({ form: 'Guest access is not available yet. Please use an account or try again.' });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function resend() {
     if (!sentTo) return;
     const { error } = await supabase.auth.resend({ type: 'signup', email: sentTo, options: { emailRedirectTo: siteUrl() } });
@@ -96,12 +109,18 @@ export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
 
   return (
     <div className="wrap page narrow auth-card">
-      <h1>{signup ? 'Create your account' : 'Log in'}</h1>
+      <h1>{signup ? 'Create your account' : 'Continue to Maua Marketplace'}</h1>
       <p className="muted">
         {signup
           ? 'Free, and your email stays private. You choose the name other members see.'
-          : 'Welcome back. Log in to message sellers, save listings and post items.'}
+          : 'Browse listings without an account. You only need credentials when you want to contact a seller or sell something.'}
       </p>
+
+      {!signup && (
+        <button type="button" className="btn btn-quiet btn-block" onClick={guest} disabled={busy}>
+          Continue as guest
+        </button>
+      )}
 
       <GoogleButton next={from} />
       <p className="divider"><span>or use your email</span></p>
