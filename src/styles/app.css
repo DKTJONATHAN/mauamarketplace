@@ -175,6 +175,25 @@ code { background: var(--green-wash); padding: 0.1em 0.35em; border-radius: 3px;
 .rail a:hover { color: #fff; background: rgb(255 255 255 / 0.1); text-decoration: none; }
 .rail .rail-all { color: var(--tag); border-color: var(--tag); font-weight: 800; }
 
+/* ---------- Landing page ---------- */
+.home-listings { padding-top: 1.35rem; }
+.home-listings-head { align-items: end; }
+.home-listings-head h1 { margin-bottom: 0.2rem; }
+.home-listings-head .result-count { margin: 0; }
+.listing-more { display: grid; justify-items: center; gap: 0.6rem; padding-top: 1.25rem; }
+.home-bottom { padding-bottom: 2rem; }
+.home-safety {
+  display: flex; gap: 0.9rem; align-items: flex-start;
+  background: var(--warn-bg); color: var(--tag-ink);
+  border: 1.5px solid var(--warn-line); border-radius: 6px;
+  padding: 1rem 1.15rem;
+}
+.home-safety > .lucide { width: 1.7rem; height: 1.7rem; flex: none; }
+.home-safety h2 { margin-bottom: 0.3rem; font-size: 1.2rem; }
+.home-safety p { margin-bottom: 0.45rem; }
+.home-safety p:last-of-type { margin-bottom: 0.55rem; }
+.home-safety a { color: var(--tag-ink); font-weight: 800; }
+
 /* ---------- Hero ---------- */
 .hero {
   background-color: var(--paper);
@@ -228,12 +247,12 @@ code { background: var(--green-wash); padding: 0.1em 0.35em; border-radius: 3px;
 .directory-group .lucide { color: var(--green); }
 
 /* ---------- Listing cards ---------- */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13.5rem), 1fr)); gap: 1rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr)); gap: 0.75rem; }
 .card { position: relative; background: var(--surface); border: 1.5px solid var(--line); border-radius: 6px; overflow: hidden; }
 .card:hover { border-color: var(--ink); }
 .card-link { display: block; color: inherit; text-decoration: none; }
 .card-link:hover { color: inherit; }
-.card-media { position: relative; aspect-ratio: 4 / 3; background: var(--green-wash); overflow: hidden; }
+.card-media { position: relative; aspect-ratio: 1 / 1; background: var(--green-wash); overflow: hidden; }
 .card-media img { width: 100%; height: 100%; object-fit: cover; }
 .card .price-tag { position: absolute; left: 0; bottom: 0.6rem; }
 .card-body { padding: 0.7rem 0.8rem 0.85rem; }
@@ -482,7 +501,13 @@ dialog.dialog::backdrop { background: rgb(8 28 18 / 0.6); }
   .brand-logo { width: 88%; height: 88%; }
   .hero-search { grid-template-columns: 1fr; }
   .hero-search .btn { width: 100%; }
-  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.65rem; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+  .home-listings { padding-top: 0.8rem; }
+  .home-listings-head .btn { min-height: 40px; padding-inline: 0.75rem; }
+  .home-listings-head { align-items: center; }
+  .home-listings-head h1 { font-size: 1.45rem; }
+  .home-safety { padding: 0.85rem; }
+  .listing-more { padding-top: 1rem; }
   .card-body { padding: 0.55rem 0.6rem 0.7rem; }
   .card .price-tag { font-size: 0.92rem; }
   .field-pair { grid-template-columns: 1fr; }
