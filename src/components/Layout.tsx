@@ -48,7 +48,7 @@ function HeaderSearch() {
   );
 }
 
-const appDownloadUrl = (import.meta.env.VITE_ANDROID_APP_DOWNLOAD_URL ?? '').trim();
+const appDownloadUrl = (import.meta.env.VITE_ANDROID_APP_DOWNLOAD_URL ?? 'https://archive.org/download/maua-marketplace/Maua-Marketplace.apk').trim();
 
 function isInstalledApp(): boolean {
   return window.matchMedia('(display-mode: standalone)').matches ||
