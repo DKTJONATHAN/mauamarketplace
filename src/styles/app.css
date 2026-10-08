@@ -124,12 +124,11 @@ code { background: var(--green-wash); padding: 0.1em 0.35em; border-radius: 3px;
 
 .site-header { background: var(--green-deep); color: #fff; }
 .header-row { display: flex; align-items: center; gap: 1.25rem; padding-block: 0.85rem; }
-.brand { display: inline-flex; align-items: center; gap: 0.6rem; color: #fff; text-decoration: none; flex: none; }
+.brand { display: inline-flex; align-items: center; color: #fff; text-decoration: none; flex: none; }
 .brand:hover { color: #fff; }
-.brand-name {
-  font-family: var(--font-display); font-stretch: 78%; font-weight: 800;
-  font-size: 1.45rem; letter-spacing: 0.005em; line-height: 1;
-}
+.brand-logo { width: 11rem; height: 4.4rem; object-fit: contain; object-position: left center; }
+.brand-logo-mark { width: 2rem; height: 2rem; object-fit: contain; }
+
 .header-search { flex: 1; display: flex; max-width: 34rem; }
 .header-search input {
   flex: 1; min-width: 0; border: 0; border-radius: 6px 0 0 6px; padding: 0.65rem 0.9rem; font: inherit; color: var(--ink);
@@ -434,7 +433,7 @@ dialog.dialog::backdrop { background: rgb(8 28 18 / 0.6); }
   .header-search { order: 3; flex-basis: 100%; max-width: none; }
   .header-actions { gap: 0.1rem; }
   .header-actions .btn-tag, .header-actions .icon-link[aria-label='Saved listings'] { display: none; }
-  .brand-name { font-size: 1.3rem; }
+  .brand-logo { width: 8.75rem; height: 3.8rem; }
   .hero-search { grid-template-columns: 1fr; }
   .hero-search .btn { width: 100%; }
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.65rem; }
