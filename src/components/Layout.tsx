@@ -150,7 +150,8 @@ function Header({ unread }: { unread: number }) {
       <div className="wrap header-row">
         {inChat ? <div className="brand-static" aria-label="Chat in progress"><Brand /></div> : <>
           <Brand /><HeaderSearch />
-          <nav className="header-actions" aria-label="Account">\n            <AppDownloadButton />
+          <nav className="header-actions" aria-label="Account">
+            <AppDownloadButton />
             <Link to="/saved" className="icon-link" aria-label="Saved listings"><Heart aria-hidden /></Link>
             <Link to="/messages" className="icon-link" aria-label={unread ? `Messages, ${unread} unread` : 'Messages'}><MessageCircle aria-hidden />{unread > 0 && <span className="badge">{unread > 9 ? '9+' : unread}</span>}</Link>
             {user && !isAnonymous ? <Link to="/account" className="icon-link" aria-label="Your account"><CircleUser aria-hidden /></Link> : <Link to="/login" className="text-link">Log in</Link>}
