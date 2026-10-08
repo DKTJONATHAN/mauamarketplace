@@ -29,38 +29,58 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Prepare preinstalled Android SDK
+      - name: Prepare Android SDK for Bubblewrap
         run: |
           set -e
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          test -d "$ANDROID_HOME"
 
-          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          if [ ! -x "$SDKMANAGER" ]; then
-            SDKMANAGER="$(command -v sdkmanager)"
-          fi
-          test -x "$SDKMANAGER"
-          echo "Using sdkmanager: $SDKMANAGER"
+          SDK="/usr/local/lib/android/sdk"
+          CMDLINE="$SDK/cmdline-tools/latest"
+          test -d "$SDK"
+          test -x "$CMDLINE/bin/sdkmanager"
 
-          yes | "$SDKMANAGER" --licenses >/dev/null 2>&1 || true
-          "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --install             "platform-tools"             "platforms;android-35"             "build-tools;35.0.0"
+          echo "Using Android SDK: $SDK"
+          echo "Using command-line tools: $CMDLINE"
 
-          test -d "$ANDROID_HOME/platforms/android-35"
-          test -d "$ANDROID_HOME/build-tools/35.0.0"
+          yes | "$CMDLINE/bin/sdkmanager" --sdk_root="$SDK" --licenses >/dev/null 2>&1 || true
+          "$CMDLINE/bin/sdkmanager" --sdk_root="$SDK" --install             "platform-tools"             "platforms;android-35"             "build-tools;35.0.0"
+
+          # Bubblewrap's current path validator expects its configured Android
+          # SDK directory to expose sdkmanager as <sdk>/bin/sdkmanager or
+          # <sdk>/tools/bin/sdkmanager. GitHub's runner uses the newer
+          # <sdk>/cmdline-tools/latest/bin/sdkmanager layout, so create a
+          # Bubblewrap-compatible SDK root while keeping the real packages.
+          BW_SDK="$RUNNER_TEMP/bubblewrap-android-sdk"
+          rm -rf "$BW_SDK"
+          mkdir -p "$BW_SDK"
+          ln -s "$CMDLINE/bin" "$BW_SDK/bin"
+          ln -s "$SDK/build-tools" "$BW_SDK/build-tools"
+          ln -s "$SDK/platform-tools" "$BW_SDK/platform-tools"
+          ln -s "$SDK/platforms" "$BW_SDK/platforms"
+          ln -s "$SDK/licenses" "$BW_SDK/licenses" || true
+
+          test -x "$BW_SDK/bin/sdkmanager"
+          test -d "$BW_SDK/build-tools/35.0.0"
+          test -d "$BW_SDK/platforms/android-35"
+
+          echo "BUBBLEWRAP_ANDROID_SDK=$BW_SDK" >> "$GITHUB_ENV"
+          echo "Bubblewrap SDK: $BW_SDK"
+          find "$BW_SDK" -maxdepth 2 -type l -o -type d | head -50
 
       - name: Install Bubblewrap
         run: npm install --global @bubblewrap/cli
 
       - name: Configure Bubblewrap non-interactively
         run: |
+          set -e
           mkdir -p "$HOME/.bubblewrap"
           cat > "$HOME/.bubblewrap/config.json" <<EOF
           {
             "jdkPath": "$JAVA_HOME",
-            "androidSdkPath": "$ANDROID_HOME"
+            "androidSdkPath": "$BUBBLEWRAP_ANDROID_SDK"
           }
           EOF
           cat "$HOME/.bubblewrap/config.json"
+          bubblewrap doctor
 
       - name: Prepare signing key
         working-directory: android
