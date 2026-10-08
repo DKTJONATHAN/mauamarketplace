@@ -25,10 +25,12 @@ export const site = {
   twitterHandle: '',
 } as const;
 
-export const mediaBaseUrl = env.supabaseUrl ? `${env.supabaseUrl}/storage/v1/object/public/listing-images` : '';
+export const mediaBaseUrl = import.meta.env.VITE_R2_MEDIA_BASE_URL?.replace(/\\/$/, '') ?? '';
 
 export function mediaUrl(path: string): string {
-  return `${mediaBaseUrl}/${path}`;
+  if (path.startsWith('r2/')) return `${mediaBaseUrl}/${path.slice(3)}`;
+  // During migration, old images continue to load from Supabase Storage.
+  return env.supabaseUrl ? `${env.supabaseUrl}/storage/v1/object/public/listing-images/${path}` : path;
 }
 
 /**
