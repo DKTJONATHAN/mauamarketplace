@@ -25,7 +25,7 @@ export const site = {
   twitterHandle: '',
 } as const;
 
-export const mediaBaseUrl = import.meta.env.VITE_R2_MEDIA_BASE_URL?.replace(/\\/$/, '') ?? '';
+export const mediaBaseUrl = (import.meta.env.VITE_R2_MEDIA_BASE_URL ?? 'https://pub-7ef5a8d013b245bfb993db42153b04e4.r2.dev').replace(/\/$/, '');
 
 export function mediaUrl(path: string): string {
   if (path.startsWith('r2/')) return `${mediaBaseUrl}/${path.slice(3)}`;
