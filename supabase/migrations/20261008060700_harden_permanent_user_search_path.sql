@@ -1,0 +1,1 @@
+alter function public.is_permanent_user() set search_path = '';
