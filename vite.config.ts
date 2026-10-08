@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
-// Root path by default (Cloudflare, custom domains). The GitHub Pages workflow sets VITE_BASE=/mauamarketplace/.
+// Cloudflare Pages and custom domains are served from the site root.
 export default defineConfig({
   base: process.env.VITE_BASE ?? '/',
   plugins: [react()],
