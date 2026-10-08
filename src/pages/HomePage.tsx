@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
-import { categoryGroups } from '../config/categories';
+import { categoryGroups, featuredCategorySlugs, getCategory } from '../config/categories';
 import { site } from '../config/site';
 import { CategoryDirectory } from '../components/CategoryDirectory';
 import { ListingGrid } from '../components/ListingGrid';
@@ -73,6 +73,13 @@ export function HomePage() {
             {typeof count.data === 'number' && count.data > 0 && (
               <p className="hero-count">{count.data.toLocaleString('en-KE')} listings live right now</p>
             )}
+            <div className="hero-category-actions" aria-label="Popular categories">
+              {featuredCategorySlugs.map((slug) => {
+                const c = getCategory(slug);
+                return <Link key={slug} to={`/browse?cat=${slug}`} className="category-chip">{c.label}</Link>;
+              })}
+              <Link to="/categories" className="btn btn-tag">All categories</Link>
+            </div>
           </div>
 
           <aside className="steps-card" aria-labelledby="steps-title">
