@@ -24,8 +24,15 @@ jobs:
           node-version: "22"
       - name: Install Bubblewrap
         run: npm install --global @bubblewrap/cli
-      - name: Configure Bubblewrap
-        run: bubblewrap updateConfig --jdkPath="$JAVA_HOME" --androidSdkPath="$ANDROID_SDK_ROOT"
+      - name: Configure Bubblewrap non-interactively
+        run: |
+          mkdir -p "$HOME/.bubblewrap"
+          cat > "$HOME/.bubblewrap/config.json" <<EOF
+          {
+            "jdkPath": "$JAVA_HOME",
+            "androidSdkPath": "$ANDROID_SDK_ROOT"
+          }
+          EOF
       - name: Prepare signing key
         working-directory: android
         run: |
