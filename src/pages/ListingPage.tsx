@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Clock, Copy, Flag, MapPin, MessageCircle, Phone, Share2, TriangleAlert } from 'lucide-react';
@@ -200,7 +200,7 @@ export function ListingPage() {
         ) : (
           <div className="stack">
             {phone.isLoading && <p aria-busy="true">Loading...</p>}
-            {phone.isError && <p role="alert">{(phone.error as Error).message)}
+            {phone.isError && <p role="alert">{(phone.error as Error).message}</p>}
             {phone.isSuccess && !phone.data && (
               <p>This seller has not shared a phone number. Use the message button to contact them.</p>
             )}
