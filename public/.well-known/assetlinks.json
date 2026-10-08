@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "ke.co.mauamarketplace.app",
+      "sha256_cert_fingerprints": [
+        "E8:B6:24:A6:BC:4C:C9:EF:7A:A4:0F:B3:D6:94:B6:BE:87:43:45:19:6A:E2:7F:C8:07:7A:A2:BC:22:1D:9C:7C"
+      ]
+    }
+  }
+]
