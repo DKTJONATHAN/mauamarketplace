@@ -1,4 +1,4 @@
-const CACHE = 'maua-market-v4';
+const CACHE = 'maua-market-shell-v5';
 const APP_SHELL = [
   './',
   './index.html',
@@ -31,10 +31,12 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
 
-  // Always prefer the live HTML so a new deployment cannot point at old chunks.
+  // Navigation is network-first so new deployments always provide the current
+  // HTML and therefore the current Vite chunk manifest.
   if (event.request.mode === 'navigate' || event.request.destination === 'document') {
     event.respondWith(
       fetch(event.request)
@@ -49,6 +51,10 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
+
+  // Never cache JavaScript, CSS, fonts, or other Vite build assets. This avoids
+  // a stale service worker returning an old chunk after a new deployment.
+  if (url.pathname.startsWith('/assets/')) return;
 
   event.respondWith(
     fetch(event.request)
