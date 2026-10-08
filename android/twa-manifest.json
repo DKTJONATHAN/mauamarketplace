@@ -20,8 +20,8 @@
     "path": "android.keystore",
     "alias": "maua-marketplace"
   },
-  "appVersionName": "1.0.1",
-  "appVersionCode": 2,
+  "appVersionName": "1.0.2",
+  "appVersionCode": 3,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://mauamarketplace.pages.dev/manifest.webmanifest",
@@ -35,7 +35,9 @@
   "isMetaQuest": false,
   "minSdkVersion": 23,
   "orientation": "portrait",
-  "fingerprints": [],
+  "fingerprints": [
+    "E8:B6:24:A6:BC:4C:C9:EF:7A:A4:0F:B3:D6:94:B6:BE:87:43:45:19:6A:E2:7F:C8:07:7A:A2:BC:22:1D:9C:7C"
+  ],
   "additionalTrustedOrigins": [],
   "retainedBundles": [],
   "protocolHandlers": [],
