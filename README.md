@@ -3,7 +3,7 @@
 A free classifieds site for Maua, Meru County. People post items, produce, services and property, and talk to each other
 inside the app. The site never handles money and never verifies anyone, so it ships with safety tools built in.
 
-- React 19 + TypeScript + Vite, deployed to GitHub Pages
+- React 19 + TypeScript + Vite, deployed to Cloudflare Pages
 - Supabase for accounts (email and Google), listings, messages and Row Level Security
 - Listing photos are stored in a public Supabase Storage bucket; uploads are authenticated server-side and require no GitHub token or image-storage secret in the website
 - See `specs/marketplace_design.md` for the design decisions
@@ -45,32 +45,33 @@ Keep the token for step 4. It is stored only as a Supabase secret and never reac
 
 1. Create a project. Note the **Project URL**, the **anon (publishable) key**, the **project ref** (the part before `.supabase.co`) and the **database password**.
 2. Authentication > URL Configuration:
-   - Site URL: `https://dktjonathan.github.io/mauamarketplace/`
+   - Site URL: your Cloudflare Pages URL or custom domain, e.g. `https://mauamarketplace.pages.dev/`
    - Redirect URLs: add the same URL, and `http://localhost:5173/` for local work.
 3. Authentication > Sign In / Providers > Email: keep **Confirm email** on. (Photo uploads require a confirmed email, which blocks throw-away sign-ups.)
-4. Authentication > Sign In / Providers > Google: enable it. In Google Cloud Console create an OAuth client of type *Web application*, add `https://YOUR-REF.supabase.co/auth/v1/callback` as an authorised redirect URI and `https://dktjonathan.github.io` as an authorised JavaScript origin, then paste the client ID and secret into Supabase.
+4. Authentication > Sign In / Providers > Google: enable it. In Google Cloud Console create an OAuth client of type *Web application*, add `https://YOUR-REF.supabase.co/auth/v1/callback` as an authorised redirect URI and your Cloudflare Pages/custom-domain origin as an authorised JavaScript origin, then paste the client ID and secret into Supabase.
 5. Supabase's built-in email sender is limited to a few messages per hour. Before real launch, add your own SMTP provider under Authentication > SMTP Settings, otherwise sign-up emails will stall.
 
-### 4. Add GitHub secrets and variables
+### 4. Configure Cloudflare Pages environment variables
 
-Repository > Settings > Secrets and variables > Actions.
+In Cloudflare Pages, open the project and set these variables for the Production environment:
 
-| Type | Name | Value |
-|---|---|---|
-| Variable | `VITE_SUPABASE_URL` | your Project URL |
-| Variable | `VITE_SUPABASE_ANON_KEY` | your anon / publishable key |
-| Variable | `SUPABASE_PROJECT_REF` | your project ref |
-| Secret | `SUPABASE_ACCESS_TOKEN` | from supabase.com/dashboard/account/tokens |
-| Secret | `SUPABASE_DB_PASSWORD` | the database password |
-| Secret | `GH_MEDIA_TOKEN` | the token from step 2 |
+| Name | Value |
+|---|---|
+| `VITE_SUPABASE_URL` | your Supabase Project URL |
+| `VITE_SUPABASE_ANON_KEY` | your Supabase anon / publishable key |
 
-### 5. Turn on Pages and deploy
+Use `/` as the Vite base path. Build with `npm run build`; the output directory is `dist`.
 
-1. Settings > Pages > Source: **GitHub Actions**.
-2. The Supabase database migration creates the marketplace tables, security policies, Storage bucket, and image service.
-3. Actions tab > **Deploy site** > Run workflow (it also runs on every push to `main`).
+Cloudflare Pages should deploy from the `main` branch using the project’s Git integration. Do not configure GitHub Pages for this repository.
 
-Your site is then live at `https://dktjonathan.github.io/mauamarketplace/`. Photos are stored in Supabase Storage; no GitHub media branch is created.
+### 5. Deploy
+
+1. Connect `DKTJONATHAN/mauamarketplace` to Cloudflare Pages.
+2. Set the build command to `npm run build` and the output directory to `dist`.
+3. Add the two `VITE_` variables above.
+4. The Supabase database migration creates the marketplace tables, security policies, Storage bucket, and image service.
+
+Your site is then live at your Cloudflare Pages URL or custom domain. Photos are stored in Supabase Storage; no GitHub media branch is required.
 
 The browser only needs `VITE_SUPABASE_URL` and the publishable/anon key. The image function uses Supabase's built-in server credentials; no custom upload secret is required.
 
