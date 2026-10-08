@@ -165,10 +165,15 @@ code { background: var(--green-wash); padding: 0.1em 0.35em; border-radius: 3px;
   font-size: 0.75rem; font-weight: 800; display: grid; place-items: center; line-height: 1;
 }
 .rail { border-top: 1px solid rgb(255 255 255 / 0.18); }
-.rail ul { list-style: none; display: flex; gap: 1.25rem; overflow-x: auto; padding-block: 0.55rem; scrollbar-width: thin; }
-.rail a { color: #e7f2ec; text-decoration: none; white-space: nowrap; font-size: 0.95rem; }
-.rail a:hover { color: #fff; text-decoration: underline; }
-.rail .rail-all { color: var(--tag); font-weight: 700; }
+.rail ul { list-style: none; display: flex; flex-wrap: wrap; gap: 0.45rem; padding-block: 0.55rem; }
+.rail li { display: flex; }
+.rail a {
+  display: inline-flex; align-items: center; min-height: 36px; padding: 0.35rem 0.75rem;
+  border: 1px solid rgb(255 255 255 / 0.24); border-radius: 999px;
+  color: #e7f2ec; text-decoration: none; white-space: nowrap; font-size: 0.9rem; font-weight: 650;
+}
+.rail a:hover { color: #fff; background: rgb(255 255 255 / 0.1); text-decoration: none; }
+.rail .rail-all { color: var(--tag); border-color: var(--tag); font-weight: 800; }
 
 /* ---------- Hero ---------- */
 .hero {
@@ -183,6 +188,15 @@ code { background: var(--green-wash); padding: 0.1em 0.35em; border-radius: 3px;
 .hero h1 { font-size: clamp(3rem, 9vw, 6.25rem); font-stretch: 70%; font-weight: 850; line-height: 0.92; margin-bottom: 1.1rem; }
 .hero-lead { font-size: 1.15rem; max-width: 36rem; margin-bottom: 1.4rem; }
 .hero-search { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 12rem) auto; gap: 0.5rem; max-width: 44rem; }
+.hero-category-actions {
+  display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 1rem; align-items: center;
+}
+.category-chip {
+  display: inline-flex; align-items: center; min-height: 38px; padding: 0.35rem 0.75rem;
+  background: var(--surface); color: var(--ink); border: 1.5px solid var(--line);
+  border-radius: 999px; text-decoration: none; font-weight: 700;
+}
+.category-chip:hover { color: var(--green-deep); border-color: var(--green); background: var(--green-wash); text-decoration: none; }
 .hero-count { margin: 0.8rem 0 0; color: var(--ink-soft); font-size: 0.95rem; }
 .steps-card { background: var(--surface); border: 2px solid var(--ink); border-radius: 6px; padding: 1.25rem 1.35rem; }
 .steps-card h2 { margin-bottom: 0.9rem; }
@@ -394,6 +408,24 @@ input[type='checkbox'] { width: 1.3rem; height: 1.3rem; min-height: 0; flex: non
 .composer { display: flex; gap: 0.5rem; align-items: flex-end; }
 .composer textarea { flex: 1; min-height: 44px; max-height: 9rem; }
 .chat-blocked { padding: 0.8rem 1rem; background: var(--danger-wash); border-radius: 6px; margin: 0; }
+.chat-finish {
+  display: inline-flex; align-items: center; gap: 0.45rem; margin-left: auto;
+}
+.chat-lock-note {
+  display: flex; gap: 0.5rem; align-items: flex-start; margin: 0;
+  padding: 0.65rem 0.8rem; background: var(--green-wash); border: 1.5px solid var(--green);
+  border-radius: 6px; font-size: 0.9rem;
+}
+.chat-decision {
+  display: grid; gap: 1rem;
+}
+.chat-decision-option {
+  display: grid; gap: 0.35rem; padding: 0.9rem; background: var(--paper);
+  border: 1.5px solid var(--line); border-radius: 6px;
+}
+.chat-decision-option h3 { margin: 0; }
+.chat-decision-option p { margin: 0; color: var(--ink-soft); }
+.chat-decision-option .btn { margin-top: 0.35rem; }
 
 /* ---------- Auth ---------- */
 .auth-card { padding-top: 2.5rem; }
