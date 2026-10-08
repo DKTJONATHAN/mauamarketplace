@@ -427,3 +427,13 @@ dialog.dialog::backdrop { background: rgb(8 28 18 / 0.6); }
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+
+/* ---------- Web app download button ---------- */
+.btn-app-download { display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; }
+.btn-app-download .lucide { width: 1rem; height: 1rem; }
+
+@media (max-width: 47.5rem) {
+  .btn-app-download span { display: none; }
+  .btn-app-download { width: 42px; min-height: 42px; padding: 0; }
+}
