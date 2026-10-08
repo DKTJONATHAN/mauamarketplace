@@ -230,6 +230,11 @@ export async function markConversationRead(conversationId: string): Promise<void
   fail(error);
 }
 
+export async function closeConversation(conversationId: string): Promise<void> {
+  const { error } = await supabase.rpc('close_conversation', { p_conversation_id: conversationId });
+  fail(error);
+}
+
 export async function fetchUnreadCount(userId: string): Promise<number> {
   const { count, error } = await supabase
     .from('messages')
