@@ -1,8 +1,7 @@
 name: Supabase (database + functions)
 
 # Run this by hand from the Actions tab after you add the secrets listed in the README.
-# It applies supabase/migrations, stores the GitHub photo token as a function secret,
-# and deploys the edge functions.
+# It applies supabase/migrations, and deploys the remaining Supabase edge functions.
 on:
   workflow_dispatch:
 
@@ -22,7 +21,5 @@ jobs:
         run: supabase link --project-ref "$PROJECT_REF"
       - name: Apply database migrations
         run: supabase db push
-      - name: Store photo token as a function secret
-        run: supabase secrets set GH_MEDIA_TOKEN="${{ secrets.GH_MEDIA_TOKEN }}" --project-ref "$PROJECT_REF"
       - name: Deploy edge functions
         run: supabase functions deploy --project-ref "$PROJECT_REF"
