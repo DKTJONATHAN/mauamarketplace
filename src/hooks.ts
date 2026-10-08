@@ -14,10 +14,13 @@ import { applySeo, type SeoProps } from './lib/seo';
  */
 export function useSeo(props: SeoProps = {}): void {
   const { title, description, path, image, type, noindex, jsonLd } = props;
+  // Stable dependency so a new object identity every render does not re-run the effect forever.
+  const jsonLdKey = jsonLd ? JSON.stringify(jsonLd) : '';
 
   useEffect(() => {
     applySeo({ title, description, path, image, type, noindex, jsonLd });
-  }, [title, description, path, image, type, noindex, jsonLd]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- jsonLdKey stands in for jsonLd
+  }, [title, description, path, image, type, noindex, jsonLdKey]);
 }
 
 /** Convenience wrapper that only sets the document title (and basic defaults). */
