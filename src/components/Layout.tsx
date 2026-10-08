@@ -62,10 +62,12 @@ function HeaderSearch() {
 
 function Header({ unread }: { unread: number }) {
   const { user, isAnonymous } = useAuth();
+  const location = useLocation();
+  const inChat = /^\/messages\/[^/]+$/.test(location.pathname);
   return (
     <header className="site-header">
       <div className="wrap header-row">
-        <Brand />
+        {inChat ? <span className="brand brand-static"><Brand /></span> : <Brand />}
         <HeaderSearch />
         <nav className="header-actions" aria-label="Account">
           <Link to="/saved" className="icon-link" aria-label="Saved listings">
@@ -89,7 +91,7 @@ function Header({ unread }: { unread: number }) {
           </Link>
         </nav>
       </div>
-      <nav className="rail" aria-label="Popular categories">
+      {!inChat && <nav className="rail" aria-label="Popular categories">
         <ul className="wrap">
           {featuredCategorySlugs.map((slug) => {
             const c = getCategory(slug);
@@ -105,7 +107,7 @@ function Header({ unread }: { unread: number }) {
             </Link>
           </li>
         </ul>
-      </nav>
+      </nav>}
     </header>
   );
 }
@@ -224,6 +226,8 @@ function ScrollToTop() {
 
 export function Layout() {
   const unread = useUnreadMessages();
+  const { pathname } = useLocation();
+  const inChat = /^\/messages\/[^/]+$/.test(pathname);
   return (
     <>
       <a href="#main" className="skip-link" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>
@@ -235,8 +239,8 @@ export function Layout() {
       <main id="main" tabIndex={-1}>
         <Outlet />
       </main>
-      <Footer />
-      <BottomNav unread={unread} />
+      {!inChat && <Footer />}
+      {!inChat && <BottomNav unread={unread} />
       <TermsGate />
     </>
   );
