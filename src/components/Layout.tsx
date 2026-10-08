@@ -86,6 +86,61 @@ function AppDownloadButton() {
   );
 }
 
+
+function AppUpdateNotice() {
+  const [update, setUpdate] = useState<{ latestVersion: string; downloadUrl: string } | null>(null);
+  const [dismissed, setDismissed] = useState(() => sessionStorage.getItem('mm.app-update-dismissed') === '1');
+
+  useEffect(() => {
+    let cancelled = false;
+    async function check() {
+      try {
+        const response = await fetch('/app-version.json', { cache: 'no-store' });
+        if (!response.ok) return;
+        const data = await response.json() as { latestVersion?: string; latestVersionCode?: number; downloadUrl?: string };
+        const latest = data.latestVersion?.trim();
+        if (!latest || cancelled) return;
+
+        const params = new URLSearchParams(window.location.search);
+        const installedVersion = params.get('app_version')?.trim();
+        const standalone = window.matchMedia('(display-mode: standalone)').matches ||
+          (navigator as Navigator & { standalone?: boolean }).standalone === true;
+
+        // The first update-aware APK is 1.0.3. Older APKs launched without
+        // app_version, so treat a standalone app without the marker as 1.0.2.
+        const knownInstalled = installedVersion || (standalone ? '1.0.2' : '');
+        if (!knownInstalled || !standalone || knownInstalled === latest) return;
+
+        if (!cancelled) setUpdate({ latestVersion: latest, downloadUrl: data.downloadUrl?.trim() ?? '' });
+      } catch {
+        // Update checks are best-effort and must never block the marketplace.
+      }
+    }
+    void check();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (!update || dismissed) return null;
+
+  return (
+    <div className="app-update-notice" role="status">
+      <div className="app-update-copy">
+        <strong>Maua Marketplace {update.latestVersion} is available</strong>
+        <p>Update the Android app to get the latest improvements.</p>
+      </div>
+      {update.downloadUrl ? (
+        <a className="btn btn-tag app-update-action" href={update.downloadUrl} target="_blank" rel="noopener noreferrer">Update</a>
+      ) : (
+        <span className="app-update-pending">Download link coming soon</span>
+      )}
+      <button type="button" className="icon-btn" aria-label="Dismiss update notice" onClick={() => {
+        sessionStorage.setItem('mm.app-update-dismissed', '1');
+        setDismissed(true);
+      }}><X aria-hidden /></button>
+    </div>
+  );
+}
+
 function Header({ unread }: { unread: number }) {
   const { user, isAnonymous } = useAuth();
   const location = useLocation();
@@ -185,6 +240,7 @@ export function Layout() {
       <ScrollToTop />
       <DisclaimerStrip />
       <InstallPrompt />
+      <AppUpdateNotice />
       <Header unread={unread} />
       <main id="main" tabIndex={-1}><Outlet /></main>
       {!inChat && <Footer />}
