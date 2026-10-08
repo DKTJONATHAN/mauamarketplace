@@ -153,10 +153,6 @@ export function listingJsonLd(listing: Listing): Record<string, unknown> {
       ? mediaUrl(listing.images[0])
       : defaultOgImage();
   const url = absoluteUrl(`/listing/${listing.id}`);
-  const priceValidUntil = listing.expires_at
-    ? listing.expires_at.slice(0, 10)
-    : undefined;
-
   const offer: Record<string, unknown> = {
     '@type': 'Offer',
     url,
@@ -172,7 +168,6 @@ export function listingJsonLd(listing: Listing): Record<string, unknown> {
   if (listing.price != null && listing.price > 0) {
     offer.price = listing.price;
   }
-  if (priceValidUntil) offer.priceValidUntil = priceValidUntil;
 
   return {
     '@context': 'https://schema.org',
