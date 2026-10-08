@@ -1,5 +1,5 @@
-const CACHE = 'maua-market-v1';
-const APP_SHELL = ['./', './index.html', './favicon.svg'];
+const CACHE = 'maua-market-v2';
+const APP_SHELL = ['./', './index.html', './logo.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
