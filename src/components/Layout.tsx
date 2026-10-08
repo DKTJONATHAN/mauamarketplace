@@ -64,50 +64,61 @@ function Header({ unread }: { unread: number }) {
   const { user, isAnonymous } = useAuth();
   const location = useLocation();
   const inChat = /^\/messages\/[^/]+$/.test(location.pathname);
+
   return (
     <header className="site-header">
       <div className="wrap header-row">
-        {inChat ? <span className="brand brand-static"><Brand /></span> : <Brand />}
-        <HeaderSearch />
-        <nav className="header-actions" aria-label="Account">
-          <Link to="/saved" className="icon-link" aria-label="Saved listings">
-            <Heart aria-hidden />
-          </Link>
-          <Link to="/messages" className="icon-link" aria-label={unread ? `Messages, ${unread} unread` : 'Messages'}>
-            <MessageCircle aria-hidden />
-            {unread > 0 && <span className="badge">{unread > 9 ? '9+' : unread}</span>}
-          </Link>
-          {user && !isAnonymous ? (
-            <Link to="/account" className="icon-link" aria-label="Your account">
-              <CircleUser aria-hidden />
-            </Link>
-          ) : (
-            <Link to="/login" className="text-link">
-              Log in
-            </Link>
-          )}
-          <Link to="/sell" className="btn btn-tag">
-            Sell
-          </Link>
-        </nav>
+        {inChat ? (
+          <div className="brand-static" aria-label="Chat in progress">
+            <Brand />
+          </div>
+        ) : (
+          <>
+            <Brand />
+            <HeaderSearch />
+            <nav className="header-actions" aria-label="Account">
+              <Link to="/saved" className="icon-link" aria-label="Saved listings">
+                <Heart aria-hidden />
+              </Link>
+              <Link to="/messages" className="icon-link" aria-label={unread ? `Messages, ${unread} unread` : 'Messages'}>
+                <MessageCircle aria-hidden />
+                {unread > 0 && <span className="badge">{unread > 9 ? '9+' : unread}</span>}
+              </Link>
+              {user && !isAnonymous ? (
+                <Link to="/account" className="icon-link" aria-label="Your account">
+                  <CircleUser aria-hidden />
+                </Link>
+              ) : (
+                <Link to="/login" className="text-link">
+                  Log in
+                </Link>
+              )}
+              <Link to="/sell" className="btn btn-tag">
+                Sell
+              </Link>
+            </nav>
+          </>
+        )}
       </div>
-      {!inChat && <nav className="rail" aria-label="Popular categories">
-        <ul className="wrap">
-          {featuredCategorySlugs.map((slug) => {
-            const c = getCategory(slug);
-            return (
-              <li key={slug}>
-                <Link to={`/browse?cat=${slug}`}>{c.label}</Link>
-              </li>
-            );
-          })}
-          <li>
-            <Link to="/categories" className="rail-all">
-              All categories
-            </Link>
-          </li>
-        </ul>
-      </nav>}
+      {!inChat && (
+        <nav className="rail" aria-label="Popular categories">
+          <ul className="wrap">
+            {featuredCategorySlugs.map((slug) => {
+              const c = getCategory(slug);
+              return (
+                <li key={slug}>
+                  <Link to={`/browse?cat=${slug}`}>{c.label}</Link>
+                </li>
+              );
+            })}
+            <li>
+              <Link to="/categories" className="rail-all">
+                All categories
+              </Link>
+            </li>
+          </ul>
+        </nav>
+      )}
     </header>
   );
 }
@@ -240,7 +251,7 @@ export function Layout() {
         <Outlet />
       </main>
       {!inChat && <Footer />}
-      {!inChat && <BottomNav unread={unread} />
+      {!inChat && <BottomNav unread={unread} />}
       <TermsGate />
     </>
   );
