@@ -23,9 +23,18 @@ function json(data: unknown, status = 200, origin?: string): Response {
 }
 
 function supabaseHeaders(env: Env, service = false): HeadersInit {
+  if (service) {
+    // Supabase's new sb_secret_* keys are API keys, not JWTs.
+    // They must be sent as apikey and must not be used as a Bearer token.
+    return {
+      apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+      'Content-Type': 'application/json',
+    };
+  }
+
   return {
-    apikey: service ? env.SUPABASE_SERVICE_ROLE_KEY : env.SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${service ? env.SUPABASE_SERVICE_ROLE_KEY : env.SUPABASE_ANON_KEY}`,
+    apikey: env.SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${env.SUPABASE_ANON_KEY}`,
     'Content-Type': 'application/json',
   };
 }
