@@ -19,7 +19,9 @@ export function LogoMark({ size = 32 }: { size?: number }) {
 export function Brand() {
   return (
     <Link to="/" className="brand" aria-label={`${site.name} home`}>
+      <span className="brand-logo-circle">
       <img src={LOGO_SRC} className="brand-logo" alt={site.name} />
+    </span>
     </Link>
   );
 }
