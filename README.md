@@ -5,7 +5,7 @@ inside the app. The site never handles money and never verifies anyone, so it sh
 
 - React 19 + TypeScript + Vite, deployed to Cloudflare Pages
 - Supabase for accounts (email and Google), listings, messages and Row Level Security
-- Listing photos are stored in a public Supabase Storage bucket; uploads are handled by the Supabase Edge Function and require no GitHub token in the website
+- Listing photos are stored in Cloudflare R2; uploads are handled by a Cloudflare Pages Function. Supabase remains the database/auth backend.
 - See `specs/marketplace_design.md` for the design decisions
 
 ## What members get
@@ -34,7 +34,7 @@ No local machine? Open the repository in a Codespace (Code > Codespaces), upload
 
 ### 2. Configure the Supabase project
 
-The marketplace uses Supabase Storage for listing photos. No GitHub token or GitHub-hosted media branch is required.
+Supabase stores accounts, listings, messages and other application data. Listing photos are stored in Cloudflare R2, not Supabase Storage.
 
 ### 3. Set up Supabase
 
@@ -54,6 +54,7 @@ In Cloudflare Pages, open the project and set these variables for the Production
 |---|---|
 | `VITE_SUPABASE_URL` | your Supabase Project URL |
 | `VITE_SUPABASE_ANON_KEY` | your Supabase anon / publishable key |
+| `VITE_R2_MEDIA_BASE_URL` | the public base URL of the R2 media domain, with no trailing slash |
 
 The app is configured to use `/` as its permanent base path. Build with `npm run build`; the output directory is `dist`.
 
@@ -64,11 +65,11 @@ Cloudflare Pages should deploy from the `main` branch using the project’s Git 
 1. Connect `DKTJONATHAN/mauamarketplace` to Cloudflare Pages.
 2. Set the build command to `npm run build` and the output directory to `dist`.
 3. Add the two `VITE_` variables above.
-4. The Supabase database migration creates the marketplace tables, security policies, Storage bucket, and image service.
+4. Bind the R2 bucket to the Pages project using the binding name `MEDIA` (Settings > Bindings > Add > R2 bucket), then redeploy.
 
-Your site is then live at your Cloudflare Pages URL or custom domain. Photos are stored in Supabase Storage; no GitHub media branch is required.
+Your site is then live at your Cloudflare Pages URL or custom domain. New photos go to R2 while the migration is in progress, and old Supabase Storage photos continue to work until they are migrated.
 
-The browser only needs `VITE_SUPABASE_URL` and the publishable/anon key. The image function uses Supabase's built-in server credentials; no custom upload secret is required.
+The browser only needs the two Supabase `VITE_` values plus `VITE_R2_MEDIA_BASE_URL`. The Pages Function keeps the Supabase service credential server-side.
 
 ## Local development
 
@@ -83,7 +84,7 @@ npm test && npm run build
 
 - **Custom domain:** set the function secret `ALLOWED_ORIGINS` to your domain (comma-separated list).
 - **Moderating:** reported listings hide themselves at five reports. To remove anything yourself, use the Supabase dashboard (Table editor > `listings`, set `status` to `hidden`, or delete the row). Only the database owner can unhide a listing.
-- **Photo storage:** photos are resized to at most 1280px and compressed, typically 100 to 400 KB each, then stored in Supabase Storage. Deleted photos are removed from the Storage bucket.
+- **Photo storage:** photos are resized to at most 1280px and compressed, typically 100 to 400 KB each, then stored in R2. Deleted photos are removed from R2. Existing Supabase Storage photos can be migrated in small batches without recreating accounts or listings.
 - **Rules and privacy text:** `src/pages/RulesPage.tsx` and `SafetyPage.tsx` are drafts written for this build. Have a Kenyan lawyer review them, and check whether you need to register with the Office of the Data Protection Commissioner. Set `contactEmail` in `src/config/site.ts` so people can request removals.
 - **Launching Meru later:** copy the project, change `src/config/site.ts` (place and locations) and deploy it against its own Supabase project.
 - **Link previews:** because the site is a static single-page app, WhatsApp shows the same preview for every listing link.
