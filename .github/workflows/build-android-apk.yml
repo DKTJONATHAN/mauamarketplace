@@ -13,10 +13,6 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      ANDROID_HOME: /usr/local/lib/android/sdk
-      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-
     steps:
       - uses: actions/checkout@v4
 
@@ -62,6 +58,10 @@ jobs:
           test -d "$BW_SDK/build-tools/35.0.0"
           test -d "$BW_SDK/platforms/android-35"
 
+          # Use one SDK environment variable only. Gradle fails when
+          # ANDROID_HOME and ANDROID_SDK_ROOT point at different directories.
+          echo "ANDROID_HOME=$BW_SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=" >> "$GITHUB_ENV"
           echo "BUBBLEWRAP_ANDROID_SDK=$BW_SDK" >> "$GITHUB_ENV"
           echo "Bubblewrap SDK: $BW_SDK"
           find "$BW_SDK" -maxdepth 2 -type l -o -type d | head -50
@@ -80,6 +80,8 @@ jobs:
           }
           EOF
           cat "$HOME/.bubblewrap/config.json"
+          unset ANDROID_SDK_ROOT
+          export ANDROID_HOME="$BUBBLEWRAP_ANDROID_SDK"
           bubblewrap doctor
 
       - name: Prepare signing key
@@ -89,14 +91,20 @@ jobs:
 
       - name: Generate Android project
         working-directory: android
-        run: bubblewrap update --skipVersionUpgrade --manifest="./twa-manifest.json"
+        run: |
+          unset ANDROID_SDK_ROOT
+          export ANDROID_HOME="$BUBBLEWRAP_ANDROID_SDK"
+          bubblewrap update --skipVersionUpgrade --manifest="./twa-manifest.json"
 
       - name: Build signed APK
         working-directory: android
         env:
           BUBBLEWRAP_KEYSTORE_PASSWORD: "maua-marketplace-build"
           BUBBLEWRAP_KEY_PASSWORD: "maua-marketplace-build"
-        run: bubblewrap build --skipPwaValidation --manifest="./twa-manifest.json" --signingKeyPath="./android.keystore" --signingKeyAlias="maua-marketplace"
+        run: |
+          unset ANDROID_SDK_ROOT
+          export ANDROID_HOME="$BUBBLEWRAP_ANDROID_SDK"
+          bubblewrap build --skipPwaValidation --manifest="./twa-manifest.json" --signingKeyPath="./android.keystore" --signingKeyAlias="maua-marketplace"
 
       - name: Rename APK
         working-directory: android
