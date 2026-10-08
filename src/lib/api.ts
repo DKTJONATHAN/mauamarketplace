@@ -31,8 +31,7 @@ export async function fetchListings(filters: BrowseFilters, page: number) {
   let query = supabase
     .from('listings')
     .select(SUMMARY_COLUMNS, { count: 'exact' })
-    .eq('status', 'active')
-    .gt('expires_at', new Date().toISOString());
+    .eq('status', 'active');
 
   if (filters.cat) query = query.eq('category', filters.cat);
   const term = cleanSearchTerm(filters.q);
@@ -82,7 +81,6 @@ export async function fetchSellerListings(sellerId: string): Promise<ListingSumm
     .select(SUMMARY_COLUMNS)
     .eq('seller_id', sellerId)
     .eq('status', 'active')
-    .gt('expires_at', new Date().toISOString())
     .order('created_at', { ascending: false })
     .limit(48);
   fail(error);
