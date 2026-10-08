@@ -5,14 +5,14 @@ inside the app. The site never handles money and never verifies anyone, so it sh
 
 - React 19 + TypeScript + Vite, deployed to Cloudflare Pages
 - Supabase for accounts (email and Google), listings, messages and Row Level Security
-- Listing photos are stored in a public Supabase Storage bucket; uploads are authenticated server-side and require no GitHub token or image-storage secret in the website
+- Listing photos are stored in a public Supabase Storage bucket; uploads are handled by the Supabase Edge Function and require no GitHub token in the website
 - See `specs/marketplace_design.md` for the design decisions
 
 ## What members get
 
 - Sign up with email or Google. Email is never shown publicly. Google names are not imported, so nobody is named without choosing it.
 - About 50 categories (phones, TVs, laptops, clothes, school items, cars, house helps, farm produce, livestock, property, services and more)
-- Search, price, condition, place and sort filters; save listings; listings expire after 60 days and can be renewed
+- Search, price, condition, place and sort filters; save listings; listings remain live until the seller marks them sold or they are removed
 - In-app chat with live updates, so nobody has to share a phone number. Optional phone number per listing, visible only to signed-in members who accept a safety reminder
 - Caution features: safety panel on every listing with category-specific advice (IMEI checks, logbook and NTSA search, land search, house-help checks), scam warnings under chat messages, report listing/member, block member, "new member" badge, automatic hiding after five reports, daily posting and messaging limits, 18+ confirmation for house-help and jobs, photo location data stripped before upload, account deletion that also removes photos
 
@@ -32,14 +32,9 @@ git push origin main
 
 No local machine? Open the repository in a Codespace (Code > Codespaces), upload `maua-marketplace.patch` into it, and run the same `git am` and `git push` commands in its terminal.
 
-### 2. Create the GitHub token for photos
+### 2. Configure the Supabase project
 
-GitHub > Settings > Developer settings > Personal access tokens > Fine-grained tokens > Generate.
-
-- Repository access: only `DKTJONATHAN/mauamarketplace`
-- Permissions: Repository > **Contents: Read and write**
-
-Keep the token for step 4. It is stored only as a Supabase secret and never reaches the browser.
+The marketplace uses Supabase Storage for listing photos. No GitHub token or GitHub-hosted media branch is required.
 
 ### 3. Set up Supabase
 
@@ -60,9 +55,9 @@ In Cloudflare Pages, open the project and set these variables for the Production
 | `VITE_SUPABASE_URL` | your Supabase Project URL |
 | `VITE_SUPABASE_ANON_KEY` | your Supabase anon / publishable key |
 
-Use `/` as the Vite base path. Build with `npm run build`; the output directory is `dist`.
+The app is configured to use `/` as its permanent base path. Build with `npm run build`; the output directory is `dist`.
 
-Cloudflare Pages should deploy from the `main` branch using the project’s Git integration. Do not configure GitHub Pages for this repository.
+Cloudflare Pages should deploy from the `main` branch using the project’s Git integration. GitHub is used only as the source repository; Cloudflare Pages is the hosting and deployment platform.
 
 ### 5. Deploy
 
@@ -86,9 +81,9 @@ npm test && npm run build
 
 ## Things to know
 
-- **Custom domain:** build with `VITE_BASE=/` and set the function secret `ALLOWED_ORIGINS` to your domain (comma-separated list).
+- **Custom domain:** set the function secret `ALLOWED_ORIGINS` to your domain (comma-separated list).
 - **Moderating:** reported listings hide themselves at five reports. To remove anything yourself, use the Supabase dashboard (Table editor > `listings`, set `status` to `hidden`, or delete the row). Only the database owner can unhide a listing.
 - **Photo storage:** photos are resized to at most 1280px and compressed, typically 100 to 400 KB each, then stored in Supabase Storage. Deleted photos are removed from the Storage bucket.
 - **Rules and privacy text:** `src/pages/RulesPage.tsx` and `SafetyPage.tsx` are drafts written for this build. Have a Kenyan lawyer review them, and check whether you need to register with the Office of the Data Protection Commissioner. Set `contactEmail` in `src/config/site.ts` so people can request removals.
-- **Launching Meru later:** copy the project, change `src/config/site.ts` (place, locations, media repo) and deploy it against its own Supabase project.
+- **Launching Meru later:** copy the project, change `src/config/site.ts` (place and locations) and deploy it against its own Supabase project.
 - **Link previews:** because the site is a static single-page app, WhatsApp shows the same preview for every listing link.
