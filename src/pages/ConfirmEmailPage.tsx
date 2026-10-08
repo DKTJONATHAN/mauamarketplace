@@ -15,11 +15,16 @@ export function ConfirmEmailPage() {
     let active = true;
 
     async function verify() {
+      const searchParams = new URLSearchParams(window.location.search);
       const hashParams = new URLSearchParams(window.location.hash.split('?')[1] ?? '');
-      const tokenHash = new URLSearchParams(window.location.search).get('token_hash') ?? hashParams.get('token_hash');
-      const type = (new URLSearchParams(window.location.search).get('type') ?? hashParams.get('type') ?? 'email') as EmailOtpType;
+      const code = searchParams.get('code') ?? hashParams.get('code');
+      const tokenHash = searchParams.get('token_hash') ?? hashParams.get('token_hash');
+      const type = (searchParams.get('type') ?? hashParams.get('type') ?? 'email') as EmailOtpType;
 
-      if (!tokenHash) {
+      // Sign-up uses PKCE, so Supabase normally returns an auth code that
+      // must be exchanged for a session. Keep token_hash support as a fallback
+      // for older/custom email templates.
+      if (!code && !tokenHash) {
         if (active) {
           setState('error');
           setMessage('This verification link is missing or incomplete. Please request a new confirmation email.');
@@ -27,7 +32,9 @@ export function ConfirmEmailPage() {
         return;
       }
 
-      const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+      const { error } = code
+        ? await supabase.auth.exchangeCodeForSession(code)
+        : await supabase.auth.verifyOtp({ token_hash: tokenHash as string, type });
       if (!active) return;
 
       if (error) {
