@@ -93,8 +93,40 @@ jobs:
           set -e
           test -n "$ANDROID_KEYSTORE_BASE64"
           test -n "$ANDROID_KEYSTORE_PASSWORD"
-          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android.keystore
-          keytool -list             -keystore android.keystore             -storepass "$ANDROID_KEYSTORE_PASSWORD"             -alias "maua-marketplace" >/dev/null
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -e
+          test -n "$ANDROID_KEYSTORE_BASE64"
+          test -n "$ANDROID_KEYSTORE_PASSWORD"
+          test -n "$ANDROID_KEY_PASSWORD"
+          # The downloaded keystore is PKCS#12 (.p12). Convert it to
+          # JKS for Bubblewrap while preserving the exact same key pair/certificate.
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android.keystore.p12
+          keytool -list \
+            -storetype PKCS12 \
+            -keystore android.keystore.p12 \
+            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -alias "maua-marketplace" >/dev/null
+
+          rm -f android.keystore
+          keytool -importkeystore \
+            -srckeystore android.keystore.p12 \
+            -srcstoretype PKCS12 \
+            -srcstorepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -srckeypass "$ANDROID_KEY_PASSWORD" \
+            -srcalias "maua-marketplace" \
+            -destkeystore android.keystore \
+            -deststoretype JKS \
+            -deststorepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -destkeypass "$ANDROID_KEY_PASSWORD" \
+            -destalias "maua-marketplace" \
+            -noprompt
+
+          keytool -list \
+            -keystore android.keystore \
+            -storetype JKS \
+            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -alias "maua-marketplace" >/dev/null
 
       - name: Generate Android project
         working-directory: android
