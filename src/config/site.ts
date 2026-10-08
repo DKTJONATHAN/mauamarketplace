@@ -20,8 +20,8 @@ export const site = {
   locale: 'en_KE',
   language: 'en',
   themeColor: '#0a4a31',
-  /** Production origin + base path (no trailing slash on origin). Used for absolute URLs in meta tags. */
-  productionOrigin: 'https://dktjonathan.github.io',
+  /** Production origin (no trailing slash). Used for absolute URLs in meta tags when window is unavailable. */
+  productionOrigin: 'https://mauamarketplace.pages.dev',
   /** Twitter / X handle if you create one later (e.g. @mauamarket). Leave empty to omit. */
   twitterHandle: '',
 } as const;
@@ -34,7 +34,7 @@ export function mediaUrl(path: string): string {
 
 /**
  * Absolute site root including Vite base path, always with a trailing slash.
- * Safe in the browser; falls back to the known GitHub Pages URL during SSR-less builds.
+ * Safe in the browser; falls back to the known production URL during SSR-less builds.
  */
 export function siteUrl(): string {
   if (typeof window !== 'undefined' && window.location?.origin) {
@@ -42,7 +42,7 @@ export function siteUrl(): string {
     const origin = window.location.origin;
     return `${origin}${base.endsWith('/') ? base : `${base}/`}`;
   }
-  const base = import.meta.env.BASE_URL || '/mauamarketplace/';
+  const base = import.meta.env.BASE_URL || '/';
   return `${site.productionOrigin}${base.endsWith('/') ? base : `${base}/`}`;
 }
 

@@ -1,4 +1,4 @@
-# Maua Marketplace — https://dktjonathan.github.io/mauamarketplace/
+# Maua Marketplace — https://mauamarketplace.pages.dev/
 User-agent: *
 Allow: /
 
@@ -13,4 +13,4 @@ Disallow: /#/seller-dashboard
 Disallow: /#/forgot-password
 Disallow: /#/reset-password
 
-Sitemap: https://dktjonathan.github.io/mauamarketplace/sitemap.xml
+Sitemap: https://mauamarketplace.pages.dev/sitemap.xml
