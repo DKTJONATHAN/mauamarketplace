@@ -7,7 +7,8 @@ import { ReportDialog } from '../components/ReportDialog';
 import { useAuth } from '../context/AuthContext';
 import { fetchPublicProfile, fetchSellerListings } from '../lib/api';
 import { isNewMember, memberSince } from '../lib/format';
-import { useDocumentTitle, useGoToLogin } from '../hooks';
+import { useSeo, useGoToLogin } from '../hooks';
+import { site } from '../config/site';
 
 export function SellerPage() {
   const { id = '' } = useParams();
@@ -17,7 +18,13 @@ export function SellerPage() {
 
   const profile = useQuery({ queryKey: ['profile', id], queryFn: () => fetchPublicProfile(id) });
   const listings = useQuery({ queryKey: ['seller-listings', id], queryFn: () => fetchSellerListings(id) });
-  useDocumentTitle(profile.data?.display_name);
+  useSeo({
+    title: profile.data?.display_name,
+    description: profile.data?.display_name
+      ? `Listings from ${profile.data.display_name} on ${site.name} in ${site.place}.`
+      : `Seller profile on ${site.name}.`,
+    path: id ? `/seller/${id}` : '/seller',
+  });
 
   if (profile.isLoading) return <div className="wrap page" aria-busy="true">Loading...</div>;
   if (!profile.data) {

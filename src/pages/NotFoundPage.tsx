@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
-import { useDocumentTitle } from '../hooks';
+import { useSeo } from '../hooks';
 
 export function NotFoundPage() {
-  useDocumentTitle('Page not found');
+  useSeo({ title: 'Page not found', noindex: true, path: '/not-found' });
   return (
     <div className="wrap page narrow">
       <h1>Page not found</h1>
