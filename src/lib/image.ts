@@ -3,7 +3,7 @@
  * Re-encoding through a canvas drops all EXIF metadata, including GPS location,
  * so sellers do not accidentally publish where they live.
  */
-const MAX_SIDE = 1280;
+const MAX_SIDE = 1200;
 const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp'];
 
 export interface PreparedImage {
@@ -57,18 +57,18 @@ export async function prepareImage(file: File): Promise<PreparedImage> {
     ctx.fillRect(0, 0, width, height);
     ctx.drawImage(decoded.source, 0, 0, width, height);
 
-    let blob = await toBlob(canvas, 'image/webp', 0.82);
+    let blob = await toBlob(canvas, 'image/webp', 0.78);
     let ext: 'webp' | 'jpg' = 'webp';
     if (!blob || blob.type !== 'image/webp') {
-      blob = await toBlob(canvas, 'image/jpeg', 0.85);
+      blob = await toBlob(canvas, 'image/jpeg', 0.8);
       ext = 'jpg';
     }
     if (!blob) throw new Error('Your browser could not process this photo.');
-    if (blob.size > 1_400_000) {
+    if (blob.size > 850_000) {
       const smaller = await toBlob(canvas, ext === 'webp' ? 'image/webp' : 'image/jpeg', 0.6);
       if (smaller && smaller.size < blob.size) blob = smaller;
     }
-    if (blob.size > 1_500_000) throw new Error('That photo is still too large after shrinking. Try a different one.');
+    if (blob.size > 950_000) throw new Error('That photo is still too large after shrinking. Try a different one.');
     return { blob, ext };
   } finally {
     decoded.close();
