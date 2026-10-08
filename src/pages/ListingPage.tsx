@@ -78,8 +78,7 @@ export function ListingPage() {
 
   const category = getCategory(listing.category);
   const isOwner = user?.id === listing.seller_id;
-  const expired = new Date(listing.expires_at).getTime() < Date.now();
-  const available = listing.status === 'active' && !expired;
+  const available = listing.status === 'active';
 
   async function share() {
     if (!listing) return;
@@ -110,7 +109,6 @@ export function ListingPage() {
         </p>
       )}
       {listing.status === 'sold' && <p className="banner" role="status">This item has been sold.</p>}
-      {listing.status === 'active' && expired && <p className="banner" role="status">This listing has expired.</p>}
 
       <div className="listing-layout">
         <div className="listing-main">
