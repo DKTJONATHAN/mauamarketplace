@@ -59,52 +59,55 @@ function setJsonLd(data: Record<string, unknown> | Record<string, unknown>[] | u
   document.head.appendChild(el);
 }
 
-/** Apply full SEO head tags. Call from useEffect; returns a cleanup that restores defaults is optional. */
+/** Apply full SEO head tags. Call from useEffect; never throws into the React tree. */
 export function applySeo(props: SeoProps = {}): void {
-  const title = props.title
-    ? `${props.title} - ${site.name}`
-    : `${site.name} - buy and sell in ${site.place}`;
-  const description = props.description ?? site.description;
-  const url = absoluteUrl(props.path ?? '/');
-  const image = props.image ?? defaultOgImage();
-  const type = props.type ?? 'website';
-  const robots = props.noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+  try {
+    const title = props.title
+      ? `${props.title} - ${site.name}`
+      : `${site.name} - buy and sell in ${site.place}`;
+    const description = props.description ?? site.description;
+    const url = absoluteUrl(props.path ?? '/');
+    const image = props.image ?? defaultOgImage();
+    const type = props.type ?? 'website';
+    const robots = props.noindex
+      ? 'noindex, nofollow'
+      : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
 
-  document.title = title;
+    document.title = title;
 
-  setMeta('name', 'description', description);
-  setMeta('name', 'robots', robots);
-  setMeta('name', 'googlebot', robots);
-  setMeta('name', 'theme-color', site.themeColor);
-  setMeta('name', 'application-name', site.name);
-  setMeta('name', 'apple-mobile-web-app-title', site.shortName);
-  setMeta('name', 'geo.region', 'KE-17'); // Meru County approx
-  setMeta('name', 'geo.placename', `${site.place}, ${site.region}`);
-  setMeta('name', 'language', site.language);
+    setMeta('name', 'description', description);
+    setMeta('name', 'robots', robots);
+    setMeta('name', 'googlebot', robots);
+    setMeta('name', 'theme-color', site.themeColor);
+    setMeta('name', 'application-name', site.name);
+    setMeta('name', 'apple-mobile-web-app-title', site.shortName);
+    setMeta('name', 'geo.region', 'KE-17');
+    setMeta('name', 'geo.placename', `${site.place}, ${site.region}`);
+    setMeta('name', 'language', site.language);
 
-  // Open Graph
-  setMeta('property', 'og:site_name', site.name);
-  setMeta('property', 'og:locale', site.locale);
-  setMeta('property', 'og:type', type);
-  setMeta('property', 'og:title', props.title ? `${props.title} | ${site.name}` : site.name);
-  setMeta('property', 'og:description', description);
-  setMeta('property', 'og:url', url);
-  setMeta('property', 'og:image', image);
-  setMeta('property', 'og:image:alt', props.title ? `${props.title} on ${site.name}` : site.name);
+    setMeta('property', 'og:site_name', site.name);
+    setMeta('property', 'og:locale', site.locale);
+    setMeta('property', 'og:type', type);
+    setMeta('property', 'og:title', props.title ? `${props.title} | ${site.name}` : site.name);
+    setMeta('property', 'og:description', description);
+    setMeta('property', 'og:url', url);
+    setMeta('property', 'og:image', image);
+    setMeta('property', 'og:image:alt', props.title ? `${props.title} on ${site.name}` : site.name);
 
-  // Twitter / X
-  setMeta('name', 'twitter:card', 'summary_large_image');
-  setMeta('name', 'twitter:title', props.title ? `${props.title} | ${site.name}` : site.name);
-  setMeta('name', 'twitter:description', description);
-  setMeta('name', 'twitter:image', image);
-  if (site.twitterHandle) {
-    setMeta('name', 'twitter:site', site.twitterHandle);
+    setMeta('name', 'twitter:card', 'summary_large_image');
+    setMeta('name', 'twitter:title', props.title ? `${props.title} | ${site.name}` : site.name);
+    setMeta('name', 'twitter:description', description);
+    setMeta('name', 'twitter:image', image);
+    if (site.twitterHandle) {
+      setMeta('name', 'twitter:site', site.twitterHandle);
+    }
+
+    setLink('canonical', url);
+    setJsonLd(props.jsonLd);
+  } catch (err) {
+    // Never let SEO side-effects take down the UI.
+    console.warn('SEO update failed', err);
   }
-
-  setLink('canonical', url);
-
-  // Prefer explicit JSON-LD; otherwise homepage defaults are set by callers.
-  setJsonLd(props.jsonLd);
 }
 
 /** Build JSON-LD for the organization / website (homepage). */
