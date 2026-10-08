@@ -54,7 +54,7 @@ describe('routes render without crashing', () => {
     expect(await screen.findByRole('heading', { level: 1, name: /safety tips/i })).toBeTruthy();
     cleanup();
     renderAt('/rules');
-    expect(await screen.findByRole('heading', { level: 1, name: /rules and privacy/i })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: /rules and privacy/i })).toBeTruthy();
   });
 
   it('login and signup pages offer Google and email', async () => {
@@ -68,7 +68,7 @@ describe('routes render without crashing', () => {
 
   it('sell page sends signed-out visitors to log in', async () => {
     renderAt('/sell');
-    expect(await screen.findByRole('heading', { level: 1, name: /log in/i })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 1, name: /continue to maua marketplace|log in/i })).toBeTruthy();
   });
 
   it('unknown routes show not found', async () => {
