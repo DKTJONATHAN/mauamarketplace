@@ -88,3 +88,35 @@ npm test && npm run build
 - **Rules and privacy text:** `src/pages/RulesPage.tsx` and `SafetyPage.tsx` are drafts written for this build. Have a Kenyan lawyer review them, and check whether you need to register with the Office of the Data Protection Commissioner. Set `contactEmail` in `src/config/site.ts` so people can request removals.
 - **Launching Meru later:** copy the project, change `src/config/site.ts` (place and locations) and deploy it against its own Supabase project.
 - **Link previews:** because the site is a static single-page app, WhatsApp shows the same preview for every listing link.
+
+
+### 6. Cloudflare R2 media setup
+
+Create an R2 bucket, for example `maua-marketplace-media`. In the Pages project, bind it as an R2 bucket with the variable name **MEDIA**.
+
+Add these Production variables/secrets to the Pages project:
+
+| Name | Type | Value |
+|---|---|---|
+| `SUPABASE_URL` | Variable | Your Supabase project URL |
+| `SUPABASE_ANON_KEY` | Variable | Your Supabase publishable/anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | **Secret** | Your Supabase server-side service role/secret key |
+| `MEDIA_MIGRATION_SECRET` | **Secret** | A long random value used only for the one-time migration |
+| `VITE_R2_MEDIA_BASE_URL` | Variable | Your R2 public custom-domain URL, without a trailing slash |
+
+For production, connect a custom domain to the R2 bucket rather than using the `r2.dev` development URL.
+
+After saving the binding and variables, trigger a new Pages deployment. The browser uploads to `/api/media`; the Pages Function validates the signed-in Supabase user and writes the photo to R2. Supabase Auth and all existing database records remain unchanged.
+
+### 7. Migrate existing Supabase Storage photos
+
+Do **not** delete the existing Supabase Storage bucket yet. The migration is deliberately dual-read: old paths continue loading from Supabase while migrated paths use R2.
+
+After the new deployment is live, run the migration endpoint in batches of up to 25:
+
+```bash
+curl -X POST "https://mauamarketplace.pages.dev/api/media?action=migrate&limit=25" \
+  -H "x-media-migration-secret: YOUR_MEDIA_MIGRATION_SECRET"
+```
+
+Repeat until the response reports `migrated: 0`. Verify the listings and their images in the website before removing the old Supabase Storage objects.
