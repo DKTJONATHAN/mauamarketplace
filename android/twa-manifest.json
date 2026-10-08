@@ -12,7 +12,7 @@
   "navigationDividerColorDark": "#0a4a31",
   "backgroundColor": "#f4f7f2",
   "enableNotifications": true,
-  "startUrl": "/",
+  "startUrl": "/?app_version=1.0.3",
   "iconUrl": "https://mauamarketplace.pages.dev/web-app-manifest-512x512.png",
   "maskableIconUrl": "https://mauamarketplace.pages.dev/web-app-manifest-512x512.png",
   "splashScreenFadeOutDuration": 300,
@@ -20,8 +20,8 @@
     "path": "android.keystore",
     "alias": "maua-marketplace"
   },
-  "appVersionName": "1.0.2",
-  "appVersionCode": 3,
+  "appVersionName": "1.0.3",
+  "appVersionCode": 4,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://mauamarketplace.pages.dev/manifest.webmanifest",
@@ -46,5 +46,5 @@
   "displayOverride": [
     "standalone"
   ],
-  "appVersion": "1.0.1"
+  "appVersion": "1.0.3"
 }
