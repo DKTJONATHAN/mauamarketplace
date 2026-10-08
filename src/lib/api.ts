@@ -59,8 +59,7 @@ export async function countActiveListings(): Promise<number> {
   const { count, error } = await supabase
     .from('listings')
     .select('id', { count: 'exact', head: true })
-    .eq('status', 'active')
-    .gt('expires_at', new Date().toISOString());
+    .eq('status', 'active');
   fail(error);
   return count ?? 0;
 }
