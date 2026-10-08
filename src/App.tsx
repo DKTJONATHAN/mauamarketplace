@@ -22,6 +22,8 @@ const SavedPage = lazy(() => import('./pages/SavedPage').then((m) => ({ default:
 const SellerDashboardPage = lazy(() => import('./pages/SellerDashboardPage').then((m) => ({ default: m.SellerDashboardPage })));
 const SellPage = lazy(() => import('./pages/SellPage').then((m) => ({ default: m.SellPage })));
 const SellerPage = lazy(() => import('./pages/SellerPage').then((m) => ({ default: m.SellerPage })));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then((m) => ({ default: m.PrivacyPage })));
+const TermsPage = lazy(() => import('./pages/TermsPage').then((m) => ({ default: m.TermsPage })));
 
 function RouteErrorBoundary({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -50,6 +52,8 @@ export function App() {
         <Route path="reset-password" element={<ResetPasswordPage />} />
         <Route path="safety" element={<SafetyPage />} />
         <Route path="rules" element={<RulesPage />} />
+        <Route path="privacy" element={<PrivacyPage />} />
+        <Route path="terms" element={<TermsPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="sell" element={<SellPage />} />
           <Route path="sell/:id/edit" element={<SellPage />} />
