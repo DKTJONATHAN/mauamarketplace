@@ -6,7 +6,7 @@ import type {
 export const PAGE_SIZE = 24;
 
 const SUMMARY_COLUMNS =
-  'id,seller_id,title,price,negotiable,category,condition,location,images,status,created_at,expires_at';
+  'id,seller_id,title,price,negotiable,category,condition,location,images,status,created_at';
 
 interface DbError {
   message: string;
@@ -123,11 +123,6 @@ export async function setListingStatus(id: string, status: 'active' | 'sold'): P
   fail(error);
 }
 
-export async function renewListing(id: string, days: number): Promise<void> {
-  const expires = new Date(Date.now() + days * 86400000).toISOString();
-  const { error } = await supabase.from('listings').update({ expires_at: expires }).eq('id', id);
-  fail(error);
-}
 
 /* ---------- Contact phone (only signed-in members can read it) ---------- */
 
