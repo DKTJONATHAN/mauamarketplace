@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { CalendarPlus, CircleCheck, Pencil, RotateCcw, Trash2 } from 'lucide-react';
-import { site } from '../config/site';
+import { CircleCheck, Pencil, RotateCcw, Trash2 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
-import { renewListing, setListingStatus } from '../lib/api';
-import { daysLeft } from '../lib/format';
+import { setListingStatus } from '../lib/api';
 import { deleteListingWithMedia } from '../lib/media';
 import type { ListingSummary } from '../lib/types';
 import { Dialog } from './Dialog';
@@ -36,15 +34,6 @@ export function OwnerActions({ listing, onDeleted }: Props) {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const renew = useMutation({
-    mutationFn: () => renewListing(listing.id, site.listingLifetimeDays),
-    onSuccess: () => {
-      toast.success(`Renewed for ${site.listingLifetimeDays} days.`);
-      refresh();
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
   const remove = useMutation({
     mutationFn: () => deleteListingWithMedia(listing.id),
     onSuccess: () => {
@@ -57,8 +46,6 @@ export function OwnerActions({ listing, onDeleted }: Props) {
   });
 
   const hidden = listing.status === 'hidden';
-  const remaining = daysLeft(listing.expires_at);
-
   return (
     <div className="owner-actions">
       {!hidden && (
@@ -74,11 +61,6 @@ export function OwnerActions({ listing, onDeleted }: Props) {
       {listing.status === 'sold' && (
         <button type="button" className="btn btn-quiet" onClick={() => status.mutate('active')} disabled={status.isPending}>
           <RotateCcw aria-hidden /> Make available again
-        </button>
-      )}
-      {!hidden && remaining <= 14 && (
-        <button type="button" className="btn btn-quiet" onClick={() => renew.mutate()} disabled={renew.isPending}>
-          <CalendarPlus aria-hidden /> Renew
         </button>
       )}
       <button type="button" className="btn btn-quiet btn-danger" onClick={() => setConfirming(true)}>
