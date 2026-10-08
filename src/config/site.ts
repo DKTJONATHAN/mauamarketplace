@@ -9,7 +9,6 @@ export const site = {
   country: 'Kenya',
   locations: ['Maua Town', 'Laare', 'Kangeta', 'Muthara', 'Mikinduri', 'Nkubu', 'Meru Town'],
   contactEmail: '',
-  listingLifetimeDays: 60,
   maxImages: 6,
   /** Default meta description (keep under ~160 chars for Google). */
   description:
