@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
@@ -7,13 +7,19 @@ import { site } from '../config/site';
 import { CategoryDirectory } from '../components/CategoryDirectory';
 import { ListingGrid } from '../components/ListingGrid';
 import { countActiveListings, fetchListings } from '../lib/api';
-import { getRecentlyViewed, useDocumentTitle } from '../hooks';
+import { getRecentlyViewed, useSeo } from '../hooks';
+import { websiteJsonLd } from '../lib/seo';
 import type { BrowseFilters } from '../lib/types';
 
 const latestFilters: BrowseFilters = { q: '', cat: '', min: '', max: '', cond: '', loc: '', sort: 'new' };
 
 export function HomePage() {
-  useDocumentTitle();
+  const jsonLd = useMemo(() => websiteJsonLd(), []);
+  useSeo({
+    path: '/',
+    description: site.description,
+    jsonLd,
+  });
   const navigate = useNavigate();
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('');
