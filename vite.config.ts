@@ -3,7 +3,6 @@ import react from '@vitejs/plugin-react';
 
 // Cloudflare Pages and custom domains are served from the site root.
 export default defineConfig({
-  base: process.env.VITE_BASE ?? '/',
   plugins: [react()],
   build: { sourcemap: false, target: 'es2022' },
   test: { environment: 'node', include: ['tests/**/*.test.{ts,tsx}'] },
