@@ -136,6 +136,5 @@ export const categoryGroups: { name: string; items: Category[] }[] = (() => {
 
 /** Categories shown in the quick rail under the header. */
 export const featuredCategorySlugs = [
-  'phones', 'computers', 'tvs-audio', 'furniture', 'cars', 'clothing-women',
-  'school-items', 'farm-produce', 'house-help', 'property-rent',
+  'phones', 'farm-produce', 'furniture', 'cars', 'services',
 ];
