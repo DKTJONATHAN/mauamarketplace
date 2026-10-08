@@ -200,7 +200,7 @@ async function migrate(req: Request, env: Env) {
   const limit = Math.min(Math.max(Number(url.searchParams.get('limit') ?? '25') || 25, 1), 25);
   const rows = await dbJson<{ path: string; bytes: number }[]>(
     env,
-    `uploads?select=path,bytes&path=not.like.r2/%26order=created_at.asc&limit=${limit}`,
+    `uploads?select=path,bytes&path=not.like.r2/&order=created_at.asc&limit=${limit}`,
   );
 
   let migrated = 0;
