@@ -8,7 +8,7 @@ import { ListingGrid } from '../components/ListingGrid';
 import { ListingCard } from '../components/ListingCard';
 import { fetchListings } from '../lib/api';
 import { conditionLabels, type BrowseFilters } from '../lib/types';
-import { useDocumentTitle } from '../hooks';
+import { useSeo } from '../hooks';
 
 function readFilters(params: URLSearchParams): BrowseFilters {
   const cat = params.get('cat') ?? '';
@@ -28,7 +28,17 @@ export function BrowsePage() {
   const [params, setParams] = useSearchParams();
   const filters = readFilters(params);
   const category = filters.cat ? getCategory(filters.cat) : null;
-  useDocumentTitle(category ? category.label : filters.q ? `"${filters.q}"` : 'Browse');
+  const browseTitle = category ? category.label : filters.q ? `"${filters.q}"` : 'Browse';
+  const browseDesc = category
+    ? `${category.label} for sale in ${site.place}, ${site.region}. Free listings on ${site.name}.`
+    : filters.q
+      ? `Search results for "${filters.q}" in ${site.place}. Buy and sell on ${site.name}.`
+      : `Browse free classifieds in ${site.place}, ${site.region} — phones, produce, furniture, cars and more.`;
+  useSeo({
+    title: browseTitle,
+    description: browseDesc,
+    path: '/browse',
+  });
 
   const [draft, setDraft] = useState(filters);
   const paramString = params.toString();
