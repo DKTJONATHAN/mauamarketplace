@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Clock, Copy, Flag, MapPin, MessageCircle, Phone, Share2, TriangleAlert } from 'lucide-react';
@@ -15,7 +15,9 @@ import { defaultNotice } from '../config/categories';
 import { fetchContactPhone, fetchListing, startConversation } from '../lib/api';
 import { formatPrice, isNewMember, memberSince, timeAgo } from '../lib/format';
 import { conditionLabels } from '../lib/types';
-import { rememberRecentlyViewed, useDocumentTitle, useGoToLogin } from '../hooks';
+import { rememberRecentlyViewed, useSeo, useGoToLogin } from '../hooks';
+import { listingDescription, listingJsonLd } from '../lib/seo';
+import { mediaUrl } from '../config/site';
 
 export function ListingPage() {
   const { id = '' } = useParams();
@@ -29,7 +31,18 @@ export function ListingPage() {
   const query = useQuery({ queryKey: ['listing', id], queryFn: () => fetchListing(id) });
   const listing = query.data;
   useEffect(() => { if (listing?.id) rememberRecentlyViewed(listing.id); }, [listing?.id]);
-  useDocumentTitle(listing?.title);
+  useSeo(
+    listing
+      ? {
+          title: listing.title,
+          description: listingDescription(listing),
+          path: `/listing/${listing.id}`,
+          image: listing.images?.[0] ? mediaUrl(listing.images[0]) : undefined,
+          type: 'product',
+          jsonLd: listingJsonLd(listing),
+        }
+      : { title: 'Listing', path: `/listing/${id}`, noindex: true },
+  );
 
   const message = useMutation({
     mutationFn: () => startConversation(id),
@@ -69,11 +82,14 @@ export function ListingPage() {
   const available = listing.status === 'active' && !expired;
 
   async function share() {
+    if (!listing) return;
     const url = window.location.href;
+    const text = listingDescription(listing);
     try {
-      if (navigator.share) await navigator.share({ title: listing?.title, url });
-      else {
-        await navigator.clipboard.writeText(url);
+      if (navigator.share) {
+        await navigator.share({ title: listing.title, text, url });
+      } else {
+        await navigator.clipboard.writeText(`${listing.title}\n${text}\n${url}`);
         toast.success('Link copied.');
       }
     } catch {
@@ -184,7 +200,7 @@ export function ListingPage() {
         ) : (
           <div className="stack">
             {phone.isLoading && <p aria-busy="true">Loading...</p>}
-            {phone.isError && <p role="alert">{(phone.error as Error).message}</p>}
+            {phone.isError && <p role="alert">{(phone.error as Error).message)}
             {phone.isSuccess && !phone.data && (
               <p>This seller has not shared a phone number. Use the message button to contact them.</p>
             )}
