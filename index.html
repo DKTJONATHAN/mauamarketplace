@@ -1,18 +1,88 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-KE">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- Primary SEO (crawlers that do not run JS see these) -->
     <title>Maua Marketplace - buy and sell in Maua</title>
     <meta name="description" content="Buy and sell phones, farm produce, furniture, cars and more with people in Maua, Meru County. Free to post. Talk to sellers in the app." />
+    <meta name="keywords" content="Maua marketplace, Maua classifieds, Meru County buy sell, farm produce Maua, phones Maua, free listings Kenya" />
+    <meta name="author" content="Maua Marketplace" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="theme-color" content="#0a4a31" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
-    <meta property="og:title" content="Maua Marketplace" />
-    <meta property="og:description" content="Buy and sell with people in Maua, Meru County." />
+    <meta name="color-scheme" content="light" />
+    <meta name="application-name" content="Maua Marketplace" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Maua Market" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="geo.region" content="KE-17" />
+    <meta name="geo.placename" content="Maua, Meru County" />
+    <meta name="language" content="en" />
+
+    <!-- Open Graph / Facebook / WhatsApp / Telegram / LinkedIn -->
+    <meta property="og:site_name" content="Maua Marketplace" />
+    <meta property="og:locale" content="en_KE" />
     <meta property="og:type" content="website" />
+    <meta property="og:title" content="Maua Marketplace" />
+    <meta property="og:description" content="Buy and sell with people in Maua, Meru County. Free classifieds — phones, produce, cars, services and more." />
+    <meta property="og:url" content="https://dktjonathan.github.io/mauamarketplace/" />
+    <meta property="og:image" content="https://dktjonathan.github.io/mauamarketplace/logo.png" />
+    <meta property="og:image:width" content="1254" />
+    <meta property="og:image:height" content="1254" />
+    <meta property="og:image:alt" content="Maua Marketplace" />
+
+    <!-- Twitter / X Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Maua Marketplace" />
+    <meta name="twitter:description" content="Buy and sell with people in Maua, Meru County. Free classifieds — phones, produce, cars, services and more." />
+    <meta name="twitter:image" content="https://dktjonathan.github.io/mauamarketplace/logo.png" />
+
+    <!-- Canonical (homepage; client updates per route) -->
+    <link rel="canonical" href="https://dktjonathan.github.io/mauamarketplace/" />
+
+    <!-- Icons & PWA -->
     <link rel="icon" type="image/png" href="%BASE_URL%logo.png" />
     <link rel="apple-touch-icon" href="%BASE_URL%logo.png" />
     <link rel="manifest" href="%BASE_URL%manifest.webmanifest" />
+
+    <!-- Structured data: WebSite + Organization (homepage default) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "name": "Maua Marketplace",
+          "url": "https://dktjonathan.github.io/mauamarketplace/",
+          "description": "Buy and sell phones, farm produce, furniture, cars and more with people in Maua, Meru County. Free to post. Talk to sellers in the app.",
+          "inLanguage": "en",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://dktjonathan.github.io/mauamarketplace/#/browse?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "Organization",
+          "name": "Maua Marketplace",
+          "url": "https://dktjonathan.github.io/mauamarketplace/",
+          "logo": "https://dktjonathan.github.io/mauamarketplace/logo.png",
+          "description": "Free classifieds for Maua, Meru County, Kenya.",
+          "areaServed": {
+            "@type": "Place",
+            "name": "Maua, Meru County, Kenya"
+          }
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
