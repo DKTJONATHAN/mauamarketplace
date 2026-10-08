@@ -28,7 +28,7 @@ export interface ListingSummary {
   images: string[];
   status: ListingStatus;
   created_at: string;
-  expires_at: string;
+  expires_at: string | null;
 }
 
 export interface Listing extends ListingSummary {
