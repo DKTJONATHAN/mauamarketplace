@@ -6,10 +6,10 @@ export function RulesPage() {
   useDocumentTitle('Rules and privacy');
   return (
     <div className="wrap page prose">
-      <h1>Rules and privacy</h1>
+      <h1>Community rules</h1>
       <p className="lead">
-        {site.name} is a free notice board for {site.place}, {site.region}. This page explains what is allowed, what we do and
-        do not do, and what happens to your data.
+        {site.name} is a free notice board for {site.place}, {site.region}. These community rules explain what is allowed and
+        what happens when members break the rules. For personal-data information, read our <Link to="/privacy">Privacy Policy</Link>.
       </p>
 
       <h2>What this site is</h2>
@@ -44,7 +44,8 @@ export function RulesPage() {
         )}
       </p>
 
-      <h2>Your privacy</h2>
+      <h2>Privacy at a glance</h2>
+      <p>For the full explanation of personal-data processing, your rights and retention, read the <Link to="/privacy">Privacy Policy</Link>.</p>
       <h3>What we store</h3>
       <ul>
         <li>Your email address and a hashed password, or your Google sign-in link. Your email is used to log you in and is never shown to other members.</li>
@@ -73,6 +74,7 @@ export function RulesPage() {
         choose to sign in with Google. We do not run ads or third-party trackers. Your browser keeps a sign-in session and a few
         small settings on your device.
       </p>
+      <p><strong>Legal documents:</strong> <Link to="/privacy">Privacy Policy</Link> · <Link to="/terms">Terms and Conditions</Link></p>
     </div>
   );
 }
