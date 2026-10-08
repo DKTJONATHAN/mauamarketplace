@@ -86,6 +86,7 @@ function Footer() {
           <li><Link to="/safety">Safety tips</Link></li><li><Link to="/rules">Community rules</Link></li><li><Link to="/privacy">Privacy Policy</Link></li><li><Link to="/terms">Terms and Conditions</Link></li>
         </ul></nav>
       </div>
+      <div className="wrap footer-credit">Maua Marketplace is built by <a href="https://zandani.co.ke" target="_blank" rel="noopener noreferrer">Jonathan Mwaniki</a>.</div>
     </footer>
   );
 }
