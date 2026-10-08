@@ -279,7 +279,7 @@ export function SellPage() {
   return (
     <div className="wrap page narrow">
       <h1>{editing ? 'Edit your listing' : 'Post a listing'}</h1>
-      <p className="muted">Free to post. Your listing stays live for {site.listingLifetimeDays} days and you can renew it.</p>
+      <p className="muted">Free to post. Your listing stays live until you mark it sold, hide it, or delete it.</p>
 
       <form onSubmit={submit} className="form stack-lg" noValidate>
         <label className="field">
