@@ -83,7 +83,7 @@ function Footer() {
         <div><Brand /><p className="muted">A free notice board for {site.place}, {site.region}. We do not handle payments, verify sellers or settle disputes, so please read the safety tips.</p></div>
         <nav aria-label="Footer"><ul>
           <li><Link to="/sell">Post a listing</Link></li><li><Link to="/categories">All categories</Link></li>
-          <li><Link to="/safety">Safety tips</Link></li><li><Link to="/rules">Rules and privacy</Link></li>
+          <li><Link to="/safety">Safety tips</Link></li><li><Link to="/rules">Community rules</Link></li><li><Link to="/privacy">Privacy Policy</Link></li><li><Link to="/terms">Terms and Conditions</Link></li>
         </ul></nav>
       </div>
     </footer>
