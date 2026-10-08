@@ -12,7 +12,7 @@ async function call<T>(action: string, init: RequestInit): Promise<T> {
   const headers = { ...(await authHeader()), ...(init.headers as Record<string, string> | undefined) };
   let res: Response;
   try {
-    res = await fetch(`${env.supabaseUrl}/functions/v1/listing-media?action=${action}`, { ...init, method: 'POST', headers });
+    res = await fetch(`/api/media?action=${action}`, { ...init, method: 'POST', headers });
   } catch {
     throw new Error('Could not reach the server. Check your connection and try again.');
   }
@@ -21,7 +21,7 @@ async function call<T>(action: string, init: RequestInit): Promise<T> {
   return body;
 }
 
-/** Uploads one prepared image through Supabase Storage. No GitHub token is required. */
+/** Uploads one prepared image through the Cloudflare Pages media API backed by R2. */
 export async function uploadImage(blob: Blob): Promise<string> {
   const { path } = await call<{ path: string }>('upload', { headers: { 'Content-Type': blob.type }, body: blob });
   return path;
