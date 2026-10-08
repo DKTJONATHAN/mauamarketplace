@@ -1,6 +1,7 @@
-import { lazy, Suspense } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { lazy, Suspense, type ReactNode } from 'react';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { ProtectedRoute } from './components/ProtectedRoute';
 const AccountPage = lazy(() => import('./pages/AccountPage').then((m) => ({ default: m.AccountPage })));
 const AuthPage = lazy(() => import('./pages/AuthPage').then((m) => ({ default: m.AuthPage })));
@@ -22,8 +23,16 @@ const SellerDashboardPage = lazy(() => import('./pages/SellerDashboardPage').the
 const SellPage = lazy(() => import('./pages/SellPage').then((m) => ({ default: m.SellPage })));
 const SellerPage = lazy(() => import('./pages/SellerPage').then((m) => ({ default: m.SellerPage })));
 
+function RouteErrorBoundary({ children }: { children: ReactNode }) {
+  const location = useLocation();
+  // Remount / reset the boundary whenever the route changes so a one-off crash
+  // does not trap the whole app until a full browser reload.
+  return <ErrorBoundary resetKey={location.pathname + location.search}>{children}</ErrorBoundary>;
+}
+
 export function App() {
   return (
+    <RouteErrorBoundary>
     <Suspense fallback={<div className="wrap page" aria-busy="true">Loading...</div>}>
     <Routes>
       <Route element={<Layout />}>
@@ -53,5 +62,6 @@ export function App() {
       </Route>
     </Routes>
     </Suspense>
+    </RouteErrorBoundary>
   );
 }
