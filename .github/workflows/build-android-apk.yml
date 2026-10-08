@@ -84,10 +84,17 @@ jobs:
           export ANDROID_HOME="$BUBBLEWRAP_ANDROID_SDK"
           bubblewrap doctor
 
-      - name: Prepare signing key
+      - name: Prepare persistent signing key
         working-directory: android
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
-          keytool -genkeypair -v             -keystore android.keystore             -storepass "maua-marketplace-build"             -keypass "maua-marketplace-build"             -alias "maua-marketplace"             -keyalg RSA             -keysize 2048             -validity 10000             -dname "CN=Maua Marketplace, OU=Maua Marketplace, O=Maua Marketplace, L=Maua, ST=Meru, C=KE"
+          set -e
+          test -n "$ANDROID_KEYSTORE_BASE64"
+          test -n "$ANDROID_KEYSTORE_PASSWORD"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android.keystore
+          keytool -list             -keystore android.keystore             -storepass "$ANDROID_KEYSTORE_PASSWORD"             -alias "maua-marketplace" >/dev/null
 
       - name: Generate Android project
         working-directory: android
@@ -99,8 +106,8 @@ jobs:
       - name: Build signed APK
         working-directory: android
         env:
-          BUBBLEWRAP_KEYSTORE_PASSWORD: "maua-marketplace-build"
-          BUBBLEWRAP_KEY_PASSWORD: "maua-marketplace-build"
+          BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           unset ANDROID_SDK_ROOT
           export ANDROID_HOME="$BUBBLEWRAP_ANDROID_SDK"
