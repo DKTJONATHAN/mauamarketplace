@@ -40,11 +40,6 @@ jobs:
           yes | "$CMDLINE/bin/sdkmanager" --sdk_root="$SDK" --licenses >/dev/null 2>&1 || true
           "$CMDLINE/bin/sdkmanager" --sdk_root="$SDK" --install             "platform-tools"             "platforms;android-35"             "build-tools;35.0.0"
 
-          # Bubblewrap's current path validator expects its configured Android
-          # SDK directory to expose sdkmanager as <sdk>/bin/sdkmanager or
-          # <sdk>/tools/bin/sdkmanager. GitHub's runner uses the newer
-          # <sdk>/cmdline-tools/latest/bin/sdkmanager layout, so create a
-          # Bubblewrap-compatible SDK root while keeping the real packages.
           BW_SDK="$RUNNER_TEMP/bubblewrap-android-sdk"
           rm -rf "$BW_SDK"
           mkdir -p "$BW_SDK"
@@ -58,8 +53,6 @@ jobs:
           test -d "$BW_SDK/build-tools/35.0.0"
           test -d "$BW_SDK/platforms/android-35"
 
-          # Use one SDK environment variable only. Gradle fails when
-          # ANDROID_HOME and ANDROID_SDK_ROOT point at different directories.
           echo "ANDROID_HOME=$BW_SDK" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=" >> "$GITHUB_ENV"
           echo "BUBBLEWRAP_ANDROID_SDK=$BW_SDK" >> "$GITHUB_ENV"
@@ -96,34 +89,23 @@ jobs:
           test -n "$ANDROID_KEYSTORE_PASSWORD"
           test -n "$ANDROID_KEY_PASSWORD"
 
-          # The downloaded keystore is PKCS#12 (.p12). Convert it to
-          # JKS for Bubblewrap while preserving the exact same key pair/certificate.
           printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android.keystore.p12
-          keytool -list \
-            -storetype PKCS12 \
-            -keystore android.keystore.p12 \
-            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
-            -alias "maua-marketplace" >/dev/null
+          keytool -list             -storetype PKCS12             -keystore android.keystore.p12             -storepass "$ANDROID_KEYSTORE_PASSWORD"             -alias "maua-marketplace" >/dev/null
 
           rm -f android.keystore
-          keytool -importkeystore \
-            -srckeystore android.keystore.p12 \
-            -srcstoretype PKCS12 \
-            -srcstorepass "$ANDROID_KEYSTORE_PASSWORD" \
-            -srckeypass "$ANDROID_KEY_PASSWORD" \
-            -srcalias "maua-marketplace" \
-            -destkeystore android.keystore \
-            -deststoretype JKS \
-            -deststorepass "$ANDROID_KEYSTORE_PASSWORD" \
-            -destkeypass "$ANDROID_KEY_PASSWORD" \
-            -destalias "maua-marketplace" \
-            -noprompt
+          keytool -importkeystore             -srckeystore android.keystore.p12             -srcstoretype PKCS12             -srcstorepass "$ANDROID_KEYSTORE_PASSWORD"             -srckeypass "$ANDROID_KEY_PASSWORD"             -srcalias "maua-marketplace"             -destkeystore android.keystore             -deststoretype JKS             -deststorepass "$ANDROID_KEYSTORE_PASSWORD"             -destkeypass "$ANDROID_KEY_PASSWORD"             -destalias "maua-marketplace"             -noprompt
 
-          keytool -list \
-            -keystore android.keystore \
-            -storetype JKS \
-            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
-            -alias "maua-marketplace" >/dev/null
+          keytool -list             -keystore android.keystore             -storetype JKS             -storepass "$ANDROID_KEYSTORE_PASSWORD"             -alias "maua-marketplace" >/dev/null
+
+      - name: Show signing certificate SHA-256
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          set -e
+          echo "Persistent Android signing certificate SHA-256:"
+          keytool -list -v             -keystore android.keystore             -storetype JKS             -storepass "$ANDROID_KEYSTORE_PASSWORD"             -alias "maua-marketplace"             | grep "SHA256:"
+
       - name: Generate Android project
         working-directory: android
         run: |
