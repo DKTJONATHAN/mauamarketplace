@@ -1,8 +1,7 @@
-import { useMemo, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Search } from 'lucide-react';
-import { categoryGroups, featuredCategorySlugs, getCategory } from '../config/categories';
+import { ShieldCheck } from 'lucide-react';
 import { site } from '../config/site';
 import { CategoryDirectory } from '../components/CategoryDirectory';
 import { ListingGrid } from '../components/ListingGrid';
@@ -12,107 +11,60 @@ import { websiteJsonLd } from '../lib/seo';
 import type { BrowseFilters } from '../lib/types';
 
 const latestFilters: BrowseFilters = { q: '', cat: '', min: '', max: '', cond: '', loc: '', sort: 'new' };
+const INITIAL_LISTINGS = 24;
 
 export function HomePage() {
   const jsonLd = useMemo(() => websiteJsonLd(), []);
-  useSeo({
-    path: '/',
-    description: site.description,
-    jsonLd,
-  });
-  const navigate = useNavigate();
-  const [q, setQ] = useState('');
-  const [cat, setCat] = useState('');
+  useSeo({ path: '/', description: site.description, jsonLd });
 
-  const latest = useQuery({ queryKey: ['latest'], queryFn: () => fetchListings(latestFilters, 0) });
+  const [showMore, setShowMore] = useState(false);
   const recentIds = getRecentlyViewed();
-  const recent = useQuery({ queryKey: ['recent-listings', recentIds.join(',')], queryFn: () => import('../lib/api').then(({ fetchListingsByIds }) => fetchListingsByIds(recentIds)), enabled: recentIds.length > 0 });
-  const count = useQuery({ queryKey: ['active-count'], queryFn: countActiveListings, staleTime: 120_000 });
 
-  function search(e: FormEvent) {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (q.trim()) params.set('q', q.trim());
-    if (cat) params.set('cat', cat);
-    navigate(`/browse${params.size ? `?${params}` : ''}`);
-  }
+  const latest = useQuery({
+    queryKey: ['latest'],
+    queryFn: () => fetchListings(latestFilters, 0),
+  });
+
+  const more = useQuery({
+    queryKey: ['latest-more'],
+    queryFn: () => fetchListings(latestFilters, 1),
+    enabled: showMore,
+  });
+
+  const recent = useQuery({
+    queryKey: ['recent-listings', recentIds.join(',')],
+    queryFn: () => import('../lib/api').then(({ fetchListingsByIds }) => fetchListingsByIds(recentIds)),
+    enabled: recentIds.length > 0,
+  });
+
+  const count = useQuery({
+    queryKey: ['active-count'],
+    queryFn: countActiveListings,
+    staleTime: 120_000,
+  });
+
+  const firstListings = latest.data?.items ?? [];
+  const moreListings = more.data?.items ?? [];
+  const listings = showMore ? [...firstListings, ...moreListings] : firstListings.slice(0, INITIAL_LISTINGS);
+  const hasMore = showMore
+    ? Boolean(more.data?.hasMore)
+    : Boolean(latest.data?.hasMore || firstListings.length > INITIAL_LISTINGS);
 
   return (
     <>
-      <section className="hero">
-        <div className="wrap hero-grid">
+      <section className="wrap section home-listings" aria-labelledby="latest-title">
+        <div className="section-head home-listings-head">
           <div>
-            <h1>
-              Buy and sell
-              <br />
-              in {site.place}.
-            </h1>
-            <p className="hero-lead">
-              Phones, farm produce, furniture, cars, house helps and more, posted by people nearby. Free to list. Talk to
-              sellers inside the app and keep your number to yourself until you choose to share it.
-            </p>
-            <form className="hero-search" role="search" onSubmit={search}>
-              <label className="sr-only" htmlFor="hero-q">What are you looking for?</label>
-              <input
-                id="hero-q"
-                type="search"
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="What are you looking for?"
-                maxLength={60}
-              />
-              <label className="sr-only" htmlFor="hero-cat">Category</label>
-              <select id="hero-cat" value={cat} onChange={(e) => setCat(e.target.value)}>
-                <option value="">All categories</option>
-                {categoryGroups.map((g) => (
-                  <optgroup key={g.name} label={g.name}>
-                    {g.items.map((c) => (
-                      <option key={c.slug} value={c.slug}>{c.label}</option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-              <button type="submit" className="btn btn-primary">
-                <Search aria-hidden /> Search
-              </button>
-            </form>
+            <h1 id="latest-title">Fresh listings in {site.place}</h1>
             {typeof count.data === 'number' && count.data > 0 && (
-              <p className="hero-count">{count.data.toLocaleString('en-KE')} listings live right now</p>
+              <p className="result-count">{count.data.toLocaleString('en-KE')} listings live right now</p>
             )}
-            <div className="hero-category-actions" aria-label="Popular categories">
-              {featuredCategorySlugs.map((slug) => {
-                const c = getCategory(slug);
-                return <Link key={slug} to={`/browse?cat=${slug}`} className="category-chip">{c.label}</Link>;
-              })}
-              <Link to="/categories" className="btn btn-tag">All categories</Link>
-            </div>
           </div>
-
-          <aside className="steps-card" aria-labelledby="steps-title">
-            <h2 id="steps-title">A safe deal, step by step</h2>
-            <ol>
-              <li>
-                <strong>Message in the app.</strong> Ask questions and agree a time. Share your phone number only if you want to.
-              </li>
-              <li>
-                <strong>Meet in a busy public place.</strong> Daytime, near other people. Bring a friend for big purchases.
-              </li>
-              <li>
-                <strong>Inspect, then pay.</strong> Test the item first. Never send money before you have seen it.
-              </li>
-            </ol>
-            <Link to="/safety">More safety tips</Link>
-          </aside>
+          <Link to="/browse" className="btn btn-quiet">Browse &amp; filter</Link>
         </div>
-      </section>
 
-      <section className="wrap section" aria-labelledby="latest-title">
-        <div className="section-head">
-          <h2 id="latest-title">Fresh in {site.place}</h2>
-          <Link to="/browse">See everything</Link>
-        </div>
         <ListingGrid
-          listings={latest.data?.items.slice(0, 12)}
+          listings={listings}
           loading={latest.isLoading}
           empty={
             latest.isError ? (
@@ -129,6 +81,23 @@ export function HomePage() {
             )
           }
         />
+
+        {!latest.isLoading && latest.data && (hasMore || showMore) && (
+          <div className="listing-more">
+            {more.isError && showMore && (
+              <p className="field-error" role="alert">More listings could not load. Please try again.</p>
+            )}
+            <button
+              type="button"
+              className="btn btn-tag btn-large"
+              onClick={() => setShowMore((value) => !value)}
+              disabled={more.isFetching}
+              aria-expanded={showMore}
+            >
+              {more.isFetching ? 'Loading more listings...' : showMore ? 'Show fewer listings' : 'Show more listings'}
+            </button>
+          </div>
+        )}
       </section>
 
       {recent.data && recent.data.length > 0 && (
@@ -148,7 +117,7 @@ export function HomePage() {
         <CategoryDirectory />
       </section>
 
-      <section className="wrap section">
+      <section className="wrap section home-bottom">
         <div className="sell-band">
           <div>
             <h2>Got something to sell?</h2>
@@ -156,6 +125,21 @@ export function HomePage() {
           </div>
           <Link to="/sell" className="btn btn-tag btn-large">Post a listing</Link>
         </div>
+
+        <aside className="home-safety" aria-labelledby="home-safety-title">
+          <ShieldCheck aria-hidden />
+          <div>
+            <h2 id="home-safety-title">Stay safe when buying or selling</h2>
+            <p>
+              Deals are directly between you and the other person. {site.name} does not verify sellers, hold money,
+              inspect items or settle disputes.
+            </p>
+            <p>
+              <strong>Meet in a busy public place, inspect the item first, and never send money before you have seen it.</strong>
+            </p>
+            <Link to="/safety">Read all safety tips</Link>
+          </div>
+        </aside>
       </section>
     </>
   );
