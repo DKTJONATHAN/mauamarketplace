@@ -1,0 +1,48 @@
+{
+  "packageId": "ke.co.mauamarketplace.app",
+  "host": "mauamarketplace.pages.dev",
+  "name": "Maua Marketplace",
+  "launcherName": "Maua Market",
+  "display": "standalone",
+  "themeColor": "#0a4a31",
+  "themeColorDark": "#0a4a31",
+  "navigationColor": "#0a4a31",
+  "navigationColorDark": "#0a4a31",
+  "navigationDividerColor": "#0a4a31",
+  "navigationDividerColorDark": "#0a4a31",
+  "backgroundColor": "#f4f7f2",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://mauamarketplace.pages.dev/web-app-manifest-512x512.png",
+  "maskableIconUrl": "https://mauamarketplace.pages.dev/web-app-manifest-512x512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "android.keystore",
+    "alias": "maua-marketplace"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://mauamarketplace.pages.dev/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "minSdkVersion": 23,
+  "orientation": "portrait",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [
+    "standalone"
+  ],
+  "appVersion": "1.0.0"
+}
