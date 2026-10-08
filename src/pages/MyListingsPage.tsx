@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getCategory } from '../config/categories';
 import { ListingImage } from '../components/ListingImage';
 import { OwnerActions } from '../components/OwnerActions';
-import { daysLeft, formatPrice } from '../lib/format';
+import { formatPrice } from '../lib/format';
 import { fetchMyListings } from '../lib/api';
 import { useDocumentTitle } from '../hooks';
 import type { ListingSummary } from '../lib/types';
@@ -12,9 +12,8 @@ import type { ListingSummary } from '../lib/types';
 function statusText(l: ListingSummary): string {
   if (l.status === 'hidden') return 'Hidden after reports from other members';
   if (l.status === 'sold') return 'Sold';
-  const left = daysLeft(l.expires_at);
-  if (left <= 0) return 'Expired. Renew it to show it again';
-  return `Live, ${left} ${left === 1 ? 'day' : 'days'} left`;
+  if (l.status === 'active') return 'Live — stays listed until you mark it sold or hide it';
+  return 'Available again when you mark it active';
 }
 
 export function MyListingsPage() {
