@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { site } from './config/site';
 import { useAuth, NEXT_KEY } from './context/AuthContext';
 import { useToast } from './context/ToastContext';
 import { fetchSavedIds, fetchUnreadCount, setSaved } from './lib/api';
