@@ -1,4 +1,4 @@
-const CACHE = 'maua-market-v3';
+const CACHE = 'maua-market-v4';
 const APP_SHELL = [
   './',
   './index.html',
@@ -23,9 +23,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
       .then((keys) => Promise.all(
-        keys
-          .filter((key) => key !== CACHE)
-          .map((key) => caches.delete(key))
+        keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))
       ))
       .then(() => self.clients.claim())
   );
@@ -33,11 +31,24 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-
   const url = new URL(event.request.url);
-
-  // Never cache API requests. This keeps Supabase/auth/listing data live.
   if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
+
+  // Always prefer the live HTML so a new deployment cannot point at old chunks.
+  if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response.ok && response.type === 'basic') {
+            const copy = response.clone();
+            void caches.open(CACHE).then((cache) => cache.put('./index.html', copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
 
   event.respondWith(
     fetch(event.request)
@@ -48,10 +59,6 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       })
-      .catch(() =>
-        caches.match(event.request).then(
-          (cached) => cached || caches.match('./index.html')
-        )
-      )
+      .catch(() => caches.match(event.request))
   );
 });
