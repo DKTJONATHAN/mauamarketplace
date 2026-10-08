@@ -6,11 +6,23 @@ import { useAuth, NEXT_KEY } from './context/AuthContext';
 import { useToast } from './context/ToastContext';
 import { fetchSavedIds, fetchUnreadCount, setSaved } from './lib/api';
 import { supabase } from './lib/supabase';
+import { applySeo, type SeoProps } from './lib/seo';
 
-export function useDocumentTitle(title?: string): void {
+/**
+ * Full SEO head management (title, description, Open Graph, Twitter, canonical, JSON-LD).
+ * Prefer this on public pages. Private/utility pages can pass noindex: true.
+ */
+export function useSeo(props: SeoProps = {}): void {
+  const { title, description, path, image, type, noindex, jsonLd } = props;
+
   useEffect(() => {
-    document.title = title ? `${title} - ${site.name}` : `${site.name} - buy and sell in ${site.place}`;
-  }, [title]);
+    applySeo({ title, description, path, image, type, noindex, jsonLd });
+  }, [title, description, path, image, type, noindex, jsonLd]);
+}
+
+/** Convenience wrapper that only sets the document title (and basic defaults). */
+export function useDocumentTitle(title?: string): void {
+  useSeo({ title });
 }
 
 /** Returns a function that sends the visitor to the login page and brings them back afterwards. */
