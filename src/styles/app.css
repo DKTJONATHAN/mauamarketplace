@@ -477,3 +477,88 @@ dialog.dialog::backdrop { background: rgb(8 28 18 / 0.6); }
   .app-update-copy p { font-size: 0.75rem; }
   .app-update-pending { max-width: 8rem; white-space: normal; text-align: right; }
 }
+
+
+/* ---------- Automatic device colour scheme ---------- */
+/* Light mode is the default. Dark mode activates only when the device requests it. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --ink: #e8efe9;
+    --ink-soft: #b1c2b7;
+    --paper: #111a15;
+    --surface: #1b2921;
+    --line: #3b5145;
+    --green: #68d49b;
+    --green-deep: #0a4a31;
+    --green-wash: #243b2e;
+    --warn-bg: #382f12;
+    --warn-line: #a88b24;
+    --danger: #ff9287;
+    --danger-wash: #3b211f;
+    --focus: #8ce5b3;
+  }
+
+  body { color: var(--ink); background: var(--paper); }
+  a { color: #80e2ad; }
+  a:hover { color: #b0f3cd; }
+  input, select, textarea {
+    color: var(--ink);
+    background: #17231c;
+    border-color: #64796b;
+    color-scheme: dark;
+  }
+  input::placeholder, textarea::placeholder { color: #a4b5aa; }
+  input:disabled { background: #202e25; }
+  .btn-primary { background: #176c49; color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: #218457; color: #fff; }
+  .btn-quiet { color: var(--ink); border-color: #64796b; }
+  .btn-quiet:hover:not(:disabled) { background: #2b4334; color: #fff; }
+  .btn-google { background: #f8faf8; color: #14211a; border-color: #b1c2b7; }
+  .btn-google:hover:not(:disabled) { background: #e7eee9; }
+  .icon-btn:hover { background: rgb(255 255 255 / 0.1); }
+  .strip { background: #5a4700; color: #fff0b0; }
+  .strip a { color: #fff0b0; }
+  .hero { background-color: var(--paper); background-image: none; }
+  .steps-card { background: var(--surface); border-color: var(--line); }
+  .category-chip { background: var(--surface); color: var(--ink); border-color: var(--line); }
+  .category-chip:hover { color: #b0f3cd; background: #243b2e; }
+  .directory-group h3, .prose h2 { border-color: var(--line); }
+  .directory-group a { color: var(--ink); }
+  .save-btn { background: rgb(17 26 21 / 0.94); color: var(--ink); border-color: var(--line); }
+  .empty { background: var(--surface); border-color: var(--line); }
+  .filters { background: var(--surface); border-color: var(--line); }
+  .photo-add { color: var(--ink); border-color: #64796b; }
+  .photo-add:hover:not(:disabled) { background: #2b4334; }
+  .photo-make-cover { background: #1b2921; color: var(--ink); border-color: var(--line); }
+  .banner { background: var(--green-wash); }
+  .panel { background: var(--surface); border-color: var(--line); }
+  .panel-danger { background: var(--danger-wash); border-color: var(--danger); }
+  .gallery-main, .gallery-thumbs button { background: var(--surface); border-color: var(--line); }
+  .gallery-main img { background: #fff; }
+  .my-item, .convo { background: var(--surface); border-color: var(--line); color: var(--ink); }
+  .my-info h2 a, .convo:hover { color: var(--ink); }
+  .chat-log { background: #17271d; border-color: var(--line); }
+  .msg { background: var(--surface); border-color: var(--line); color: var(--ink); }
+  .msg-mine { background: #176c49; border-color: #176c49; color: #fff; }
+  .chat-head .icon-link { color: var(--ink); }
+  .chat-head .icon-link:hover { background: var(--green-wash); color: var(--ink); }
+  .chat-decision-option { background: var(--surface); border-color: var(--line); }
+  .chat-decision-option p { color: var(--ink-soft); }
+  dialog.dialog { background: var(--surface); color: var(--ink); }
+  .site-footer { background: #0b120e; color: #dbe6df; }
+  .footer-grid .muted { color: #a9bbb1; }
+  .bottom-nav { background: var(--surface); border-color: var(--line); }
+  .bottom-nav a { color: var(--ink-soft); }
+  .bottom-nav a.active { color: #80e2ad; }
+  .bottom-nav a.bottom-sell { color: var(--tag-ink); }
+  .install-prompt { background: var(--surface); color: var(--ink); }
+  .install-prompt-copy p { color: var(--ink-soft); }
+  .install-prompt-icon { background: var(--green-wash); color: #80e2ad; }
+  .install-prompt-close { color: var(--ink-soft); }
+  .app-update-notice { background: var(--green-wash); color: var(--ink); }
+  .app-update-copy p, .app-update-pending { color: var(--ink-soft); }
+  .toasts .toast { background: #26362c; color: #fff; }
+  .btn-app-download { color: #fff; border-color: rgb(255 255 255 / 0.72); background: rgb(255 255 255 / 0.08); }
+  .btn-app-download:hover, .btn-app-download:focus-visible { color: #fff; background: rgb(255 255 255 / 0.18); }
+}
