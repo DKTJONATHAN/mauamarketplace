@@ -15,17 +15,36 @@ function GoogleG() {
   );
 }
 
+function safeInternalPath(path: string): string {
+  // Only retain an app-local path; never store an external redirect target.
+  return path.startsWith('/') && !path.startsWith('//') ? path : '/';
+}
+
 export function GoogleButton({ next }: { next: string }) {
   const toast = useToast();
   const [busy, setBusy] = useState(false);
 
   async function go() {
+    if (busy) return;
+
     setBusy(true);
-    sessionStorage.setItem(NEXT_KEY, next);
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: siteUrl() } });
-    if (error) {
+    try {
+      sessionStorage.setItem(NEXT_KEY, safeInternalPath(next));
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          // Return to the app root. Supabase completes the PKCE exchange from
+          // the OAuth code, then AuthContext sends the member to their target.
+          redirectTo: siteUrl(),
+        },
+      });
+
+      if (error) throw error;
+      // On success the browser navigates to Google, so leave the busy state on.
+    } catch {
+      sessionStorage.removeItem(NEXT_KEY);
       setBusy(false);
-      toast.error('Google sign-in is not available right now. Try email instead.');
+      toast.error('Could not start Google sign-in. Check your connection and make sure Google is enabled in Supabase Auth.');
     }
   }
 
