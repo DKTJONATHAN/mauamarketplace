@@ -430,8 +430,21 @@ dialog.dialog::backdrop { background: rgb(8 28 18 / 0.6); }
 
 
 /* ---------- Web app download button ---------- */
-.btn-app-download { display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; }
-.btn-app-download .lucide { width: 1rem; height: 1rem; }
+.btn-app-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  color: #fff;
+  border-color: rgb(255 255 255 / 0.72);
+  background: rgb(255 255 255 / 0.08);
+}
+.btn-app-download:hover, .btn-app-download:focus-visible {
+  color: #fff;
+  border-color: #fff;
+  background: rgb(255 255 255 / 0.18);
+}
+.btn-app-download .lucide { width: 1rem; height: 1rem; color: #fff; stroke: currentColor; }
 
 @media (max-width: 47.5rem) {
   .btn-app-download span { display: inline; }
