@@ -1,16 +1,8 @@
 # Maua Marketplace — https://mauamarketplace.pages.dev/
 User-agent: *
 Allow: /
-Disallow: /login
-Disallow: /signup
-Disallow: /auth/
-Disallow: /account
-Disallow: /messages
-Disallow: /sell
-Disallow: /my-listings
-Disallow: /seller-dashboard
-Disallow: /saved
-Disallow: /forgot-password
-Disallow: /reset-password
+
+# Private account and authentication screens set a noindex robots meta tag.
+# They remain crawlable so search engines can see that directive.
 
 Sitemap: https://mauamarketplace.pages.dev/sitemap.xml
