@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useDocumentTitle, useGoToLogin, useSaved } from '../hooks';
 
 export function SavedPage() {
-  useDocumentTitle('Saved');
+  useDocumentTitle('Saved', true);
   const { user, loading, isAnonymous } = useAuth();
   const { ids } = useSaved();
   const goToLogin = useGoToLogin();
