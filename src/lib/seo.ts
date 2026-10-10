@@ -6,7 +6,7 @@ import { getCategory } from '../config/categories';
 export function listingPath(title: string, id: string): string {
   const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   if (!uuid.test(id)) return `/listing/${id}`;
-  const slug = title.normalize('NFKD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase()
+  const slug = title.toLowerCase()
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70).replace(/-+$/g, '');
   return `/listing/${slug || 'item'}-${id}`;
 }
