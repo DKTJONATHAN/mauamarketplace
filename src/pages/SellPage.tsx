@@ -53,7 +53,7 @@ type Errors = Partial<Record<keyof FormState | 'photos', string>>;
 export function SellPage() {
   const { id } = useParams();
   const editing = Boolean(id);
-  useDocumentTitle(editing ? 'Edit listing' : 'Post a listing');
+  useDocumentTitle(editing ? 'Edit listing' : 'Post a listing', true);
 
   const navigate = useNavigate();
   const qc = useQueryClient();
