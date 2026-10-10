@@ -17,7 +17,7 @@ function statusText(l: ListingSummary): string {
 }
 
 export function MyListingsPage() {
-  useDocumentTitle('My listings');
+  useDocumentTitle('My listings', true);
   const { user } = useAuth();
   const query = useQuery({
     queryKey: ['my-listings', user?.id],
