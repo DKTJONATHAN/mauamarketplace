@@ -1,6 +1,6 @@
 {
-  "latestVersion": "1.0.3",
-  "latestVersionCode": 4,
+  "latestVersion": "1.0.4",
+  "latestVersionCode": 5,
   "updateMessage": "A newer Maua Marketplace Android app is available.",
-  "downloadUrl": "https://archive.org/download/maua-marketplace/Maua-Marketplace.apk"
+  "downloadUrl": "https://github.com/DKTJONATHAN/mauamarketplace/releases/latest/download/Maua-Marketplace.apk"
 }
