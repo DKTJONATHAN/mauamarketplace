@@ -117,6 +117,22 @@ export function HomePage() {
         <CategoryDirectory />
       </section>
 
+      <section className="wrap section home-intro" aria-labelledby="local-market-title">
+        <h2 id="local-market-title">Maua’s local online market for new and second-hand items</h2>
+        <p>
+          Looking for a market in Maua town? {site.name} helps buyers and sellers across Maua, Igembe and
+          nearby parts of {site.region}, Kenya, find each other online. Browse new products and second-hand
+          bargains, compare prices, and discover items listed by people in your community.
+        </p>
+        <p>
+          Find phones and electronics, sofas and furniture, clothes and shoes, household goods, farm produce,
+          tools, vehicles, property and local services. You can also post an item for sale and connect directly
+          with interested buyers. Listings are free to browse, and sellers and buyers should meet safely and
+          inspect goods before making payment.
+        </p>
+        <p><Link to="/categories">Explore all Maua Marketplace categories</Link> or <Link to="/browse">browse every listing</Link>.</p>
+      </section>
+
       <section className="wrap section home-bottom">
         <div className="sell-band">
           <div>
