@@ -34,7 +34,7 @@ export async function onRequest({ env }: { env: SitemapEnv }): Promise<Response>
     ...CATEGORY_SLUGS.map((slug: string) => urlEntry(`/category/${slug}`, '0.8')),
   ];
 
-  const supabaseUrl = (env.SUPABASE_URL || env.VITE_SUPABASE_URL || '').replace(/\\/+$/, '');
+  let supabaseUrl = env.SUPABASE_URL || env.VITE_SUPABASE_URL || '';\n  while (supabaseUrl.endsWith('/')) supabaseUrl = supabaseUrl.slice(0, -1);
   const supabaseKey = env.SUPABASE_ANON_KEY || env.VITE_SUPABASE_ANON_KEY || '';
   if (supabaseUrl && supabaseKey) {
     try {
