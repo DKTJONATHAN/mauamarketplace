@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { HashRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@fontsource-variable/archivo/wdth.css';
 import '@fontsource-variable/figtree';
@@ -11,6 +11,12 @@ import { SetupNeeded } from './components/SetupNeeded';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { env } from './lib/env';
+
+// Convert old hash-router links to clean paths so existing shared links keep working.
+if (window.location.hash.startsWith('#/')) {
+  const legacyRoute = window.location.hash.slice(1);
+  window.history.replaceState(null, '', `${window.location.pathname.replace(/\\/$/, '')}${legacyRoute}` || '/');
+}
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) window.addEventListener('load', () => {
   void navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`, { updateViaCache: 'none' });
@@ -28,13 +34,13 @@ createRoot(root).render(
     <ErrorBoundary>
       {env.configured ? (
         <QueryClientProvider client={queryClient}>
-          <HashRouter>
+          <BrowserRouter>
             <ToastProvider>
               <AuthProvider>
                 <App />
               </AuthProvider>
             </ToastProvider>
-          </HashRouter>
+          </BrowserRouter>
         </QueryClientProvider>
       ) : (
         <SetupNeeded />
