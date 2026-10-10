@@ -99,7 +99,7 @@ export function ListingPage() {
         toast.success('Link copied.');
       }
     } catch {
-      /* the person closed the share sheet */
+      /* closed share sheet */
     }
   }
 
@@ -131,6 +131,13 @@ export function ListingPage() {
             <li><Link to={`/browse?cat=${listing.category}`}>{category.label}</Link></li>
             {listing.condition && <li>Condition: {conditionLabels[listing.condition]}</li>}
           </ul>
+          {!isOwner && listing.seller && (
+            <p className="seller-line">
+              <Link to={`/seller/${listing.seller_id}`}>{listing.seller.display_name ?? 'Member'}</Link>
+              <span className="muted">Member since {memberSince(listing.seller.created_at)}</span>
+              {isNewMember(listing.seller.created_at) && <span className="chip chip-warn">New member</span>}
+            </p>
+          )}
           <h2>Description</h2>
           <p className="listing-description">{listing.description}</p>
         </div>
@@ -155,7 +162,7 @@ export function ListingPage() {
                 )}
               </div>
               {available ? (
-                <div className="stack">
+                <div className="stack contact-actions">
                   <button
                     type="button"
                     className="btn btn-primary btn-block"
@@ -186,6 +193,23 @@ export function ListingPage() {
         </div>
       </div>
 
+      {!isOwner && available && (
+        <div className="listing-actionbar" role="group" aria-label="Contact the seller">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => (user && !isAnonymous ? message.mutate() : goToLogin())}
+            disabled={message.isPending}
+          >
+            <MessageCircle aria-hidden /> {message.isPending ? 'Opening...' : 'Message'}
+          </button>
+          <button type="button" className="btn btn-quiet" onClick={showPhone}>
+            <Phone aria-hidden /> Phone
+          </button>
+          <SaveButton listingId={listing.id} />
+        </div>
+      )}
+
       <ReportDialog open={reporting} onClose={() => setReporting(false)} listingId={listing.id} subject="this listing" />
 
       <Dialog
@@ -204,7 +228,7 @@ export function ListingPage() {
           </div>
         ) : (
           <div className="stack">
-            {phone.isLoading && <p role="alert" aria-busy="true">Loading...</p>}
+            {phone.isLoading && <p aria-busy="true">Loading...</p>}
             {phone.isError && <p role="alert">{(phone.error as Error).message}</p>}
             {phone.isSuccess && !phone.data && (
               <p>This seller has not shared a phone number. Use the message button to contact them.</p>
