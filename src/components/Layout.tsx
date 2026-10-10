@@ -162,7 +162,7 @@ function Header({ unread }: { unread: number }) {
       {!inChat && <nav className="rail" aria-label="Popular categories"><ul className="wrap">
         {featuredCategorySlugs.map((slug) => {
           const c = getCategory(slug);
-          return <li key={slug}><Link to={`/browse?cat=${slug}`}>{c.label}</Link></li>;
+          return <li key={slug}><Link to={`/category/${slug}`}>{c.label}</Link></li>;
         })}
         <li><Link to="/categories" className="rail-all">All categories</Link></li>
       </ul></nav>}
@@ -218,7 +218,7 @@ function TermsGate() {
       <div className="stack">
         <p>{site.name} is a notice board. Anything you buy or sell is a deal between you and the other person.</p>
         <ul className="plain-list"><li>We do not verify members, hold money, inspect items or settle disputes.</li><li>Meet in public, inspect first, and pay only when you are happy.</li><li>Your email stays private. Your display name, listings and photos are public.</li></ul>
-        <label className="check"><input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} /><span>I am 18 or older and I accept the{' '}<a href={`${import.meta.env.BASE_URL}#/rules`} target="_blank" rel="noreferrer">rules and privacy notice</a>.</span></label>
+        <label className="check"><input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} /><span>I am 18 or older and I accept the{' '}<a href={`${import.meta.env.BASE_URL}rules`} target="_blank" rel="noreferrer">rules and privacy notice</a>.</span></label>
         <div className="actions"><button type="button" className="btn btn-primary" disabled={!agreed || busy} onClick={accept}>{busy ? 'Saving...' : 'Continue'}</button></div>
       </div>
     </Dialog>
