@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "android/twa-manifest.json"
+      - ".github/workflows/build-android-apk.yml"
   workflow_dispatch:
 
 permissions:
