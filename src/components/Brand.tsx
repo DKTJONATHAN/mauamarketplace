@@ -20,8 +20,9 @@ export function Brand() {
   return (
     <Link to="/" className="brand" aria-label={`${site.name} home`}>
       <span className="brand-logo-circle">
-      <img src={LOGO_SRC} className="brand-logo" alt={site.name} />
-    </span>
+        <img src={LOGO_SRC} className="brand-logo" alt="" aria-hidden="true" />
+      </span>
+      <span className="brand-word">{site.name}</span>
     </Link>
   );
 }
