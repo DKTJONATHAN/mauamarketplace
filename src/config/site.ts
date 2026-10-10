@@ -12,9 +12,9 @@ export const site = {
   maxImages: 6,
   /** Default meta description (keep under ~160 chars for Google). */
   description:
-    'Buy and sell phones, farm produce, furniture, cars and more with people in Maua, Meru County. Free to post. Talk to sellers in the app.',
+    'Maua Marketplace is the local online market for Maua, Meru County, Kenya. Buy and sell new and second-hand phones, electronics, furniture, clothes, farm produce, vehicles and household items.',
   /** Short description for social cards. */
-  socialDescription: 'Buy and sell with people in Maua, Meru County. Free classifieds — phones, produce, cars, services and more.',
+  socialDescription: 'Shop new and second-hand items in Maua, Meru County, Kenya. Find phones, electronics, clothes, furniture, farm produce, vehicles and more.',
   /** Locale for Open Graph / HTML. */
   locale: 'en_KE',
   language: 'en',
@@ -47,13 +47,12 @@ export function siteUrl(): string {
   return `${site.productionOrigin}${base.endsWith('/') ? base : `${base}/`}`;
 }
 
-/** Absolute URL for a hash-router path (e.g. path = "/listing/abc"). */
+/** Absolute URL for a clean browser-router path (e.g. path = "/listing/abc"). */
 export function absoluteUrl(path = '/'): string {
   const root = siteUrl();
   const clean = path.startsWith('/') ? path : `/${path}`;
   if (clean === '/') return root;
-  // HashRouter: public shareable links use #/path
-  return `${root}#${clean}`;
+  return clean === '/' ? root : `${root}${clean.replace(/^\\//, '')}`;
 }
 
 /** Default Open Graph image (logo). Prefer a dedicated 1200×630 asset when available. */
