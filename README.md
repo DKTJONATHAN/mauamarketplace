@@ -82,7 +82,7 @@ npm test && npm run build
 4. **R2** – create a bucket, bind it to the Pages project as `MEDIA`. Add server-side secrets (`SUPABASE_SERVICE_ROLE_KEY`, etc.) for the media Function.
 5. Redeploy. New photos go to R2; existing Supabase Storage paths continue to work until migrated.
 
-See the original setup notes in the commit history or `specs/` for the full media-migration and SMTP steps.
+See `specs/` for media-migration and SMTP details.
 
 ---
 
