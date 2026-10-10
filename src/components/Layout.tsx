@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { CircleUser, Download, Heart, Home, MessageCircle, Plus, Search, X } from 'lucide-react';
+import { CircleUser, Heart, Home, MessageCircle, Plus, Search, X } from 'lucide-react';
 import { featuredCategorySlugs, getCategory } from '../config/categories';
 import { site } from '../config/site';
 import { useAuth } from '../context/AuthContext';
@@ -18,8 +18,9 @@ function DisclaimerStrip() {
   return (
     <div className="strip" role="note">
       <p>
-        Deals here are between you and the other person. {site.name} does not verify sellers, hold money or inspect items.{' '}
-        <Link to="/safety">Read the safety tips</Link>
+        <span className="strip-long">Deals here are between you and the other person. {site.name} does not verify sellers, hold money or inspect items.</span>
+        <span className="strip-short">We do not verify sellers or hold money.</span>{' '}
+        <Link to="/safety">Safety tips</Link>
       </p>
       <button type="button" className="icon-btn" aria-label="Dismiss notice" onClick={() => {
         sessionStorage.setItem('mm.strip', '1');
@@ -50,43 +51,6 @@ function HeaderSearch() {
 
 const appDownloadUrl = 'https://github.com/DKTJONATHAN/mauamarketplace/releases/latest/download/Maua-Marketplace.apk';
 
-function isInstalledApp(): boolean {
-  return window.matchMedia('(display-mode: standalone)').matches ||
-    (navigator as Navigator & { standalone?: boolean }).standalone === true;
-}
-
-function AppDownloadButton() {
-  const [installed, setInstalled] = useState(false);
-
-  useEffect(() => {
-    const update = () => setInstalled(isInstalledApp());
-    update();
-    const media = window.matchMedia('(display-mode: standalone)');
-    media.addEventListener?.('change', update);
-    window.addEventListener('appinstalled', update);
-    return () => {
-      media.removeEventListener?.('change', update);
-      window.removeEventListener('appinstalled', update);
-    };
-  }, []);
-
-  if (!appDownloadUrl || installed) return null;
-
-  return (
-    <a
-      href={appDownloadUrl}
-      className="btn btn-app-download"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Get the Maua Marketplace app"
-    >
-      <Download aria-hidden />
-      <span>Get the app</span>
-    </a>
-  );
-}
-
-
 function AppUpdateNotice() {
   const [update, setUpdate] = useState<{ latestVersion: string; downloadUrl: string } | null>(null);
   const [dismissed, setDismissed] = useState(() => sessionStorage.getItem('mm.app-update-dismissed') === '1');
@@ -106,14 +70,12 @@ function AppUpdateNotice() {
         const standalone = window.matchMedia('(display-mode: standalone)').matches ||
           (navigator as Navigator & { standalone?: boolean }).standalone === true;
 
-        // The first update-aware APK is 1.0.3. Older APKs launched without
-        // app_version, so treat a standalone app without the marker as 1.0.2.
         const knownInstalled = installedVersion || (standalone ? '1.0.2' : '');
         if (!knownInstalled || !standalone || knownInstalled === latest) return;
 
         if (!cancelled) setUpdate({ latestVersion: latest, downloadUrl: data.downloadUrl?.trim() ?? '' });
       } catch {
-        // Update checks are best-effort and must never block the marketplace.
+        // Update checks are best-effort
       }
     }
     void check();
@@ -145,13 +107,13 @@ function Header({ unread }: { unread: number }) {
   const { user, isAnonymous } = useAuth();
   const location = useLocation();
   const inChat = /^\/messages\/[^/]+$/.test(location.pathname);
+  const isHome = location.pathname === '/';
   return (
     <header className="site-header">
       <div className="wrap header-row">
         {inChat ? <div className="brand-static" aria-label="Chat in progress"><Brand /></div> : <>
           <Brand /><HeaderSearch />
           <nav className="header-actions" aria-label="Account">
-            <AppDownloadButton />
             <Link to="/saved" className="icon-link" aria-label="Saved listings"><Heart aria-hidden /></Link>
             <Link to="/messages" className="icon-link" aria-label={unread ? `Messages, ${unread} unread` : 'Messages'}><MessageCircle aria-hidden />{unread > 0 && <span className="badge">{unread > 9 ? '9+' : unread}</span>}</Link>
             {user && !isAnonymous ? <Link to="/account" className="icon-link" aria-label="Your account"><CircleUser aria-hidden /></Link> : <Link to="/login" className="text-link">Log in</Link>}
@@ -159,7 +121,7 @@ function Header({ unread }: { unread: number }) {
           </nav>
         </>}
       </div>
-      {!inChat && <nav className="rail" aria-label="Popular categories"><ul className="wrap">
+      {!inChat && !isHome && <nav className="rail" aria-label="Popular categories"><ul className="wrap">
         {featuredCategorySlugs.map((slug) => {
           const c = getCategory(slug);
           return <li key={slug}><Link to={`/category/${slug}`}>{c.label}</Link></li>;
