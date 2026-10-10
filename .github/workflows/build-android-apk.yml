@@ -4,11 +4,10 @@ on:
   push:
     paths:
       - "android/twa-manifest.json"
-      - ".github/workflows/build-android-apk.yml"
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -38,7 +37,10 @@ jobs:
           echo "Using command-line tools: $CMDLINE"
 
           yes | "$CMDLINE/bin/sdkmanager" --sdk_root="$SDK" --licenses >/dev/null 2>&1 || true
-          "$CMDLINE/bin/sdkmanager" --sdk_root="$SDK" --install             "platform-tools"             "platforms;android-35"             "build-tools;35.0.0"
+          "$CMDLINE/bin/sdkmanager" --sdk_root="$SDK" --install \
+            "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
 
           BW_SDK="$RUNNER_TEMP/bubblewrap-android-sdk"
           rm -rf "$BW_SDK"
@@ -90,12 +92,23 @@ jobs:
           test -n "$ANDROID_KEY_PASSWORD"
 
           printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android.keystore.p12
-          keytool -list             -storetype PKCS12             -keystore android.keystore.p12             -storepass "$ANDROID_KEYSTORE_PASSWORD"             -alias "maua-marketplace" >/dev/null
+          keytool -list -storetype PKCS12 -keystore android.keystore.p12 -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "maua-marketplace" >/dev/null
 
           rm -f android.keystore
-          keytool -importkeystore             -srckeystore android.keystore.p12             -srcstoretype PKCS12             -srcstorepass "$ANDROID_KEYSTORE_PASSWORD"             -srckeypass "$ANDROID_KEY_PASSWORD"             -srcalias "maua-marketplace"             -destkeystore android.keystore             -deststoretype JKS             -deststorepass "$ANDROID_KEYSTORE_PASSWORD"             -destkeypass "$ANDROID_KEY_PASSWORD"             -destalias "maua-marketplace"             -noprompt
+          keytool -importkeystore \
+            -srckeystore android.keystore.p12 \
+            -srcstoretype PKCS12 \
+            -srcstorepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -srckeypass "$ANDROID_KEY_PASSWORD" \
+            -srcalias "maua-marketplace" \
+            -destkeystore android.keystore \
+            -deststoretype JKS \
+            -deststorepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -destkeypass "$ANDROID_KEY_PASSWORD" \
+            -destalias "maua-marketplace" \
+            -noprompt
 
-          keytool -list             -keystore android.keystore             -storetype JKS             -storepass "$ANDROID_KEYSTORE_PASSWORD"             -alias "maua-marketplace" >/dev/null
+          keytool -list -keystore android.keystore -storetype JKS -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "maua-marketplace" >/dev/null
 
       - name: Show signing certificate SHA-256
         working-directory: android
@@ -104,7 +117,7 @@ jobs:
         run: |
           set -e
           echo "Persistent Android signing certificate SHA-256:"
-          keytool -list -v             -keystore android.keystore             -storetype JKS             -storepass "$ANDROID_KEYSTORE_PASSWORD"             -alias "maua-marketplace"             | grep "SHA256:"
+          keytool -list -v -keystore android.keystore -storetype JKS -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "maua-marketplace" | grep "SHA256:"
 
       - name: Generate Android project
         working-directory: android
@@ -123,18 +136,43 @@ jobs:
           export ANDROID_HOME="$BUBBLEWRAP_ANDROID_SDK"
           bubblewrap build --skipPwaValidation --manifest="./twa-manifest.json" --signingKeyPath="./android.keystore" --signingKeyAlias="maua-marketplace"
 
-      - name: Rename APK
+      - name: Verify APK and version
         working-directory: android
-        run: cp app-release-signed.apk ../Maua-Marketplace.apk
+        run: |
+          set -e
+          test -s app-release-signed.apk
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging app-release-signed.apk | grep -E "package: name='ke.co.mauamarketplace.app', versionCode='5', versionName='1.0.4'"
+          cp app-release-signed.apk ../Maua-Marketplace.apk
+          sha256sum ../Maua-Marketplace.apk | tee ../Maua-Marketplace.apk.sha256
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
         with:
           name: Maua-Marketplace-APK
-          path: Maua-Marketplace.apk
+          path: |
+            Maua-Marketplace.apk
+            Maua-Marketplace.apk.sha256
           retention-days: 90
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
         with:
           name: Maua-Marketplace-AAB
           path: android/app-release-bundle.aab
+          if-no-files-found: warn
           retention-days: 90
+
+      - name: Publish latest APK release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-latest
+          name: Maua Marketplace Android (latest)
+          body: |
+            Latest signed Android APK for Maua Marketplace.
+            Version: 1.0.4 (version code 5).
+            Use the APK asset below for the current version. Older workflow artifacts may contain older builds.
+          files: |
+            Maua-Marketplace.apk
+            Maua-Marketplace.apk.sha256
+          overwrite_files: true
+          make_latest: true
