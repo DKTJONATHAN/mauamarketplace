@@ -3,6 +3,14 @@ import type { Listing } from './types';
 import { formatPrice } from './format';
 import { getCategory } from '../config/categories';
 
+export function listingPath(title: string, id: string): string {
+  const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  if (!uuid.test(id)) return `/listing/${id}`;
+  const slug = title.normalize('NFKD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70).replace(/-+$/g, '');
+  return `/listing/${slug || 'item'}-${id}`;
+}
+
 export interface SeoProps {
   /** Document title (without site name suffix). Omit for homepage default. */
   title?: string;
@@ -152,7 +160,7 @@ export function listingJsonLd(listing: Listing): Record<string, unknown> {
     listing.images?.[0] != null
       ? mediaUrl(listing.images[0])
       : defaultOgImage();
-  const url = absoluteUrl(`/listing/${listing.id}`);
+  const url = absoluteUrl(listingPath(listing.title, listing.id));
   const offer: Record<string, unknown> = {
     '@type': 'Offer',
     url,
