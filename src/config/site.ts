@@ -52,7 +52,7 @@ export function absoluteUrl(path = '/'): string {
   const root = siteUrl();
   const clean = path.startsWith('/') ? path : `/${path}`;
   if (clean === '/') return root;
-  return clean === '/' ? root : `${root}${clean.replace(/^\\//, '')}`;
+  return clean === '/' ? root : `${root}${clean.slice(1)}`;
 }
 
 /** Default Open Graph image (logo). Prefer a dedicated 1200×630 asset when available. */
