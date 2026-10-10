@@ -7,6 +7,7 @@ interface SitemapEnv {
 
 interface PublicListing {
   id: string;
+  title?: string | null;
   created_at?: string | null;
 }
 
@@ -40,7 +41,7 @@ export async function onRequest({ env }: { env: SitemapEnv }): Promise<Response>
   if (supabaseUrl && supabaseKey) {
     try {
       const params = new URLSearchParams({
-        select: 'id,created_at',
+        select: 'id,title,created_at',
         status: 'eq.active',
         order: 'created_at.desc',
         limit: '5000',
@@ -56,7 +57,10 @@ export async function onRequest({ env }: { env: SitemapEnv }): Promise<Response>
         const listings = await response.json() as PublicListing[];
         for (const listing of listings) {
           if (listing.id && /^[a-zA-Z0-9-]+$/.test(listing.id)) {
-            entries.push(urlEntry(`/listing/${listing.id}`, '0.7', listing.created_at ?? undefined));
+            const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+            const slug = (listing.title || 'item').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70).replace(/-+$/g, '');
+            const path = uuid.test(listing.id) ? `/listing/${slug || 'item'}-${listing.id}` : `/listing/${listing.id}`;
+            entries.push(urlEntry(path, '0.7', listing.created_at ?? undefined));
           }
         }
       }
