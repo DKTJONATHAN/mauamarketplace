@@ -57,13 +57,16 @@ function setLink(rel: string, href: string): void {
 
 function setJsonLd(data: Record<string, unknown> | Record<string, unknown>[] | undefined): void {
   if (typeof document === 'undefined') return;
-  // Replace any existing JSON-LD (static homepage graph or previous page) with the current one.
+  // Keep the website and organization identity available on every route, then add
+  // route-specific structured data such as Product for an individual listing.
   document.head.querySelectorAll('script[type="application/ld+json"]').forEach((n) => n.remove());
-  if (!data) return;
+  const pageData = data ? (Array.isArray(data) ? data : [data]) : [];
+  const includesSiteIdentity = pageData.some((entry) => entry['@type'] === 'WebSite' || entry['@type'] === 'Organization');
+  const structuredData = includesSiteIdentity ? pageData : [...websiteJsonLd(), ...pageData];
   const el = document.createElement('script');
   el.type = 'application/ld+json';
   el.setAttribute(META_ATTR, '1');
-  el.textContent = JSON.stringify(data);
+  el.textContent = JSON.stringify(structuredData);
   document.head.appendChild(el);
 }
 
