@@ -9,11 +9,20 @@ export function SafetyPanel({ category }: { category: string }) {
       <h2 id="safety-title">
         <ShieldAlert aria-hidden /> Before you pay
       </h2>
-      <p>{defaultNotice}</p>
-      {notice && <p>{notice}</p>}
-      <p>
-        <Link to="/safety">Read all safety tips</Link>
-      </p>
+      <p>{notice ?? defaultNotice}</p>
+      {notice ? (
+        <details>
+          <summary>More safety tips</summary>
+          <p>{defaultNotice}</p>
+          <p>
+            <Link to="/safety">Read all safety tips</Link>
+          </p>
+        </details>
+      ) : (
+        <p>
+          <Link to="/safety">Read all safety tips</Link>
+        </p>
+      )}
     </aside>
   );
 }
