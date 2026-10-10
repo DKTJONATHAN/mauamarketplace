@@ -12,7 +12,7 @@ import { memberSince } from '../lib/format';
 import { useDocumentTitle } from '../hooks';
 
 export function AccountPage() {
-  useDocumentTitle('Your account');
+  useDocumentTitle('Your account', true);
   const { user, profile, refreshProfile, signOut } = useAuth();
   const toast = useToast();
   const qc = useQueryClient();
