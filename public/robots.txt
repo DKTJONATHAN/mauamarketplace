@@ -1,16 +1,16 @@
 # Maua Marketplace — https://mauamarketplace.pages.dev/
 User-agent: *
 Allow: /
-
-# Private / account areas (hash routes still reachable; this is advisory)
-Disallow: /#/login
-Disallow: /#/signup
-Disallow: /#/account
-Disallow: /#/messages
-Disallow: /#/sell
-Disallow: /#/my-listings
-Disallow: /#/seller-dashboard
-Disallow: /#/forgot-password
-Disallow: /#/reset-password
+Disallow: /login
+Disallow: /signup
+Disallow: /auth/
+Disallow: /account
+Disallow: /messages
+Disallow: /sell
+Disallow: /my-listings
+Disallow: /seller-dashboard
+Disallow: /saved
+Disallow: /forgot-password
+Disallow: /reset-password
 
 Sitemap: https://mauamarketplace.pages.dev/sitemap.xml
