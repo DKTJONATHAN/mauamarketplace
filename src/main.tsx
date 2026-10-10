@@ -15,7 +15,7 @@ import { env } from './lib/env';
 // Convert old hash-router links to clean paths so existing shared links keep working.
 if (window.location.hash.startsWith('#/')) {
   const legacyRoute = window.location.hash.slice(1);
-  window.history.replaceState(null, '', `${window.location.pathname.replace(/\\/$/, '')}${legacyRoute}` || '/');
+  window.history.replaceState(null, '', `${(window.location.pathname.endsWith('/') ? window.location.pathname.slice(0, -1) : window.location.pathname)}${legacyRoute}` || '/');
 }
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) window.addEventListener('load', () => {
