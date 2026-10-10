@@ -1,7 +1,7 @@
 {
   "name": "Maua Marketplace",
   "short_name": "Maua Market",
-  "description": "Buy and sell with people in Maua, Meru County. Free classifieds.",
+  "description": "Buy and sell new and second-hand items in Maua, Meru County, Kenya.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
