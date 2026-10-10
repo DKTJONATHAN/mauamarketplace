@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ListingGrid } from '../components/ListingGrid';
 import { getCategory, isValidCategory } from '../config/categories';
-import { site } from '../config/site';
+import { absoluteUrl, site } from '../config/site';
 import { fetchListings } from '../lib/api';
 import { useSeo } from '../hooks';
 import type { BrowseFilters } from '../lib/types';
@@ -21,6 +21,25 @@ export function CategoryPage() {
     description,
     path: `/category/${slug}`,
     noindex: !valid,
+    jsonLd: valid ? [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: title,
+        description,
+        url: absoluteUrl(`/category/${slug}`),
+        about: { '@type': 'Thing', name: category.label },
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: absoluteUrl('/') },
+          { '@type': 'ListItem', position: 2, name: 'Categories', item: absoluteUrl('/categories') },
+          { '@type': 'ListItem', position: 3, name: category.label, item: absoluteUrl(`/category/${slug}`) },
+        ],
+      },
+    ] : undefined,
   });
 
   const filters: BrowseFilters = { q: '', cat: valid ? slug : '', min: '', max: '', cond: '', loc: '', sort: 'new' };
