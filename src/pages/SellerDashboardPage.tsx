@@ -6,7 +6,7 @@ import { fetchMyListings } from '../lib/api';
 import { useUnreadMessages, useDocumentTitle } from '../hooks';
 
 export function SellerDashboardPage() {
-  useDocumentTitle('Seller dashboard');
+  useDocumentTitle('Seller dashboard', true);
   const { user } = useAuth();
   const unread = useUnreadMessages();
   const query = useQuery({
