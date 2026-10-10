@@ -10,7 +10,7 @@ export function CategoryDirectory() {
           <ul>
             {group.items.map((c) => (
               <li key={c.slug}>
-                <Link to={`/browse?cat=${c.slug}`}>
+                <Link to={`/category/${c.slug}`}>
                   <c.icon aria-hidden />
                   <span>{c.label}</span>
                 </Link>
