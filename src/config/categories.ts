@@ -134,6 +134,12 @@ export const categoryGroups: { name: string; items: Category[] }[] = (() => {
   return order.map((name) => ({ name, items: map.get(name) ?? [] }));
 })();
 
+/** Categories shown as icon shortcuts at the top of the home page. */
+export const homeCategorySlugs = [
+  'phones', 'tvs-audio', 'computers', 'furniture', 'clothing-women', 'school-items', 'cars',
+  'farm-produce', 'livestock', 'property-rent', 'house-help', 'services',
+];
+
 /** Categories shown in the quick rail under the header. */
 export const featuredCategorySlugs = [
   'phones', 'farm-produce', 'furniture', 'cars', 'services',
