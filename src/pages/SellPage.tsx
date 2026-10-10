@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'r
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ImagePlus, Star, X } from 'lucide-react';
+import { CropImageDialog } from '../components/CropImageDialog';
 import { categoryGroups, getCategory } from '../config/categories';
 import { site } from '../config/site';
 import { useAuth } from '../context/AuthContext';
@@ -67,6 +68,9 @@ export function SellPage() {
   const [progress, setProgress] = useState('');
   const [saving, setSaving] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [queuedFiles, setQueuedFiles] = useState<File[]>([]);
+  const [cropTargetKey, setCropTargetKey] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const prefilled = useRef(false);
   const photosRef = useRef<Photo[]>([]);
@@ -114,16 +118,20 @@ export function SellPage() {
     setErrors((e) => ({ ...e, [key]: undefined }));
   }
 
-  async function addFiles(e: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []);
-    e.target.value = '';
+  async function prepareFiles(files: File[], croppedFirst?: Blob) {
     const room = site.maxImages - photos.length;
-    if (files.length > room) toast.info(`You can add up to ${site.maxImages} photos. Extra photos were skipped.`);
+    const selected = files.slice(0, Math.max(0, room));
+    if (!selected.length) return;
     setProcessing(true);
     const added: Photo[] = [];
-    for (const file of files.slice(0, Math.max(0, room))) {
+    for (let i = 0; i < selected.length; i++) {
+      const file = selected[i];
+      if (!file) continue;
       try {
-        const { blob } = await prepareImage(file);
+        const source = i === 0 && croppedFirst
+          ? new File([croppedFirst], file.name, { type: croppedFirst.type || file.type })
+          : file;
+        const { blob } = await prepareImage(source);
         added.push({ key: crypto.randomUUID(), previewUrl: URL.createObjectURL(blob), existing: false, blob });
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'That photo could not be added.');
@@ -136,6 +144,67 @@ export function SellPage() {
     }
   }
 
+  function addFiles(e: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = '';
+    const room = site.maxImages - photos.length;
+    if (files.length > room) toast.info(`You can add up to ${site.maxImages} photos. Extra photos were skipped.`);
+    const selected = files.slice(0, Math.max(0, room));
+    if (!selected.length) return;
+
+    // The first photo is the display/cover photo, so let the seller crop it before processing.
+    if (photos.length === 0) {
+      const [first, ...rest] = selected;
+      if (first) {
+        setCropTargetKey(null);
+        setQueuedFiles(rest);
+        setCropFile(first);
+      }
+      return;
+    }
+    void prepareFiles(selected);
+  }
+
+  function cancelCrop() {
+    setCropFile(null);
+    setQueuedFiles([]);
+    setCropTargetKey(null);
+  }
+
+  async function confirmCrop(blob: Blob) {
+    const file = cropFile;
+    const targetKey = cropTargetKey;
+    const queued = queuedFiles;
+    setCropFile(null);
+    setQueuedFiles([]);
+    setCropTargetKey(null);
+    if (!file) return;
+
+    if (targetKey) {
+      const target = photos.find((photo) => photo.key === targetKey);
+      if (!target) return;
+      try {
+        const croppedFile = new File([blob], file.name, { type: blob.type || file.type });
+        const { blob: prepared } = await prepareImage(croppedFile);
+        if (target.path) setRemoved((items) => [...items, target.path as string]);
+        if (!target.existing) URL.revokeObjectURL(target.previewUrl);
+        const previewUrl = URL.createObjectURL(prepared);
+        setPhotos((current) => {
+          const updated = current.map((photo) => photo.key === targetKey
+            ? { ...photo, previewUrl, existing: false, path: undefined, blob: prepared }
+            : photo);
+          const cover = updated.find((photo) => photo.key === targetKey);
+          return cover ? [cover, ...updated.filter((photo) => photo.key !== targetKey)] : updated;
+        });
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'That photo could not be cropped.');
+      }
+      return;
+    }
+
+    await prepareFiles([file, ...queued], blob);
+  }
+
   function removePhoto(photo: Photo) {
     setPhotos((p) => p.filter((x) => x.key !== photo.key));
     if (photo.existing && photo.path) setRemoved((r) => [...r, photo.path as string]);
@@ -143,6 +212,14 @@ export function SellPage() {
   }
 
   function makeCover(photo: Photo) {
+    if (photo.key === photos[0]?.key) return;
+    // Newly added photos still have their processed blob, so they can be cropped as the cover.
+    if (photo.blob) {
+      setCropTargetKey(photo.key);
+      setQueuedFiles([]);
+      setCropFile(new File([photo.blob], 'display-photo.webp', { type: photo.blob.type || 'image/webp' }));
+      return;
+    }
     setPhotos((p) => [photo, ...p.filter((x) => x.key !== photo.key)]);
   }
 
@@ -387,7 +464,7 @@ export function SellPage() {
         <fieldset className="field photos">
           <legend>Photos{photosRequired ? '' : ' (optional)'}</legend>
           <small className="hint">
-            Up to {site.maxImages}. The first photo is the cover. Photos are public, and location data is removed from them before upload.
+            Up to {site.maxImages}. The first photo is the display/cover photo and can be cropped before upload. Other photos stay unchanged. Photos are public, and location data is removed from them before upload.
             {category?.adultOnly && ' Only upload a photo of a person with their clear permission.'}
           </small>
           <ul className="photo-grid">
@@ -463,6 +540,7 @@ export function SellPage() {
           </button>
         </div>
       </form>
+      {cropFile && <CropImageDialog file={cropFile} onCancel={cancelCrop} onConfirm={confirmCrop} />}
     </div>
   );
 }
