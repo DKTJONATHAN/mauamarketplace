@@ -8,7 +8,7 @@ import { timeAgo } from '../lib/format';
 import { useDocumentTitle, useGoToLogin } from '../hooks';
 
 export function MessagesPage() {
-  useDocumentTitle('Messages');
+  useDocumentTitle('Messages', true);
   const { user, loading } = useAuth();
   const goToLogin = useGoToLogin();
   const query = useQuery({
