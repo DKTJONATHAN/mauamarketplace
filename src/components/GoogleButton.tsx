@@ -33,7 +33,7 @@ export function GoogleButton({ next }: { next: string }) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          // Return to the app root. Supabase completes the PKCE exchange from
+          // Return to the clean app root. Supabase completes the PKCE exchange from
           // the OAuth code, then AuthContext sends the member to their target.
           redirectTo: siteUrl(),
         },
