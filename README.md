@@ -1,122 +1,93 @@
 # Maua Marketplace
 
-A free classifieds site for Maua, Meru County. People post items, produce, services and property, and talk to each other
-inside the app. The site never handles money and never verifies anyone, so it ships with safety tools built in.
+**Free local classifieds for Maua, Meru County.**
 
-- React 19 + TypeScript + Vite, deployed to Cloudflare Pages
-- Supabase for accounts (email and Google), listings, messages and Row Level Security
-- Listing photos are stored in Cloudflare R2; uploads are handled by a Cloudflare Pages Function. Supabase remains the database/auth backend.
-- See `specs/marketplace_design.md` for the design decisions
+Buy and sell phones, farm produce, furniture, cars, livestock, property, services and more — right where you live. Listings stay up until the seller marks them sold. Chat happens inside the app so you never have to share a phone number unless you want to.
 
-## What members get
+The platform never holds money, never verifies sellers, and never inspects items. Safety tools are built in from the start.
 
-- Sign up with email or Google. Email is never shown publicly. Google names are not imported, so nobody is named without choosing it.
-- About 50 categories (phones, TVs, laptops, clothes, school items, cars, house helps, farm produce, livestock, property, services and more)
-- Search, price, condition, place and sort filters; save listings; listings remain live until the seller marks them sold or they are removed
-- In-app chat with live updates, so nobody has to share a phone number. Optional phone number per listing, visible only to signed-in members who accept a safety reminder
-- Caution features: safety panel on every listing with category-specific advice (IMEI checks, logbook and NTSA search, land search, house-help checks), scam warnings under chat messages, report listing/member, block member, "new member" badge, automatic hiding after five reports, daily posting and messaging limits, 18+ confirmation for house-help and jobs, photo location data stripped before upload, account deletion that also removes photos
+---
 
-## One-time setup
+## What you can do
 
-You need a Supabase project (free tier is fine) and this repository to be public.
+- **Post a listing** in ~50 categories (phones, TVs & audio, computers, furniture, clothing, school items, cars, farm produce, livestock, property for rent/sale, house help, services, and more)
+- **Search & filter** by category, price, condition, location and sort order
+- **Save favourites** and message sellers with live chat
+- **Optional phone number** on a listing — shown only to signed-in members who accept a safety reminder
+- **Report or block** anything that feels off; listings auto-hide after five reports
 
-### 1. Apply the patch
+### Safety built in
 
-```bash
-git clone https://github.com/DKTJONATHAN/mauamarketplace.git
-cd mauamarketplace
-git rm -f README.md .gitignore 2>/dev/null; git commit -m "Clear starter files" 2>/dev/null   # only if GitHub created them
-git am < maua-marketplace.patch
-git push origin main
-```
+- Category-specific tips on every listing (IMEI checks, NTSA/logbook, land search, house-help checks, etc.)
+- Scam warnings under chat messages
+- “New member” badge for recent accounts
+- Daily posting and messaging limits
+- 18+ confirmation for house-help and job listings
+- Photo location data stripped before upload
+- Full account deletion also removes your photos
 
-No local machine? Open the repository in a Codespace (Code > Codespaces), upload `maua-marketplace.patch` into it, and run the same `git am` and `git push` commands in its terminal.
+---
 
-### 2. Configure the Supabase project
+## Mobile-first experience
 
-Supabase stores accounts, listings, messages and other application data. Listing photos are stored in Cloudflare R2, not Supabase Storage.
+The UI is tuned for phones:
 
-### 3. Set up Supabase
+- Compact header with logo + wordmark and a single-row category rail
+- Icon shortcuts for popular categories on the home page
+- Sticky **Message / Phone / Save** action bar on listing pages
+- Swipeable photo gallery with a photo counter
+- Compact safety panel that leads with category advice
 
-1. Create a project. Note the **Project URL**, the **anon (publishable) key**, the **project ref** (the part before `.supabase.co`) and the **database password**.
-2. Authentication > URL Configuration:
-   - Site URL: your Cloudflare Pages URL or custom domain, e.g. `https://mauamarketplace.pages.dev/`
-   - Redirect URLs: add the same URL, and `http://localhost:5173/` for local work.
-3. Authentication > Sign In / Providers > Email: keep **Confirm email** on. (Photo uploads require a confirmed email, which blocks throw-away sign-ups.)
-4. Authentication > Sign In / Providers > Google: enable it. In Google Cloud Console create an OAuth client of type *Web application*, add `https://YOUR-REF.supabase.co/auth/v1/callback` as an authorised redirect URI and your Cloudflare Pages/custom-domain origin as an authorised JavaScript origin, then paste the client ID and secret into Supabase.
-5. Supabase's built-in email sender is limited to a few messages per hour. Before real launch, add your own SMTP provider under Authentication > SMTP Settings, otherwise sign-up emails will stall.
+An Android APK is available from the [latest release](https://github.com/DKTJONATHAN/mauamarketplace/releases/latest).
 
-### 4. Configure Cloudflare Pages environment variables
+---
 
-In Cloudflare Pages, open the project and set these variables for the Production environment:
+## Tech stack
 
-| Name | Value |
-|---|---|
-| `VITE_SUPABASE_URL` | your Supabase Project URL |
-| `VITE_SUPABASE_ANON_KEY` | your Supabase anon / publishable key |
-| `VITE_R2_MEDIA_BASE_URL` | the public base URL of the R2 media domain, with no trailing slash |
+| Layer | Choice |
+|-------|--------|
+| Frontend | React 19 + TypeScript + Vite |
+| Hosting | Cloudflare Pages |
+| Auth & database | Supabase (email + Google, RLS) |
+| Listing photos | Cloudflare R2 (via Pages Function) |
+| Chat | Real-time via Supabase |
 
-The app is configured to use `/` as its permanent base path. Build with `npm run build`; the output directory is `dist`.
+Design notes live in `specs/marketplace_design.md`.
 
-Cloudflare Pages should deploy from the `main` branch using the project’s Git integration. GitHub is used only as the source repository; Cloudflare Pages is the hosting and deployment platform.
-
-### 5. Deploy
-
-1. Connect `DKTJONATHAN/mauamarketplace` to Cloudflare Pages.
-2. Set the build command to `npm run build` and the output directory to `dist`.
-3. Add the two `VITE_` variables above.
-4. Bind the R2 bucket to the Pages project using the binding name `MEDIA` (Settings > Bindings > Add > R2 bucket), then redeploy.
-
-Your site is then live at your Cloudflare Pages URL or custom domain. New photos go to R2 while the migration is in progress, and old Supabase Storage photos continue to work until they are migrated.
-
-The browser only needs the two Supabase `VITE_` values plus `VITE_R2_MEDIA_BASE_URL`. The Pages Function keeps the Supabase service credential server-side.
+---
 
 ## Local development
 
 ```bash
-cp .env.example .env.local   # fill in the two Supabase values
+cp .env.example .env.local   # add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
 npm install
 npm run dev                  # http://localhost:5173
 npm test && npm run build
 ```
 
-## Things to know
+---
 
-- **Custom domain:** set the function secret `ALLOWED_ORIGINS` to your domain (comma-separated list).
-- **Moderating:** reported listings hide themselves at five reports. To remove anything yourself, use the Supabase dashboard (Table editor > `listings`, set `status` to `hidden`, or delete the row). Only the database owner can unhide a listing.
-- **Photo storage:** photos are resized to at most 1280px and compressed, typically 100 to 400 KB each, then stored in R2. Deleted photos are removed from R2. Existing Supabase Storage photos can be migrated in small batches without recreating accounts or listings.
-- **Rules and privacy text:** `src/pages/RulesPage.tsx` and `SafetyPage.tsx` are drafts written for this build. Have a Kenyan lawyer review them, and check whether you need to register with the Office of the Data Protection Commissioner. Set `contactEmail` in `src/config/site.ts` so people can request removals.
-- **Launching Meru later:** copy the project, change `src/config/site.ts` (place and locations) and deploy it against its own Supabase project.
-- **Link previews:** because the site is a static single-page app, WhatsApp shows the same preview for every listing link.
+## Deploy (Cloudflare Pages + Supabase + R2)
 
+1. **Supabase** – create a project, enable Email (confirm email on) and Google providers, set Site URL + Redirect URLs to your Pages domain (and `http://localhost:5173` for local work).
+2. **Cloudflare Pages** – connect this repo, build command `npm run build`, output directory `dist`.
+3. **Environment variables** (Production):
 
-### 6. Cloudflare R2 media setup
+   | Name | Value |
+   |------|-------|
+   | `VITE_SUPABASE_URL` | your Supabase project URL |
+   | `VITE_SUPABASE_ANON_KEY` | your Supabase anon/publishable key |
+   | `VITE_R2_MEDIA_BASE_URL` | public base URL of the R2 media domain (no trailing slash) |
 
-Create an R2 bucket, for example `maua-marketplace-media`. In the Pages project, bind it as an R2 bucket with the variable name **MEDIA**.
+4. **R2** – create a bucket, bind it to the Pages project as `MEDIA`. Add server-side secrets (`SUPABASE_SERVICE_ROLE_KEY`, etc.) for the media Function.
+5. Redeploy. New photos go to R2; existing Supabase Storage paths continue to work until migrated.
 
-Add these Production variables/secrets to the Pages project:
+See the original setup notes in the commit history or `specs/` for the full media-migration and SMTP steps.
 
-| Name | Type | Value |
-|---|---|---|
-| `SUPABASE_URL` | Variable | Your Supabase project URL |
-| `SUPABASE_ANON_KEY` | Variable | Your Supabase publishable/anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | **Secret** | Your Supabase server-side service role/secret key |
-| `MEDIA_MIGRATION_SECRET` | **Secret** | A long random value used only for the one-time migration |
-| `VITE_R2_MEDIA_BASE_URL` | Variable | Your R2 public custom-domain URL, without a trailing slash |
+---
 
-For production, connect a custom domain to the R2 bucket rather than using the `r2.dev` development URL.
+## Licence & contact
 
-After saving the binding and variables, trigger a new Pages deployment. The browser uploads to `/api/media`; the Pages Function validates the signed-in Supabase user and writes the photo to R2. Supabase Auth and all existing database records remain unchanged.
+This is a community project for Maua. Rules and privacy text in the app are drafts — have a Kenyan lawyer review them before wide launch, and check Data Protection Commissioner registration if required.
 
-### 7. Migrate existing Supabase Storage photos
-
-Do **not** delete the existing Supabase Storage bucket yet. The migration is deliberately dual-read: old paths continue loading from Supabase while migrated paths use R2.
-
-After the new deployment is live, run the migration endpoint in batches of up to 25:
-
-```bash
-curl -X POST "https://mauamarketplace.pages.dev/api/media?action=migrate&limit=25" \
-  -H "x-media-migration-secret: YOUR_MEDIA_MIGRATION_SECRET"
-```
-
-Repeat until the response reports `migrated: 0`. Verify the listings and their images in the website before removing the old Supabase Storage objects.
+Set `contactEmail` in `src/config/site.ts` so people can request removals.
