@@ -5,12 +5,13 @@ import { formatPrice, timeAgo } from '../lib/format';
 import { conditionLabels, type ListingSummary } from '../lib/types';
 import { ListingImage } from './ListingImage';
 import { SaveButton } from './SaveButton';
+import { listingPath } from '../lib/seo';
 
 export function ListingCard({ listing }: { listing: ListingSummary }) {
   const category = getCategory(listing.category);
   return (
     <article className="card">
-      <Link to={`/listing/${listing.id}`} className="card-link">
+      <Link to={listingPath(listing.title, listing.id)} className="card-link">
         <div className="card-media">
           <ListingImage path={listing.images[0]} category={listing.category} alt="" />
           <span className="price-tag">{formatPrice(listing.price, category.priceSuffix)}</span>
