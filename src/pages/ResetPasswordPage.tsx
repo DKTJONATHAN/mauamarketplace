@@ -7,7 +7,7 @@ import { passwordSchema } from '../lib/validation';
 import { useDocumentTitle } from '../hooks';
 
 export function ResetPasswordPage() {
-  useDocumentTitle('Choose a new password');
+  useDocumentTitle('Choose a new password', true);
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
