@@ -6,7 +6,7 @@ import { emailSchema } from '../lib/validation';
 import { useDocumentTitle } from '../hooks';
 
 export function ForgotPasswordPage() {
-  useDocumentTitle('Reset password');
+  useDocumentTitle('Reset password', true);
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
