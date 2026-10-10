@@ -15,7 +15,7 @@ function confirmationRedirect(): string {
 
 export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
   const signup = mode === 'signup';
-  useDocumentTitle(signup ? 'Create an account' : 'Log in');
+  useDocumentTitle(signup ? 'Create an account' : 'Log in', true);
   const { user, loading, isAnonymous, continueAsGuest } = useAuth();
   const toast = useToast();
   const location = useLocation();
