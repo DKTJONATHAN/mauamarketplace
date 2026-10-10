@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ShieldCheck } from 'lucide-react';
 import { site } from '../config/site';
 import { CategoryDirectory } from '../components/CategoryDirectory';
+import { CategoryShortcuts } from '../components/CategoryShortcuts';
 import { ListingGrid } from '../components/ListingGrid';
 import { countActiveListings, fetchListings } from '../lib/api';
 import { getRecentlyViewed, useSeo } from '../hooks';
@@ -52,6 +53,8 @@ export function HomePage() {
 
   return (
     <>
+      <CategoryShortcuts />
+
       <section className="wrap section home-listings" aria-labelledby="latest-title">
         <div className="section-head home-listings-head">
           <div>
