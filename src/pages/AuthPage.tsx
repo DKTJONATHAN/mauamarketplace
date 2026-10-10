@@ -10,7 +10,7 @@ import { displayNameSchema, emailSchema, passwordSchema } from '../lib/validatio
 import { useDocumentTitle } from '../hooks';
 
 function confirmationRedirect(): string {
-  return `${siteUrl()}#/auth/confirm`;
+  return `${siteUrl()}auth/confirm`;
 }
 
 export function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
