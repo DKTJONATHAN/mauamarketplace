@@ -16,11 +16,12 @@ import { fetchContactPhone, fetchListing, startConversation } from '../lib/api';
 import { formatPrice, isNewMember, memberSince, timeAgo } from '../lib/format';
 import { conditionLabels } from '../lib/types';
 import { rememberRecentlyViewed, useSeo, useGoToLogin } from '../hooks';
-import { listingDescription, listingJsonLd } from '../lib/seo';
+import { listingDescription, listingJsonLd, listingPath } from '../lib/seo';
 import { mediaUrl } from '../config/site';
 
 export function ListingPage() {
-  const { id = '' } = useParams();
+  const { id: routeId = '' } = useParams();
+  const id = routeId.match(/[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)?.[0] ?? routeId;
   const navigate = useNavigate();
   const toast = useToast();
   const { user, isAnonymous } = useAuth();
@@ -31,12 +32,17 @@ export function ListingPage() {
   const query = useQuery({ queryKey: ['listing', id], queryFn: () => fetchListing(id) });
   const listing = query.data;
   useEffect(() => { if (listing?.id) rememberRecentlyViewed(listing.id); }, [listing?.id]);
+  useEffect(() => {
+    if (!listing) return;
+    const canonicalPath = listingPath(listing.title, listing.id);
+    if (window.location.pathname !== canonicalPath) navigate(canonicalPath, { replace: true });
+  }, [listing?.id, listing?.title, navigate]);
   useSeo(
     listing
       ? {
           title: listing.title,
           description: listingDescription(listing),
-          path: `/listing/${listing.id}`,
+          path: listingPath(listing.title, listing.id),
           image: listing.images?.[0] ? mediaUrl(listing.images[0]) : undefined,
           type: 'product',
           noindex: listing.status === 'hidden',
