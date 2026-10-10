@@ -7,6 +7,7 @@ const AccountPage = lazy(() => import('./pages/AccountPage').then((m) => ({ defa
 const AuthPage = lazy(() => import('./pages/AuthPage').then((m) => ({ default: m.AuthPage })));
 const BrowsePage = lazy(() => import('./pages/BrowsePage').then((m) => ({ default: m.BrowsePage })));
 const CategoriesPage = lazy(() => import('./pages/CategoriesPage').then((m) => ({ default: m.CategoriesPage })));
+const CategoryPage = lazy(() => import('./pages/CategoryPage').then((m) => ({ default: m.CategoryPage })));
 const ConversationPage = lazy(() => import('./pages/ConversationPage').then((m) => ({ default: m.ConversationPage })));
 const ConfirmEmailPage = lazy(() => import('./pages/ConfirmEmailPage').then((m) => ({ default: m.ConfirmEmailPage })));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })));
@@ -41,6 +42,7 @@ export function App() {
         <Route index element={<HomePage />} />
         <Route path="browse" element={<BrowsePage />} />
         <Route path="categories" element={<CategoriesPage />} />
+        <Route path="category/:slug" element={<CategoryPage />} />
         <Route path="listing/:id" element={<ListingPage />} />
         <Route path="seller/:id" element={<SellerPage />} />
         <Route path="saved" element={<SavedPage />} />
