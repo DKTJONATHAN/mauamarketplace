@@ -42,7 +42,7 @@ export function ConversationPage() {
   const blocked = useQuery({ queryKey: ['blocked', user?.id], queryFn: fetchBlockedUsers, enabled: Boolean(user) });
 
   const other = convo.data;
-  useDocumentTitle(other ? `Chat with ${other.other_name}` : 'Chat');
+  useDocumentTitle(other ? `Chat with ${other.other_name}` : 'Chat', true);
   const iBlockedThem = Boolean(other && blocked.data?.some((b) => b.blocked_id === other.other_user_id));
 
   const lastIncoming = messages.data?.filter((m) => m.sender_id !== user?.id && !m.read_at).length ?? 0;
