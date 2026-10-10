@@ -7,7 +7,7 @@ export interface SeoProps {
   /** Document title (without site name suffix). Omit for homepage default. */
   title?: string;
   description?: string;
-  /** Absolute or site-relative path for canonical / og:url (hash path, e.g. /listing/id). */
+  /** Absolute or site-relative path for canonical / og:url (clean path, e.g. /listing/id). */
   path?: string;
   /** Absolute image URL for og:image / twitter:image. */
   image?: string;
@@ -125,7 +125,7 @@ export function websiteJsonLd(): Record<string, unknown>[] {
         '@type': 'SearchAction',
         target: {
           '@type': 'EntryPoint',
-          urlTemplate: `${url}#/browse?q={search_term_string}`,
+          urlTemplate: `${url}browse?q={search_term_string}`,
         },
         'query-input': 'required name=search_term_string',
       },
