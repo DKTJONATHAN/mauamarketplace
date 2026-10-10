@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase';
 import { useDocumentTitle } from '../hooks';
 
 export function ConfirmEmailPage() {
-  useDocumentTitle('Email verified');
+  useDocumentTitle('Email verified', true);
   const navigate = useNavigate();
   const [state, setState] = useState<'working' | 'success' | 'error'>('working');
   const [message, setMessage] = useState('Verifying your email address...');
