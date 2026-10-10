@@ -23,8 +23,8 @@ export function useSeo(props: SeoProps = {}): void {
 }
 
 /** Convenience wrapper that only sets the document title (and basic defaults). */
-export function useDocumentTitle(title?: string): void {
-  useSeo({ title });
+export function useDocumentTitle(title?: string, noindex = false): void {
+  useSeo({ title, noindex });
 }
 
 /** Returns a function that sends the visitor to the login page and brings them back afterwards. */
