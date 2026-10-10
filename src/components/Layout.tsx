@@ -48,7 +48,7 @@ function HeaderSearch() {
   );
 }
 
-const appDownloadUrl = (import.meta.env.VITE_ANDROID_APP_DOWNLOAD_URL ?? 'https://archive.org/download/maua-marketplace/Maua-Marketplace.apk').trim();
+const appDownloadUrl = 'https://github.com/DKTJONATHAN/mauamarketplace/releases/latest/download/Maua-Marketplace.apk';
 
 function isInstalledApp(): boolean {
   return window.matchMedia('(display-mode: standalone)').matches ||
@@ -177,7 +177,7 @@ function Footer() {
         <div><Brand /><p className="muted">A free notice board for {site.place}, {site.region}. We do not handle payments, verify sellers or settle disputes, so please read the safety tips.</p></div>
         <nav aria-label="Footer"><ul>
           <li><Link to="/sell">Post a listing</Link></li><li><Link to="/categories">All categories</Link></li>
-          <li><Link to="/safety">Safety tips</Link></li><li><Link to="/rules">Community rules</Link></li><li><Link to="/privacy">Privacy Policy</Link></li><li><Link to="/terms">Terms and Conditions</Link></li>
+          <li><Link to="/safety">Safety tips</Link></li><li><Link to="/rules">Community rules</Link></li><li><Link to="/privacy">Privacy Policy</Link></li><li><Link to="/terms">Terms and Conditions</Link></li><li><a href={appDownloadUrl} download="Maua-Marketplace.apk">Download Android app (APK)</a></li>
         </ul></nav>
       </div>
       <div className="wrap footer-credit">Maua Marketplace is built by <a href="https://zandani.co.ke" target="_blank" rel="noopener noreferrer">Jonathan Mwaniki</a>.</div>
