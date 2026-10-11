@@ -15,7 +15,7 @@ import {
 } from '../lib/api';
 import { mediaUrl } from '../config/site';
 import { prepareImage } from '../lib/image';
-import { uploadImage } from '../lib/media';
+import { uploadChatImage } from '../lib/media';
 import { scanMessage } from '../lib/safety';
 import { messageSchema } from '../lib/validation';
 import { useDocumentTitle } from '../hooks';
@@ -132,7 +132,7 @@ export function ConversationPage() {
 
   const send = useMutation({
     mutationFn: async (payload: { body: string; photo: PendingPhoto | null }) => {
-      const imagePath = payload.photo ? await uploadImage(payload.photo.blob) : null;
+      const imagePath = payload.photo ? await uploadChatImage(payload.photo.blob) : null;
       await sendMessage(id, payload.body, imagePath);
     },
     onSuccess: () => {
