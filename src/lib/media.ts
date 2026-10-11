@@ -27,6 +27,15 @@ export async function uploadImage(blob: Blob): Promise<string> {
   return path;
 }
 
+/** Chat attachments must always resolve to a Cloudflare R2 object, never Supabase Storage. */
+export async function uploadChatImage(blob: Blob): Promise<string> {
+  const path = await uploadImage(blob);
+  if (!path.startsWith('r2/uploads/')) {
+    throw new Error('The chat photo was not saved to Cloudflare. Please try again.');
+  }
+  return path;
+}
+
 /** Best-effort removal of images that are no longer used by any listing. */
 export async function deleteImages(paths: string[]): Promise<void> {
   if (paths.length === 0) return;
