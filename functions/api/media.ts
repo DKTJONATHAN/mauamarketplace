@@ -161,6 +161,14 @@ async function deleteFiles(req: Request, env: Env, user: { id: string }) {
     );
     if (used.length) continue;
 
+    // Chat attachments share the same R2 upload registry. Never remove a file
+    // while a message still references it, even if it is not a listing photo.
+    const usedInChat = await dbJson<{ id: string }[]>(
+      env,
+      `messages?select=id&image_path=eq.${encodeURIComponent(path)}&limit=1`,
+    );
+    if (usedInChat.length) continue;
+
     if (R2_PATH_RE.test(path)) {
       await env.MEDIA.delete(path.slice(3));
     } else {

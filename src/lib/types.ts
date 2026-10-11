@@ -52,6 +52,7 @@ export interface ChatMessage {
   conversation_id: string;
   sender_id: string;
   body: string;
+  image_path: string | null;
   created_at: string;
   read_at: string | null;
 }

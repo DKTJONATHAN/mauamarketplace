@@ -201,7 +201,7 @@ export async function fetchConversation(id: string): Promise<ConversationRow | n
 export async function fetchMessages(conversationId: string): Promise<ChatMessage[]> {
   const { data, error } = await supabase
     .from('messages')
-    .select('id,conversation_id,sender_id,body,created_at,read_at')
+    .select('id,conversation_id,sender_id,body,image_path,created_at,read_at')
     .eq('conversation_id', conversationId)
     .order('created_at', { ascending: true })
     .limit(500);
@@ -209,12 +209,41 @@ export async function fetchMessages(conversationId: string): Promise<ChatMessage
   return (data ?? []) as ChatMessage[];
 }
 
-export async function sendMessage(conversationId: string, body: string): Promise<void> {
-  const { error } = await supabase.from('messages').insert({ conversation_id: conversationId, body });
+export async function sendMessage(conversationId: string, body: string, imagePath: string | null = null): Promise<void> {
+  const { error } = await supabase.from('messages').insert({
+    conversation_id: conversationId,
+    body: body.trim() || (imagePath ? '📷 Photo' : ''),
+    image_path: imagePath,
+  });
   if (error?.code === '42501') {
     throw new Error('Message not sent. This conversation is no longer open to new messages.');
   }
   fail(error);
+}
+
+export interface MessageLike {
+  message_id: string;
+  user_id: string;
+}
+
+export async function fetchMessageLikes(messageIds: string[]): Promise<MessageLike[]> {
+  if (!messageIds.length) return [];
+  const { data, error } = await supabase
+    .from('message_likes')
+    .select('message_id,user_id')
+    .in('message_id', messageIds);
+  fail(error);
+  return (data ?? []) as MessageLike[];
+}
+
+export async function setMessageLike(messageId: string, liked: boolean): Promise<void> {
+  if (liked) {
+    const { error } = await supabase.from('message_likes').insert({ message_id: messageId });
+    if (error && error.code !== '23505') fail(error);
+  } else {
+    const { error } = await supabase.from('message_likes').delete().eq('message_id', messageId);
+    fail(error);
+  }
 }
 
 export async function markConversationRead(conversationId: string): Promise<void> {
