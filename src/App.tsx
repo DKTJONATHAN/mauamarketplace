@@ -25,6 +25,7 @@ const SellPage = lazy(() => import('./pages/SellPage').then((m) => ({ default: m
 const SellerPage = lazy(() => import('./pages/SellerPage').then((m) => ({ default: m.SellerPage })));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then((m) => ({ default: m.PrivacyPage })));
 const TermsPage = lazy(() => import('./pages/TermsPage').then((m) => ({ default: m.TermsPage })));
+const RefundPolicyPage = lazy(() => import('./pages/RefundPolicyPage').then((m) => ({ default: m.RefundPolicyPage })));
 
 function RouteErrorBoundary({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -56,6 +57,7 @@ export function App() {
         <Route path="rules" element={<RulesPage />} />
         <Route path="privacy" element={<PrivacyPage />} />
         <Route path="terms" element={<TermsPage />} />
+        <Route path="refund-policy" element={<RefundPolicyPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="sell" element={<SellPage />} />
           <Route path="sell/:id/edit" element={<SellPage />} />
