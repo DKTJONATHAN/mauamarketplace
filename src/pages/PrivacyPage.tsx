@@ -65,12 +65,18 @@ export function PrivacyPage() {
         before uploading. We may process images to validate file type and protect the service from abusive uploads.
       </p>
 
-      <h2>7. Service providers</h2>
+      <h2>7. Third-party services and information they handle</h2>
+      <ul>
+        <li><strong>Supabase (authentication and database):</strong> processes account email, authentication identifiers and session/security data, plus profile, listing, saved-item, block/report and message records needed to run the marketplace. Google sign-in is routed through Supabase Auth.</li>
+        <li><strong>Google Sign-In / Google OAuth (optional):</strong> if you choose Google sign-in, Google shares the basic profile information authorised on the consent screen, such as your email address, account identifier, name and profile picture. The app does not need access to your Gmail inbox or Google Drive. Your Google name is not automatically used as your public display name.</li>
+        <li><strong>Cloudflare Pages:</strong> hosts the website and serves application files. As part of normal internet delivery and security, Cloudflare may process IP address, request headers, browser/device information, timestamps and security/diagnostic logs.</li>
+        <li><strong>Cloudflare Pages Functions:</strong> processes requests to the app's media API. It checks the signed-in user's Supabase access token and applies upload/security limits. Request metadata and media identifiers may be processed to operate and protect the upload service.</li>
+        <li><strong>Cloudflare R2:</strong> stores and serves listing photos. Uploaded images may be resized/compressed and are intended to be public listing media. The app strips photo location metadata before upload where supported. Public image URLs can be accessed by anyone who has the URL.</li>
+        <li><strong>GitHub:</strong> stores the app's source code and supports development/deployment integration. GitHub is not intended to receive marketplace account profiles, private messages or listing data through normal app use.</li>
+        <li><strong>Browser/PWA features:</strong> the browser may store an authentication session and app preferences locally. These are device-side features rather than a separate analytics provider.</li>
+      </ul>
       <p>
-        We use third-party infrastructure providers to operate the service, including Supabase for authentication, database
-        services and related backend functions, and Cloudflare for website hosting, application functions and media delivery.
-        Google may process authentication information if you choose Google sign-in. These providers process information only as
-        needed to provide their services, subject to their own terms and privacy practices.
+        The app's declared runtime dependencies also include React, Vite, React Router, TanStack Query, Zod, Lucide icons and locally bundled Archivo/Figtree fonts. These libraries run as part of the app; the fonts are bundled locally rather than requested from Google Fonts. We have not identified a payment processor, advertising network or analytics platform in the reviewed configuration. This inventory reflects the repository configuration reviewed on 19 October 2026 and may change if new integrations are added.
       </p>
 
       <h2>8. International transfers</h2>
