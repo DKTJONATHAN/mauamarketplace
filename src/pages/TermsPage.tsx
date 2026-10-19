@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks';
 
 export function TermsPage() {
@@ -10,7 +11,7 @@ export function TermsPage() {
         These Terms and Conditions govern your use of Maua Marketplace. By creating an account or using features that require
         acceptance of the terms, you agree to follow these rules.
       </p>
-      <p><strong>Effective date:</strong> 8 October 2026</p>
+      <p><strong>Effective date:</strong> 19 October 2026</p>
 
       <h2>1. About the service</h2>
       <p>
