@@ -36,6 +36,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://mauamarketplace.pages.dev/refund-policy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
     <loc>https://mauamarketplace.pages.dev/category/phones</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
