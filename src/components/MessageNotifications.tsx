@@ -4,9 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 
 const STORAGE_KEY = 'mm.message-notifications-enabled';
-function applicationServerKey(value: string): Uint8Array {
+function applicationServerKey(value: string): ArrayBuffer {
   const normalized = value.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - value.length % 4) % 4);
-  return Uint8Array.from(atob(normalized), (character) => character.charCodeAt(0));
+  return Uint8Array.from(atob(normalized), (character) => character.charCodeAt(0)).buffer as ArrayBuffer;
 }
 async function postPushAction(action: string, extra: Record<string, unknown> = {}) {
   const { data } = await supabase.auth.getSession();
