@@ -135,8 +135,9 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     if (body.action === 'subscribe') {
       if (!validSubscription(body.subscription)) return json({ error: 'Invalid push subscription.' }, 400);
       const key = `user:${user.id}`;
+      const subscription = body.subscription;
       const saved = await env.PUSH_SUBSCRIPTIONS.get<PushSubscription[]>(key, 'json') ?? [];
-      const next = [...saved.filter(item => item.endpoint !== body.subscription!.endpoint), body.subscription];
+      const next = [...saved.filter(item => item.endpoint !== subscription.endpoint), subscription];
       await env.PUSH_SUBSCRIPTIONS.put(key, JSON.stringify(next.slice(-5)));
       return json({ saved: true });
     }
@@ -156,6 +157,11 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       );
       const conversation = conversations[0];
       if (!conversation || ![conversation.buyer_id, conversation.seller_id].includes(user.id)) return json({ error: 'Conversation not found.' }, 404);
+      const recentMessages = await database<{ id: string; sender_id: string }[]>(
+        env,
+        `messages?select=id,sender_id&conversation_id=eq.${encodeURIComponent(conversation.id)}&order=created_at.desc&limit=1`,
+      );
+      if (!recentMessages[0] || recentMessages[0].sender_id !== user.id) return json({ error: 'No new message to notify about.' }, 409);
       const recipient = conversation.buyer_id === user.id ? conversation.seller_id : conversation.buyer_id;
       const subscriptions = await env.PUSH_SUBSCRIPTIONS.get<PushSubscription[]>(`user:${recipient}`, 'json') ?? [];
       const payload = {
