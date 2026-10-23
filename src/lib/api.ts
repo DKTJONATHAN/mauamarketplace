@@ -219,6 +219,22 @@ export async function sendMessage(conversationId: string, body: string, imagePat
     throw new Error('Message not sent. This conversation is no longer open to new messages.');
   }
   fail(error);
+
+  // Ask the trusted Pages Function to notify the other participant. This is
+  // deliberately best-effort: a push outage must never make a sent message fail.
+  try {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (token) {
+      await fetch('/api/push', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'notify', conversationId }),
+      });
+    }
+  } catch (pushError) {
+    console.warn('Message was sent, but its push notification could not be requested.', pushError);
+  }
 }
 
 export interface MessageLike {
