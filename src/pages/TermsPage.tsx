@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks';
 
 export function TermsPage() {
