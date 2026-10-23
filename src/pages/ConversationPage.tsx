@@ -7,6 +7,7 @@ import {
 import { Dialog } from '../components/Dialog';
 import { ListingImage } from '../components/ListingImage';
 import { ReportDialog } from '../components/ReportDialog';
+import { notifyNewMessage } from '../components/MessageNotifications';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import {
@@ -134,6 +135,7 @@ export function ConversationPage() {
     mutationFn: async (payload: { body: string; photo: PendingPhoto | null }) => {
       const imagePath = payload.photo ? await uploadImage(payload.photo.blob) : null;
       await sendMessage(id, payload.body, imagePath);
+      await notifyNewMessage(id);
     },
     onSuccess: () => {
       setText('');
