@@ -104,7 +104,11 @@ async function getUser(request: Request, env: Env): Promise<{ id: string } | nul
 }
 async function database<T>(env: Env, path: string): Promise<T> {
   const response = await fetch(`${env.SUPABASE_URL}/rest/v1/${path}`, {
-    headers: { apikey: env.SUPABASE_SERVICE_ROLE_KEY, 'Content-Type': 'application/json' },
+    headers: {
+      apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+      'Content-Type': 'application/json',
+    },
   });
   if (!response.ok) throw new Error(`Database lookup failed: ${response.status}`);
   return await response.json() as T;
