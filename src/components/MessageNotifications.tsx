@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Bell, BellRing } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 
@@ -36,48 +35,10 @@ export async function notifyNewMessage(conversationId: string) {
 
 export function MessageNotifications() {
   const { user, isAnonymous } = useAuth();
-  const location = useLocation();
   const [permission, setPermission] = useState<NotificationPermission | 'unsupported'>(
     typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'unsupported',
   );
   const [enabled, setEnabled] = useState(() => localStorage.getItem(STORAGE_KEY) === '1');
-
-  useEffect(() => {
-    if (!user || isAnonymous || !enabled || permission !== 'granted') return;
-
-    const channel = supabase
-      .channel(`message-notifications-${user.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (event) => {
-        const message = event.new as { conversation_id?: string; sender_id?: string };
-        if (!message.conversation_id || message.sender_id === user.id) return;
-        try {
-          const { data: conversation } = await supabase
-            .from('conversations')
-            .select('id,buyer_id,seller_id')
-            .eq('id', message.conversation_id)
-            .maybeSingle();
-          if (!conversation || (conversation.buyer_id !== user.id && conversation.seller_id !== user.id)) return;
-          if (document.visibilityState === 'visible' && location.pathname === `/messages/${conversation.id}`) return;
-          const registration = await navigator.serviceWorker?.ready.catch(() => undefined);
-          const options: NotificationOptions = {
-            body: 'You have an unread message. Open Maua Marketplace to reply.',
-            icon: '/web-app-manifest-192x192.png',
-            badge: '/favicon-96x96.png',
-            tag: `maua-unread-${conversation.id}`,
-            data: { url: `/messages/${conversation.id}` },
-          };
-          if (registration) await registration.showNotification('You have a new message', options);
-          else {
-            const notification = new Notification('You have a new message', options);
-            notification.onclick = () => { window.focus(); window.location.href = options.data?.url ?? '/messages'; };
-          }
-        } catch {
-          // Push is delivered by the server when the sender submits a new message.
-        }
-      })
-      .subscribe();
-    return () => { void supabase.removeChannel(channel); };
-  }, [user?.id, isAnonymous, enabled, permission, location.pathname]);
 
   if (!user || isAnonymous || permission === 'unsupported') return null;
 
