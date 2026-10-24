@@ -27,7 +27,7 @@ From the repository root on a computer with Node.js installed, run:
 node scripts/generate-vapid-keys.mjs
 ```
 
-Copy `VAPID_PUBLIC_KEY` into the matching Cloudflare variable and the complete `VAPID_PRIVATE_JWK` JSON string into the matching Cloudflare **Secret**. Generate these once and keep them stable; do not regenerate them after users have subscribed, or devices will need to subscribe again. Never commit the output.
+Copy `VAPID_PUBLIC_KEY` into the matching Cloudflare **Variable** and the complete `VAPID_PRIVATE_JWK` JSON string into the matching Cloudflare **Secret**. They must come from the same generated key pair. Generate these once and keep them stable; do not regenerate them after users have subscribed, or devices will need to subscribe again. Never commit the output.
 
 ## Test
 
