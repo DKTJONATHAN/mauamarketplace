@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@fontsource-variable/archivo/wdth.css';
 import '@fontsource-variable/figtree';
 import './styles/app.css';
+import './styles/marketplace-unslop.css';
 import { App } from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { SetupNeeded } from './components/SetupNeeded';
