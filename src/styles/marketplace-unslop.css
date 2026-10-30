@@ -1,0 +1,186 @@
+/* Maua Marketplace — deliberate visual refinement layer.
+   Keeps the existing market-signboard identity; improves hierarchy, density,
+   mobile ergonomics and consistency without changing application behavior. */
+
+:root {
+  color-scheme: light;
+  --ink: #17231c;
+  --ink-soft: #56645b;
+  --paper: #f5f6f2;
+  --surface: #fff;
+  --line: #dce3dc;
+  --green: #176344;
+  --green-deep: #103f2d;
+  --green-wash: #edf4ef;
+  --tag: #f2c044;
+  --tag-ink: #2b220d;
+  --focus: #176344;
+  --gutter: clamp(1rem, 3.5vw, 2.25rem);
+}
+
+html { color-scheme: light; background: var(--paper); }
+body { background: var(--paper); color: var(--ink); }
+button, input, select, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+a { text-decoration-thickness: 1px; }
+h1, h2, h3 { letter-spacing: -0.025em; }
+h1 { line-height: 1.04; }
+h2 { line-height: 1.12; }
+p { max-width: 72ch; }
+
+/* Clearer page rhythm and quieter surfaces */
+.wrap { width: min(100% - 2 * var(--gutter), 76rem); }
+.page { padding-block: clamp(1.5rem, 4vw, 2.75rem) 4rem; }
+.section { padding-block: clamp(1.4rem, 3.5vw, 2.4rem) .5rem; }
+.section-head { align-items: center; margin-bottom: 1.15rem; }
+.section-head h1, .section-head h2 { max-width: 24ch; }
+.muted, .result-count, .card-meta, .hint { color: var(--ink-soft); }
+
+/* Navigation: strong brand bar, calm category rail, fewer decorative shapes */
+.strip { min-height: 2.4rem; padding-block: .45rem; gap: .5rem; font-size: .86rem; }
+.strip p { line-height: 1.35; }
+.site-header { background: var(--green-deep); }
+.header-row { min-height: 5.5rem; gap: clamp(.65rem, 2vw, 1.25rem); padding-block: .65rem; }
+.brand-logo-circle { width: 3.8rem; height: 3.8rem; box-shadow: none; }
+.header-search { max-width: 42rem; }
+.header-search input { min-height: 2.85rem; border-radius: 4px 0 0 4px; }
+.header-search button { min-width: 3rem; border-radius: 0 4px 4px 0; }
+.header-actions { gap: .2rem; }
+.icon-link { width: 42px; height: 42px; border-radius: 4px; }
+.rail { border-top-color: rgb(255 255 255 / .14); }
+.rail ul { gap: .35rem; padding-block: .55rem; }
+.rail a { min-height: 34px; padding: .3rem .65rem; border-radius: 4px; border-color: transparent; font-size: .86rem; }
+.rail a:hover { background: rgb(255 255 255 / .09); }
+.rail .rail-all { border-color: rgb(242 192 68 / .75); }
+
+/* Buttons: consistent geometry and purposeful contrast */
+.btn { min-height: 44px; padding: .62rem 1rem; border-radius: 4px; border-width: 1px; font-weight: 700; transition: background-color .16s ease, border-color .16s ease, color .16s ease; }
+.btn-primary { background: var(--green); }
+.btn-primary:hover:not(:disabled) { background: var(--green-deep); }
+.btn-tag { background: var(--tag); border-color: #d4a72e; }
+.btn-large { min-height: 48px; font-size: 1rem; }
+.icon-btn { border-radius: 4px; }
+.btn:focus-visible, .icon-btn:focus-visible, a:focus-visible { outline-offset: 3px; }
+
+/* Product discovery and listing cards */
+.home-listings { padding-top: clamp(1.4rem, 3vw, 2rem); }
+.home-listings-head { margin-bottom: 1.2rem; }
+.home-listings-head h1 { font-size: clamp(1.75rem, 3.5vw, 2.5rem); }
+.grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 12.25rem), 1fr)); gap: 1rem; }
+.card { border: 1px solid var(--line); border-radius: 4px; box-shadow: none; transition: border-color .16s ease, background-color .16s ease; }
+.card:hover { border-color: #9eafa2; }
+.card-media { aspect-ratio: 4 / 3; background: #eef1ed; }
+.card-media img { transition: none; }
+.card-body { padding: .8rem .85rem .95rem; }
+.card-title { font-size: .98rem; line-height: 1.35; font-weight: 650; }
+.card-meta { line-height: 1.4; }
+.price-tag { font-family: var(--font-display); font-size: 1rem; box-shadow: none; }
+.save-btn { width: 38px; height: 38px; border: 1px solid rgb(23 35 28 / .2); background: #fff; }
+.sold-flag { border-radius: 2px; }
+.empty { border: 1px dashed #b9c6bc; border-radius: 4px; background: #fff; padding: 3rem 1.25rem; }
+
+/* Category directory and conversion sections */
+.category-chip { min-height: 36px; padding: .35rem .7rem; border-radius: 4px; font-size: .9rem; }
+.sell-band { border-radius: 4px; padding: clamp(1.35rem, 3vw, 2rem); }
+.sell-band h2 { font-size: clamp(1.4rem, 2.5vw, 1.9rem); }
+.home-safety { border-radius: 4px; border-width: 1px; }
+.home-intro { max-width: 76rem; }
+.home-intro h2 { max-width: 34ch; }
+
+/* Forms: readable labels, consistent controls, no ornamental styling */
+.field { gap: .42rem; }
+.field > span:first-child, .field > legend { font-size: .94rem; font-weight: 700; }
+input, select, textarea {
+  min-height: 46px;
+  padding: .68rem .8rem;
+  border: 1px solid #aebbb1;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: none;
+}
+textarea { min-height: 7rem; }
+input:hover, select:hover, textarea:hover { border-color: #718579; }
+input:focus, select:focus, textarea:focus { border-color: var(--green); outline: 2px solid rgb(23 99 68 / .14); outline-offset: 0; }
+input[type='checkbox'] { accent-color: var(--green); }
+.filters { border: 1px solid var(--line); border-radius: 4px; box-shadow: none; }
+.filters summary { min-height: 48px; }
+.filter-grid { padding-top: .25rem; }
+.banner { border-radius: 4px; }
+.auth-card, .form-card, .panel, .dashboard-card, .account-card {
+  border-radius: 4px;
+  box-shadow: none;
+}
+.auth-card { max-width: 34rem; }
+.auth-card h1 { font-size: clamp(1.8rem, 4vw, 2.35rem); }
+.divider { color: var(--ink-soft); }
+
+/* Listing detail, seller/account and dashboard layouts */
+.listing-detail, .listing-page, .seller-page, .account-page, .dashboard-page { min-width: 0; }
+.listing-gallery img { border-radius: 3px; }
+.listing-detail h1, .listing-page h1 { max-width: 26ch; }
+.price-tag-large { font-size: clamp(1.4rem, 3vw, 1.8rem); }
+.site-footer { background: #e9eee9; color: var(--ink); border-top: 1px solid var(--line); }
+.site-footer a { color: var(--green-deep); }
+.footer-grid { gap: clamp(1.5rem, 4vw, 3rem); padding-block: 2.5rem; }
+.footer-credit { border-top: 1px solid #d2dbd3; padding-block: 1rem; font-size: .88rem; }
+
+/* Chat and messaging: deliberately light, readable and low-noise */
+.chat-log-modern { background: #f5f7f4 !important; background-image: none !important; }
+.msg-modern { background: #fff !important; color: var(--ink) !important; border: 1px solid var(--line); box-shadow: none !important; }
+.msg-modern.msg-mine { background: #e5f1e9 !important; color: var(--ink) !important; border-color: #c9dfd0; }
+.chat-context-card, .chat-photo-preview, .chat-safety-modern { box-shadow: none !important; }
+.chat-like.is-liked { color: #a82a1f; background: #fff0ee; }
+.inbox-toolbar, .inbox-unread-summary { background: #fff !important; }
+.inbox-conversation:hover { background: #f2f5f2 !important; }
+.inbox-conversation.is-unread { background: #edf5ef !important; }
+.inbox-person-avatar, .chat-avatar, .chat-message-avatar { background: #e8efe9 !important; color: var(--green-deep) !important; }
+
+/* Remove dark-mode overrides from legacy chat styles; the app stays light. */
+@media (prefers-color-scheme: dark) {
+  body { background: var(--paper); color: var(--ink); }
+  .chat-log-modern { background: #f5f7f4 !important; background-image: none !important; }
+  .msg-modern { background: #fff !important; color: var(--ink) !important; }
+  .msg-modern.msg-mine { background: #e5f1e9 !important; color: var(--ink) !important; }
+  .inbox-toolbar, .inbox-unread-summary { background: #fff !important; }
+  .inbox-conversation:hover { background: #f2f5f2 !important; }
+  .inbox-conversation.is-unread { background: #edf5ef !important; }
+  .inbox-person-avatar, .chat-avatar, .chat-message-avatar { background: #e8efe9 !important; color: var(--green-deep) !important; }
+}
+
+/* Small screens: keep the marketplace usable one-handed. */
+@media (max-width: 760px) {
+  :root { --gutter: 1rem; }
+  .header-row { flex-wrap: wrap; gap: .55rem .7rem; padding-block: .65rem; }
+  .brand-logo-circle { width: 3.2rem; height: 3.2rem; }
+  .header-search { order: 3; flex: 1 0 100%; max-width: none; }
+  .header-actions { gap: .1rem; }
+  .header-actions .btn-app-download { display: none; }
+  .header-actions .text-link { padding-inline: .35rem; }
+  .rail ul { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; padding-bottom: .7rem; }
+  .rail li { flex: none; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+  .card-body { padding: .65rem; }
+  .card-title { font-size: .92rem; }
+  .card-meta { font-size: .78rem; }
+  .section-head { align-items: flex-start; }
+  .section-head > .btn { flex: none; }
+  .sell-band { align-items: flex-start; }
+  .sell-band .btn { width: 100%; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .bottom-nav { background: #fff; border-top: 1px solid var(--line); box-shadow: 0 -3px 12px rgb(20 33 26 / .06); }
+  .bottom-nav a { min-height: 58px; color: #536258; }
+  .bottom-nav a.active { color: var(--green-deep); }
+  .bottom-nav .bottom-sell { border-radius: 4px; background: var(--green); color: #fff; }
+  .page { padding-block: 1.35rem 5.5rem; }
+  .auth-card { padding-inline: 1.15rem; }
+  .photos .photo-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 380px) {
+  .grid { gap: .5rem; }
+  .card-body { padding: .55rem; }
+  .card-title { font-size: .86rem; }
+  .header-actions .icon-link { width: 36px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}
