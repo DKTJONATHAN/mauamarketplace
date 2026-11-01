@@ -385,3 +385,20 @@ input:focus, select:focus, textarea:focus { border-color: var(--green); outline:
 @media (prefers-reduced-motion: reduce) {
   .card, .card-media img, .btn, .inbox-conversation { transition:none !important; }
 }
+
+/* Public seller profile */
+.seller-profile-hero { display:flex; align-items:center; gap:1.1rem; margin-bottom:2rem; padding:clamp(1.15rem,3vw,1.8rem); border:1px solid var(--line); border-radius:18px; background:#fff; }
+.seller-profile-avatar { display:grid; place-items:center; flex:none; width:76px; height:76px; border-radius:50%; background:var(--green-wash); color:var(--green-deep); font-family:var(--font-display); font-size:2rem; font-weight:650; }
+.seller-profile-copy { flex:1; min-width:0; }
+.seller-profile-copy h1 { margin:0 0 .35rem; overflow-wrap:anywhere; }
+.seller-profile-meta { display:flex; align-items:center; gap:.4rem; margin:0; color:var(--ink-soft); font-size:.88rem; }
+.seller-listings-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; margin-bottom:1rem; }
+.seller-listings-heading h2 { margin:0; }
+.seller-listings-note { display:flex; align-items:center; gap:.4rem; color:var(--ink-soft); font-size:.82rem; }
+@media (max-width:760px) {
+  .seller-profile-hero { align-items:flex-start; flex-wrap:wrap; gap:.85rem; }
+  .seller-profile-avatar { width:60px; height:60px; font-size:1.65rem; }
+  .seller-profile-copy { flex:1 1 calc(100% - 76px); }
+  .seller-report { width:100%; }
+  .seller-listings-heading { align-items:flex-start; flex-direction:column; }
+}
