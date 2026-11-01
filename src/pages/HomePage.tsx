@@ -54,13 +54,15 @@ export function HomePage() {
     <>
       <section className="wrap section home-listings" aria-labelledby="latest-title">
         <div className="section-head home-listings-head">
-          <div>
-            <h1 id="latest-title">Fresh listings in {site.place}</h1>
+          <div className="home-heading-copy">
+            <span className="home-eyebrow">MAUA'S COMMUNITY MARKET</span>
+            <h1 id="latest-title">Find something good in {site.place}</h1>
+            <p className="home-heading-note">Discover local finds, compare prices and connect directly with people in your community.</p>
             {typeof count.data === 'number' && count.data > 0 && (
               <p className="result-count">{count.data.toLocaleString('en-KE')} listings live right now</p>
             )}
           </div>
-          <Link to="/browse" className="btn btn-quiet">Browse &amp; filter</Link>
+          <Link to="/browse" className="btn btn-quiet">Explore all listings</Link>
         </div>
 
         <ListingGrid
