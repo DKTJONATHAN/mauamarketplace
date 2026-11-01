@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { CalendarDays, Flag, PackageCheck, ShieldCheck } from 'lucide-react';
+import { CalendarDays, Flag, PackageCheck } from 'lucide-react';
 import { ListingGrid } from '../components/ListingGrid';
 import { ReportDialog } from '../components/ReportDialog';
 import { useAuth } from '../context/AuthContext';
