@@ -402,3 +402,70 @@ input:focus, select:focus, textarea:focus { border-color: var(--green); outline:
   .seller-report { width:100%; }
   .seller-listings-heading { align-items:flex-start; flex-direction:column; }
 }
+;
+/* Dark-device contrast guard: Maua Marketplace intentionally uses the light theme. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: light !important;
+    --ink:#202923 !important; --ink-soft:#68736b !important; --paper:#f6f7f4 !important;
+    --surface:#fff !important; --line:#e1e6e0 !important; --green:#176344 !important;
+    --green-deep:#103f2d !important; --green-wash:#edf4ef !important;
+    --tag:#e8b94b !important; --tag-ink:#2b2414 !important;
+    --warn-bg:#fff8df !important; --warn-line:#e4c76f !important;
+    --danger:#a43b30 !important; --danger-wash:#fff5f2 !important; --focus:#176344 !important;
+  }
+  html,body,#root,main { color-scheme:light !important; background:var(--paper) !important; color:var(--ink) !important; }
+  a,.directory-group a,.site-footer a,.card-link,.card-link:hover { color:var(--green-deep) !important; }
+  .site-header { background:var(--green-deep) !important; color:#fff !important; }
+  .site-header a,.site-header .icon-link,.site-header .text-link,.rail a,.rail .rail-all { color:#f5faf6 !important; }
+  .site-header .btn-tag,.bottom-nav .bottom-sell { background:var(--tag) !important; border-color:#d6aa42 !important; color:var(--tag-ink) !important; }
+  .strip { background:#f2e7c9 !important; color:#4d3d19 !important; }
+  .strip a { color:#315f45 !important; }
+  .panel,.account-card,.dashboard-card,.auth-card,.form-card,.filters,.directory-group,.steps-card,.empty,
+  .account-profile-hero,.inbox-panel,.inbox-toolbar,.install-prompt,.app-update-notice,.crop-dialog,
+  dialog.dialog,.chat-context-card,.chat-photo-preview,.composer-modern,.chat-blocked,.my-item,.convo,
+  .gallery-main,.gallery-thumbs button,.chat-decision-option { background:#fff !important; color:var(--ink) !important; border-color:var(--line) !important; }
+  .sell-band { background:#edf4ef !important; color:var(--ink) !important; border-color:#d7e4d9 !important; }
+  .home-safety,.inbox-safety-note { background:#fff !important; color:var(--ink) !important; border-color:var(--line) !important; }
+  .account-facts>div { background:#fafbf9 !important; }
+  .account-activity-list a { color:var(--ink) !important; }
+  .account-activity-list a:hover { background:#f8faf7 !important; color:var(--green-deep) !important; }
+  .account-danger,.panel-danger { background:#fffdfc !important; border-color:#ecd8d4 !important; }
+  input,select,textarea,.inbox-search,.chat-composer-row textarea {
+    color:var(--ink) !important; background:#fff !important; border-color:#cbd5cd !important; color-scheme:light !important;
+  }
+  input::placeholder,textarea::placeholder { color:#68736b !important; opacity:1 !important; }
+  input:disabled,textarea:disabled,select:disabled { background:#f0f2ef !important; color:#68736b !important; }
+  .btn-quiet { background:#fff !important; color:var(--ink) !important; border-color:var(--line) !important; }
+  .btn-quiet:hover:not(:disabled) { background:var(--green-wash) !important; color:var(--green-deep) !important; }
+  .btn-primary { background:var(--green) !important; color:#fff !important; }
+  .btn-primary:hover:not(:disabled) { background:var(--green-deep) !important; color:#fff !important; }
+  .btn-tag,.badge,.inbox-unread-badge { background:var(--tag) !important; color:var(--tag-ink) !important; }
+  .bottom-nav { background:#fff !important; border-color:var(--line) !important; }
+  .bottom-nav a { color:#68736b !important; }
+  .bottom-nav a.active { color:var(--green-deep) !important; }
+  .site-footer { background:#edf0eb !important; color:var(--ink) !important; border-color:var(--line) !important; }
+  .site-footer .muted,.site-footer p { color:#56645b !important; }
+  .chat-log,.chat-log-modern { background:#f6f7f4 !important; background-image:none !important; }
+  .msg,.msg-modern { background:#fff !important; color:var(--ink) !important; border-color:var(--line) !important; }
+  .msg-mine,.msg-modern.msg-mine { background:#e5f1e9 !important; color:var(--ink) !important; border-color:#c9dfd0 !important; }
+  .msg-modern .msg-time,.msg-modern.msg-mine .msg-time { color:#68736b !important; }
+  .chat-delivery { color:var(--green) !important; }
+  .chat-context-card { background:#f0f5f0 !important; }
+  .chat-context-card small,.chat-context-card>a { color:var(--green-deep) !important; }
+  .chat-safety-modern { background:#f7f0dd !important; border-color:#e9ddb8 !important; color:#594b27 !important; }
+  .chat-avatar,.chat-message-avatar,.inbox-person-avatar { background:var(--green-wash) !important; color:var(--green-deep) !important; }
+  .inbox-toolbar,.inbox-unread-summary { background:#fafbf9 !important; color:var(--ink) !important; }
+  .inbox-conversation { color:var(--ink) !important; }
+  .inbox-conversation:hover { background:#f2f5f2 !important; }
+  .inbox-conversation.is-unread { background:#f1f6f1 !important; }
+  .inbox-preview,.inbox-conversation time,.inbox-safety-note { color:#68736b !important; }
+  .chat-like { color:#68736b !important; }
+  .chat-like.is-liked { color:#a82a1f !important; background:#fff0ee !important; }
+  .photo-make-cover { background:#fff !important; color:var(--ink) !important; }
+  .toasts .toast { background:#26362c !important; color:#fff !important; }
+  .btn-app-download { color:#fff !important; border-color:rgb(255 255 255 / .72) !important; background:rgb(255 255 255 / .08) !important; }
+  .install-prompt-copy p,.app-update-copy p,.app-update-pending { color:#68736b !important; }
+  .install-prompt-icon { background:var(--green-wash) !important; color:var(--green-deep) !important; }
+  .install-prompt-close { color:#68736b !important; }
+}
