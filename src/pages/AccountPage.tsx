@@ -1,6 +1,10 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  ArrowUpRight, Bookmark, CalendarDays, ChevronRight, CircleUserRound, LayoutDashboard,
+  LogOut, Mail, MessageCircle, Package, ShieldBan, Trash2, UserRound,
+} from 'lucide-react';
 import { Dialog } from '../components/Dialog';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -62,69 +66,94 @@ export function AccountPage() {
 
   if (!user) return null;
   const current = name ?? profile?.display_name ?? '';
+  const initial = (profile?.display_name || user.email || 'M').trim().charAt(0).toUpperCase();
+  const joined = profile ? memberSince(profile.created_at) : '—';
 
   return (
-    <div className="wrap page narrow">
+    <div className="wrap page account-page">
+      <span className="account-eyebrow">Your space on Maua Marketplace</span>
       <h1>Your account</h1>
 
-      <section className="panel stack" aria-labelledby="acc-profile">
-        <h2 id="acc-profile">Profile</h2>
-        <form onSubmit={saveName} className="stack" noValidate>
-          <label className="field">
-            <span>Display name</span>
-            <input value={current} maxLength={40} onChange={(e) => setName(e.target.value)} aria-invalid={Boolean(nameError)} />
-            <small className="hint">This is the only name other members see. You do not need to use your real name.</small>
-            {nameError && <p className="field-error" role="alert">{nameError}</p>}
-          </label>
-          <div className="actions">
-            <button type="submit" className="btn btn-primary" disabled={rename.isPending || name === null || name === profile?.display_name}>
-              Save name
-            </button>
+      <section className="account-profile-hero" aria-label="Profile overview">
+        <span className="account-avatar" aria-hidden>{initial}</span>
+        <div className="account-profile-copy">
+          <span className="account-eyebrow">Member profile</span>
+          <h2>{profile?.display_name || 'Your profile'}</h2>
+          <p>Manage your details, listings and conversations.</p>
+          <div className="account-profile-meta">
+            <span><CalendarDays aria-hidden size={14} /> Member since {joined}</span>
+            <span><ShieldBan aria-hidden size={14} /> Your email is private</span>
           </div>
-        </form>
-        <dl className="facts-list">
-          <div><dt>Email</dt><dd>{user.email} <span className="muted">(only you can see this)</span></dd></div>
-          {profile && <div><dt>Member since</dt><dd>{memberSince(profile.created_at)}</dd></div>}
-        </dl>
-      </section>
-
-      <section className="panel stack" aria-labelledby="acc-links">
-        <h2 id="acc-links">Your activity</h2>
-        <ul className="plain-list">
-          <li><Link to="/seller-dashboard">Seller dashboard</Link></li>
-          <li><Link to="/my-listings">My listings</Link></li>
-          <li><Link to="/saved">Saved listings</Link></li>
-          <li><Link to="/messages">Messages</Link></li>
-        </ul>
-      </section>
-
-      <section className="panel stack" aria-labelledby="acc-blocked">
-        <h2 id="acc-blocked">Blocked members</h2>
-        {blocked.data && blocked.data.length === 0 && <p className="muted">You have not blocked anyone.</p>}
-        <ul className="plain-list">
-          {blocked.data?.map((b) => (
-            <li key={b.blocked_id} className="row-between">
-              <span>{b.name}</span>
-              <button type="button" className="btn btn-quiet" onClick={() => unblock.mutate(b.blocked_id)}>Unblock</button>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="panel stack">
-        <button type="button" className="btn btn-quiet" onClick={() => void signOut().then(() => navigate('/'))}>Log out</button>
-      </section>
-
-      <section className="panel panel-danger stack" aria-labelledby="acc-delete">
-        <h2 id="acc-delete">Delete your account</h2>
-        <p>
-          This removes your profile, listings, saved items and conversations (including the other person's copy), and takes your
-          photos off the site. It cannot be undone.
-        </p>
-        <div className="actions">
-          <button type="button" className="btn btn-danger-solid" onClick={() => setDeleting(true)}>Delete my account</button>
         </div>
       </section>
+
+      <div className="account-layout">
+        <div className="account-main-column">
+          <section className="panel stack" aria-labelledby="acc-profile">
+            <div className="account-section-heading"><UserRound aria-hidden /><h2 id="acc-profile">Profile details</h2></div>
+            <form onSubmit={saveName} className="account-profile-form" noValidate>
+              <label className="field">
+                <span>Display name</span>
+                <input value={current} maxLength={40} onChange={(e) => setName(e.target.value)} aria-invalid={Boolean(nameError)} />
+                <small className="hint">This is the name other members see. You do not need to use your real name.</small>
+                {nameError && <p className="field-error" role="alert">{nameError}</p>}
+              </label>
+              <div className="actions">
+                <button type="submit" className="btn btn-primary" disabled={rename.isPending || name === null || name === profile?.display_name}>
+                  {rename.isPending ? 'Saving…' : 'Save display name'}
+                </button>
+              </div>
+            </form>
+            <dl className="account-facts">
+              <div><dt><Mail aria-hidden size={14} /> Email address</dt><dd>{user.email} <span className="muted">(private)</span></dd></div>
+              <div><dt><CalendarDays aria-hidden size={14} /> Member since</dt><dd>{joined}</dd></div>
+            </dl>
+          </section>
+
+          <section className="panel stack" aria-labelledby="acc-links">
+            <div className="account-section-heading"><LayoutDashboard aria-hidden /><h2 id="acc-links">Your marketplace</h2></div>
+            <ul className="account-activity-list">
+              <li><Link to="/seller-dashboard"><Package aria-hidden /> Seller dashboard <ChevronRight className="account-link-arrow" aria-hidden /></Link></li>
+              <li><Link to="/my-listings"><UserRound aria-hidden /> My listings <ChevronRight className="account-link-arrow" aria-hidden /></Link></li>
+              <li><Link to="/saved"><Bookmark aria-hidden /> Saved listings <ChevronRight className="account-link-arrow" aria-hidden /></Link></li>
+              <li><Link to="/messages"><MessageCircle aria-hidden /> Messages <ChevronRight className="account-link-arrow" aria-hidden /></Link></li>
+            </ul>
+          </section>
+        </div>
+
+        <aside className="account-side-column">
+          <section className="panel stack" aria-labelledby="acc-blocked">
+            <div className="account-section-heading"><ShieldBan aria-hidden /><h2 id="acc-blocked">Blocked members</h2></div>
+            {blocked.isLoading && <p className="muted">Loading blocked members…</p>}
+            {blocked.data && blocked.data.length === 0 && <p className="muted">You have not blocked anyone.</p>}
+            <ul className="account-blocked-list">
+              {blocked.data?.map((b) => (
+                <li key={b.blocked_id}>
+                  <span>{b.name}</span>
+                  <button type="button" className="btn btn-quiet" onClick={() => unblock.mutate(b.blocked_id)} disabled={unblock.isPending}>Unblock</button>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="panel stack">
+            <div className="account-section-heading"><LogOut aria-hidden /><h2>Sign out</h2></div>
+            <p className="muted">Sign out of this device. Your listings and account remain available.</p>
+            <button type="button" className="btn btn-quiet account-logout" onClick={() => void signOut().then(() => navigate('/'))}>
+              <LogOut aria-hidden size={17} /> Log out
+            </button>
+          </section>
+
+          <section className="panel account-danger stack" aria-labelledby="acc-delete">
+            <div className="account-section-heading"><Trash2 aria-hidden /><h2 id="acc-delete">Delete your account</h2></div>
+            <p className="muted">
+              This removes your profile, listings, saved items and conversations (including the other person's copy), and takes your
+              photos off the site. It cannot be undone.
+            </p>
+            <button type="button" className="btn btn-danger-solid" onClick={() => setDeleting(true)}>Delete my account</button>
+          </section>
+        </aside>
+      </div>
 
       <Dialog open={deleting} onClose={() => { setDeleting(false); setConfirmText(''); }} title="Delete your account?">
         <div className="stack">
@@ -133,7 +162,7 @@ export function AccountPage() {
           <div className="actions">
             <button type="button" className="btn btn-quiet" onClick={() => { setDeleting(false); setConfirmText(''); }}>Cancel</button>
             <button type="button" className="btn btn-danger-solid" disabled={confirmText !== 'DELETE' || erase.isPending} onClick={() => erase.mutate()}>
-              {erase.isPending ? 'Deleting...' : 'Delete everything'}
+              {erase.isPending ? 'Deleting…' : 'Delete everything'}
             </button>
           </div>
         </div>
