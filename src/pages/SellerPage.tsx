@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Flag } from 'lucide-react';
+import { CalendarDays, Flag, PackageCheck } from 'lucide-react';
 import { ListingGrid } from '../components/ListingGrid';
 import { ReportDialog } from '../components/ReportDialog';
 import { useAuth } from '../context/AuthContext';
@@ -39,21 +39,24 @@ export function SellerPage() {
   const p = profile.data;
   return (
     <div className="wrap page">
-      <header className="seller-head">
-        <div>
+      <header className="seller-profile-hero">
+        <span className="seller-profile-avatar" aria-hidden>{p.display_name.trim().charAt(0).toUpperCase() || 'M'}</span>
+        <div className="seller-profile-copy">
+          <span className="account-eyebrow">Maua Marketplace member</span>
           <h1>{p.display_name}</h1>
-          <p className="muted">
-            Member since {memberSince(p.created_at)}
-            {isNewMember(p.created_at) && <span className="chip chip-warn">New member</span>}
-          </p>
+          <p className="seller-profile-meta"><CalendarDays aria-hidden size={15} /> Member since {memberSince(p.created_at)}</p>
+          {isNewMember(p.created_at) && <span className="chip chip-warn">New member</span>}
         </div>
         {user?.id !== p.id && (
-          <button type="button" className="btn btn-quiet" onClick={() => (user ? setReporting(true) : goToLogin())}>
+          <button type="button" className="btn btn-quiet seller-report" onClick={() => (user ? setReporting(true) : goToLogin())}>
             <Flag aria-hidden /> Report member
           </button>
         )}
       </header>
-      <h2>Listings</h2>
+      <div className="seller-listings-heading">
+        <div><span className="account-eyebrow">From this seller</span><h2>Listings</h2></div>
+        <span className="seller-listings-note"><PackageCheck aria-hidden size={16} /> Items posted by this member</span>
+      </div>
       <ListingGrid listings={listings.data} loading={listings.isLoading} empty={<p>This member has no live listings.</p>} />
       <ReportDialog open={reporting} onClose={() => setReporting(false)} userId={p.id} subject={p.display_name} />
     </div>

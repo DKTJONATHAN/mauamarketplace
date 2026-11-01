@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, Search, SlidersHorizontal } from 'lucide-react';
+import { MessageCircle, Search, ShieldCheck, SlidersHorizontal } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { ListingImage } from '../components/ListingImage';
 import { useAuth } from '../context/AuthContext';
@@ -91,7 +91,7 @@ export function MessagesPage() {
                   <span className="inbox-conversation-copy">
                     <span className="inbox-conversation-top"><strong>{c.other_name}</strong><time dateTime={c.last_at}>{timeAgo(c.last_at)}</time></span>
                     <span className="inbox-listing-title">{c.listing_title}</span>
-                    <span className="inbox-preview">{c.last_body === '📷 Photo' ? '📷 Photo' : c.last_body ?? 'Start the conversation'}</span>
+                    <span className="inbox-preview">{c.last_body === '📷 Photo' ? 'Photo attachment' : c.last_body ?? 'Start the conversation'}</span>
                   </span>
                   <span className="inbox-conversation-end">{c.unread > 0 && <span className="inbox-unread-badge" aria-label={`${c.unread} unread messages`}>{c.unread > 99 ? '99+' : c.unread}</span>}<span className="inbox-chevron" aria-hidden>›</span></span>
                 </Link>
@@ -100,7 +100,7 @@ export function MessagesPage() {
           </ul>
         )}
       </section>
-      <p className="inbox-safety-note"><span aria-hidden>🛡️</span> Keep conversations here, meet in public, inspect items before paying, and never share your M-Pesa PIN.</p>
+      <p className="inbox-safety-note"><ShieldCheck aria-hidden size={17} /> <span>Keep conversations here, meet in public, inspect items before paying, and never share your M-Pesa PIN.</span></p>
     </div>
   );
 }
