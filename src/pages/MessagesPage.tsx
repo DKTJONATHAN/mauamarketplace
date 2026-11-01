@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageCircle, Search, SlidersHorizontal } from 'lucide-react';
+import { MessageCircle, Search, ShieldCheck, SlidersHorizontal } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { ListingImage } from '../components/ListingImage';
 import { useAuth } from '../context/AuthContext';
@@ -100,7 +100,7 @@ export function MessagesPage() {
           </ul>
         )}
       </section>
-      <p className="inbox-safety-note"><span aria-hidden>🛡️</span> Keep conversations here, meet in public, inspect items before paying, and never share your M-Pesa PIN.</p>
+      <p className="inbox-safety-note"><ShieldCheck aria-hidden size={17} /> <span>Keep conversations here, meet in public, inspect items before paying, and never share your M-Pesa PIN.</span></p>
     </div>
   );
 }
