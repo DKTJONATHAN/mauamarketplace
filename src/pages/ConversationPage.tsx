@@ -305,7 +305,7 @@ export function ConversationPage() {
         <p className="chat-blocked">You blocked this member. Unblock them to continue the conversation.</p>
       ) : (
         <form className="composer composer-modern" onSubmit={submit}>
-          {photo && <div className="chat-photo-preview"><img src={photo.previewUrl} alt="Ready to send" /><span>Photo ready to send</span><button type="button" className="icon-btn" aria-label="Remove photo" onClick={() => { URL.revokeObjectURL(photo.previewUrl); setPhoto(null); }}><X aria-hidden /></button></div>}
+          {photo && <div className="chat-photo-preview"><img src={photo.previewUrl} alt="Photo selected for your message" /><span>Photo ready to send</span><button type="button" className="icon-btn" aria-label="Remove attached photo" onClick={() => { URL.revokeObjectURL(photo.previewUrl); setPhoto(null); }}><X aria-hidden /></button></div>}
           <div className="chat-composer-row">
             <input ref={fileInput} className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => void choosePhoto(e)} aria-label="Choose a photo to attach" />
             <button type="button" className="chat-attach btn btn-quiet" onClick={() => fileInput.current?.click()} disabled={send.isPending || preparingPhoto} aria-label="Attach image"><ImagePlus aria-hidden /></button>
