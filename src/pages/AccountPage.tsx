@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ArrowUpRight, Bookmark, CalendarDays, ChevronRight, CircleUserRound, LayoutDashboard,
+  Bookmark, CalendarDays, ChevronRight, LayoutDashboard,
   LogOut, Mail, MessageCircle, Package, ShieldBan, Trash2, UserRound,
 } from 'lucide-react';
 import { Dialog } from '../components/Dialog';
