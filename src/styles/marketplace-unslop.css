@@ -669,3 +669,10 @@ input:disabled, select:disabled, textarea:disabled { color: #536257 !important; 
   .photo-grid img { transition: none !important; }
   .chat-conversation, .inbox-conversation { transition: none !important; }
 }
+
+/* Final small-text and icon contrast corrections found during the AA review. */
+.bottom-nav a:not(.bottom-sell) { color: #4b5a50 !important; }
+.account-activity-list .account-link-arrow { color: #4b5a50 !important; }
+.inbox-conversation time, .inbox-preview, .inbox-safety-note,
+.install-prompt-copy p, .app-update-copy p, .app-update-pending,
+.install-prompt-close { color: #4b5a50 !important; }
