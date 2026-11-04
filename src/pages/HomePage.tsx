@@ -55,9 +55,9 @@ export function HomePage() {
       <section className="wrap section home-listings" aria-labelledby="latest-title">
         <div className="section-head home-listings-head">
           <div className="home-heading-copy">
-            <span className="home-eyebrow">MAUA'S COMMUNITY MARKET</span>
-            <h1 id="latest-title">Find something good in {site.place}</h1>
-            <p className="home-heading-note">Discover local finds, compare prices and connect directly with people in your community.</p>
+            <span className="home-eyebrow">MAUA TOWN · MERU COUNTY · KENYA</span>
+            <h1 id="latest-title">Maua Soko – Buy and Sell in Maua Town</h1>
+            <p className="home-heading-note">Welcome to {site.name}, Maua’s online market. Discover new and second-hand items, compare prices and connect directly with local sellers across Maua and Meru County.</p>
             {typeof count.data === 'number' && count.data > 0 && (
               <p className="result-count">{count.data.toLocaleString('en-KE')} listings live right now</p>
             )}
@@ -120,17 +120,15 @@ export function HomePage() {
       </section>
 
       <section className="wrap section home-intro" aria-labelledby="local-market-title">
-        <h2 id="local-market-title">Maua’s local online market for new and second-hand items</h2>
+        <h2 id="local-market-title">Maua Marketplace – your online Maua Soko</h2>
         <p>
-          Looking for a market in Maua town? {site.name} helps buyers and sellers across Maua, Igembe and
-          nearby parts of {site.region}, Kenya, find each other online. Browse new products and second-hand
-          bargains, compare prices, and discover items listed by people in your community.
+          Looking for Maua market, Maua Soko or a marketplace in Maua town? {site.name} helps buyers and sellers across Maua, Igembe and nearby parts of {site.region}, Kenya, find each other online. Browse new products and second-hand bargains, compare prices, and discover items listed by people in your community.
         </p>
         <p>
-          Find phones and electronics, sofas and furniture, clothes and shoes, household goods, farm produce,
-          tools, vehicles, property and local services. You can also post an item for sale and connect directly
-          with interested buyers. Listings are free to browse, and sellers and buyers should meet safely and
-          inspect goods before making payment.
+          Shop for phones and electronics, sofas and furniture, clothes and shoes, household goods, farm produce,
+          tools, vehicles, property and local services. Whether you search for “Maua marketplace”, “Maua market”
+          or “Maua Soko”, you can browse local listings, post an item for sale and connect directly with interested
+          buyers in Maua and Meru County. Listings are free to browse. Meet safely and inspect goods before paying.
         </p>
         <p><Link to="/categories">Explore all Maua Marketplace categories</Link> or <Link to="/browse">browse every listing</Link>.</p>
       </section>
