@@ -12,9 +12,9 @@ export const site = {
   maxImages: 6,
   /** Default meta description (keep under ~160 chars for Google). */
   description:
-    'Maua Marketplace is the local online market for Maua, Meru County, Kenya. Buy and sell new and second-hand phones, electronics, furniture, clothes, farm produce, vehicles and household items.',
+    'Maua Soko is the online marketplace for Maua town and Meru County, Kenya. Buy and sell new and second-hand items from local sellers.',
   /** Short description for social cards. */
-  socialDescription: 'Shop new and second-hand items in Maua, Meru County, Kenya. Find phones, electronics, clothes, furniture, farm produce, vehicles and more.',
+  socialDescription: 'Shop and sell on Maua Soko, Maua town’s online marketplace in Meru County. Find new and second-hand items from local sellers.',
   /** Locale for Open Graph / HTML. */
   locale: 'en_KE',
   language: 'en',
