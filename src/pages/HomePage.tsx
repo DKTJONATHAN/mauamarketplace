@@ -15,7 +15,7 @@ const INITIAL_LISTINGS = 24;
 
 export function HomePage() {
   const jsonLd = useMemo(() => websiteJsonLd(), []);
-  useSeo({ path: '/', description: site.description, jsonLd });
+  useSeo({ title: 'Maua Soko in Maua Town, Meru', path: '/', description: site.description, jsonLd });
 
   const [showMore, setShowMore] = useState(false);
   const recentIds = getRecentlyViewed();
