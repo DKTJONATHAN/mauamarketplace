@@ -40,7 +40,7 @@ function loadGoogleIdentityScript(): Promise<void> {
   if (window.google?.accounts?.id) return Promise.resolve();
   if (googleScriptPromise) return googleScriptPromise;
 
-  googleScriptPromise = new Promise((resolve, reject) => {
+  googleScriptPromise = new Promise<void>((resolve, reject) => {
     let script = document.querySelector<HTMLScriptElement>('script[data-google-identity]');
     const onLoad = () => {
       if (window.google?.accounts?.id) resolve();
@@ -69,7 +69,7 @@ function loadGoogleIdentityScript(): Promise<void> {
     throw error;
   });
 
-  return googleScriptPromise;
+  return googleScriptPromise!;
 }
 
 function createNonce(): string {
