@@ -676,3 +676,13 @@ input:disabled, select:disabled, textarea:disabled { color: #536257 !important; 
 .inbox-conversation time, .inbox-preview, .inbox-safety-note,
 .install-prompt-copy p, .app-update-copy p, .app-update-pending,
 .install-prompt-close { color: #4b5a50 !important; }
+
+
+/* Google Identity Services button: retain Google's official, unmodified button artwork. */
+.google-signin-wrap { width: 100%; display: grid; gap: .45rem; }
+.google-signin-button { display: flex; justify-content: center; width: 100%; min-height: 44px; }
+.google-signin-button > div { max-width: 100%; }
+.google-signin-button iframe { max-width: 100%; }
+.google-signin-wrap[aria-busy="true"] .google-signin-button { pointer-events: none; opacity: .65; }
+.google-signin-status, .google-signin-unavailable { margin: 0; color: var(--ink-soft); font-size: .88rem; text-align: center; }
+.google-signin-unavailable { padding: .7rem .85rem; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
