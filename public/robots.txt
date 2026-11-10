@@ -1,8 +1,8 @@
-# Maua Marketplace — https://mauamarketplace.pages.dev/
+# Maua Marketplace — https://mauamarketplace.eu.cc/
 User-agent: *
 Allow: /
 
 # Private account and authentication screens set a noindex robots meta tag.
 # They remain crawlable so search engines can see that directive.
 
-Sitemap: https://mauamarketplace.pages.dev/sitemap.xml
+Sitemap: https://mauamarketplace.eu.cc/sitemap.xml
