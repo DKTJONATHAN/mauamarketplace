@@ -678,11 +678,31 @@ input:disabled, select:disabled, textarea:disabled { color: #536257 !important; 
 .install-prompt-close { color: #4b5a50 !important; }
 
 
-/* Google Identity Services button: retain Google's official, unmodified button artwork. */
-.google-signin-wrap { width: 100%; display: grid; gap: .45rem; }
-.google-signin-button { display: flex; justify-content: center; width: 100%; min-height: 44px; }
-.google-signin-button > div { max-width: 100%; }
-.google-signin-button iframe { max-width: 100%; }
-.google-signin-wrap[aria-busy="true"] .google-signin-button { pointer-events: none; opacity: .65; }
+/* Google sign-in: clear, full-width control with Google's recognisable mark. */
+.google-signin-wrap { width: 100%; display: grid; gap: .55rem; }
+button.google-signin-button {
+  appearance: none; -webkit-appearance: none;
+  display: flex; align-items: center; justify-content: center; gap: .8rem;
+  width: 100%; min-height: 50px; padding: .7rem 1rem;
+  border: 1px solid #747775; border-radius: 7px;
+  background: #fff; color: #1f1f1f;
+  font-family: Arial, Helvetica, sans-serif; font-size: 14px;
+  font-weight: 600; letter-spacing: .01em; line-height: 1.2;
+  cursor: pointer; box-shadow: 0 1px 2px rgb(0 0 0 / .08);
+  transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+.google-signin-button svg { display: block; width: 20px; height: 20px; flex: 0 0 20px; }
+.google-signin-button span { display: block; }
+.google-signin-button:hover:not(:disabled) {
+  background: #f8faff; border-color: #5f6368;
+  box-shadow: 0 2px 5px rgb(60 64 67 / .18);
+}
+.google-signin-button:active:not(:disabled) { background: #f1f3f4; box-shadow: none; transform: translateY(1px); }
+.google-signin-button:focus-visible { outline: 3px solid rgb(20 91 60 / .28); outline-offset: 2px; border-color: #145b3c; }
+.google-signin-button:disabled { cursor: wait; opacity: .7; box-shadow: none; }
+.google-signin-wrap[aria-busy="true"] .google-signin-button { pointer-events: none; }
 .google-signin-status, .google-signin-unavailable { margin: 0; color: var(--ink-soft); font-size: .88rem; text-align: center; }
 .google-signin-unavailable { padding: .7rem .85rem; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
+@media (prefers-reduced-motion: reduce) {
+  .google-signin-button { transition: none; }
+}
