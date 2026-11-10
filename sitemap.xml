@@ -1,325 +1,185 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
-       <loc>https://mauamarketplace.pages.dev/</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>1.0000</priority>
+       <loc>https://mauamarketplace.eu.cc/</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/safety</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/safety</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/saved</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/phones</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/messages</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/farm-produce</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/login</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/furniture</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/sell</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/cars</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/phones</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/services</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/farm-produce</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/categories</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/furniture</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/browse</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/cars</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/phone-accessories</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/services</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/computers</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/categories</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/computer-accessories</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/browse</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/tvs-audio</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/phone-accessories</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/cameras</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/computers</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/gaming</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/computer-accessories</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/solar-power</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/tvs-audio</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/appliances</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/cameras</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/kitchenware</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/gaming</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/beds-bedding</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/solar-power</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/decor</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/appliances</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/building-materials</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/kitchenware</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/tools</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/beds-bedding</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/clothing-women</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/decor</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/clothing-men</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/building-materials</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/clothing-kids</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/tools</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/shoes</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/clothing-women</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/bags</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/clothing-men</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/jewellery-watches</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/clothing-kids</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/baby</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/shoes</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/motorbikes</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/bags</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/trucks-vans</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/jewellery-watches</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/bicycles</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/baby</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/vehicle-parts</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/motorbikes</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/school-items</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/trucks-vans</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/books</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/bicycles</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/livestock</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/vehicle-parts</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/farm-machinery</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/school-items</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/farm-inputs</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/books</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/pets</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/livestock</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/property-rent</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/farm-machinery</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/property-sale</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/farm-inputs</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/commercial-property</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/pets</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/house-help</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/property-rent</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/jobs</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/property-sale</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/construction</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/commercial-property</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/cleaning</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/house-help</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/events</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/jobs</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/beauty</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/construction</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/business-equipment</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/cleaning</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/health-fitness</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/events</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/sports</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/beauty</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/music</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/business-equipment</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/art-crafts</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/health-fitness</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/free</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/sports</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/wanted</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/music</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/category/other</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/art-crafts</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/rules</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/free</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/privacy</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/wanted</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/terms</loc>
   </url>
   <url>
-       <loc>https://mauamarketplace.pages.dev/category/other</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
-  </url>
-  <url>
-       <loc>https://mauamarketplace.pages.dev/rules</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
-  </url>
-  <url>
-       <loc>https://mauamarketplace.pages.dev/privacy</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
-  </url>
-  <url>
-       <loc>https://mauamarketplace.pages.dev/terms</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
-  </url>
-  <url>
-       <loc>https://mauamarketplace.pages.dev/refund-policy</loc>
-       <lastmod>2026-11-06T21:05:29+00:00</lastmod>
-       <priority>0.5120</priority>
+       <loc>https://mauamarketplace.eu.cc/refund-policy</loc>
   </url>
 </urlset>
