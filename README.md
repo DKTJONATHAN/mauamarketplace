@@ -5,6 +5,7 @@ inside the app. The site never handles money and never verifies anyone, so it sh
 
 - React 19 + TypeScript + Vite, deployed to Cloudflare Pages
 - Supabase for accounts (email and Google), listings, messages and Row Level Security
+- Google Identity Services provides the branded Google sign-in button and returns an ID token directly to Supabase Auth. This avoids the Supabase-hosted browser redirect while retaining Supabase sessions.
 - Listing photos are stored in Cloudflare R2; uploads are handled by a Cloudflare Pages Function. Supabase remains the database/auth backend.
 - See `specs/marketplace_design.md` for the design decisions
 
@@ -20,33 +21,36 @@ inside the app. The site never handles money and never verifies anyone, so it sh
 
 You need a Supabase project (free tier is fine) and this repository to be public.
 
-### 1. Apply the patch
+### 1. Configure Google sign-in
 
-```bash
-git clone https://github.com/DKTJONATHAN/mauamarketplace.git
-cd mauamarketplace
-git rm -f README.md .gitignore 2>/dev/null; git commit -m "Clear starter files" 2>/dev/null   # only if GitHub created them
-git am < maua-marketplace.patch
-git push origin main
-```
+Google sign-in uses Google's popup credential flow and Supabase's `signInWithIdToken()` API. Supabase remains responsible for validating the Google ID token and issuing the normal app session.
 
-No local machine? Open the repository in a Codespace (Code > Codespaces), upload `maua-marketplace.patch` into it, and run the same `git am` and `git push` commands in its terminal.
+1. In [Google Auth Platform](https://console.cloud.google.com/auth/overview), select the project that owns your OAuth client.
+2. Under **Branding**, set the app name to **Maua Marketplace**, upload the Maua Marketplace logo, and confirm the authorised domain and homepage.
+3. Under **Clients**, create or use an OAuth client with application type **Web application**.
+4. Under **Authorized JavaScript origins**, add every origin where the app is served, for example:
+   - `https://mauamarketplace.eu.cc`
+   - `https://mauamarketplace.pages.dev` (if you still use this address)
+   - `http://localhost:5173` (local development only)
+5. Copy the OAuth **Client ID**. Do not put the client secret in the browser.
+6. Keep Google enabled under **Supabase Dashboard > Authentication > Sign In / Providers > Google** and configure the same Google Client ID and its client secret there. Supabase validates the ID token and creates the existing Supabase user session.
+7. Add `VITE_GOOGLE_CLIENT_ID` to the Cloudflare Pages project's **Production** and **Preview** environment variables, using the Web client ID from step 5. Redeploy after saving it.
+
+This popup-based ID-token flow does not send the browser through `<project-ref>.supabase.co/auth/v1/authorize` or require that Supabase URL as a Google redirect URI. Google still verifies the user's identity, and Supabase Auth remains the session and account provider. Keep your Supabase Google provider enabled.
+
+For local development, add the same variable to `.env.local`. See `.env.example`.
 
 ### 2. Configure the Supabase project
 
-Supabase stores accounts, listings, messages and other application data. Listing photos are stored in Cloudflare R2, not Supabase Storage.
-
-### 3. Set up Supabase
-
 1. Create a project. Note the **Project URL**, the **anon (publishable) key**, the **project ref** (the part before `.supabase.co`) and the **database password**.
 2. Authentication > URL Configuration:
-   - Site URL: your Cloudflare Pages URL or custom domain, e.g. `https://mauamarketplace.pages.dev/`
+   - Site URL: your Cloudflare Pages URL or custom domain, e.g. `https://mauamarketplace.eu.cc/`
    - Redirect URLs: add the same URL, and `http://localhost:5173/` for local work.
 3. Authentication > Sign In / Providers > Email: keep **Confirm email** on. (Photo uploads require a confirmed email, which blocks throw-away sign-ups.)
-4. Authentication > Sign In / Providers > Google: enable it. In Google Cloud Console create an OAuth client of type *Web application*, add `https://YOUR-REF.supabase.co/auth/v1/callback` as an authorised redirect URI and your Cloudflare Pages/custom-domain origin as an authorised JavaScript origin, then paste the client ID and secret into Supabase.
+4. Authentication > Sign In / Providers > Google: enable it. Keep the Google Client ID and client secret configured as described above. The old callback URL may remain registered for compatibility, but this app's new Google button uses the popup ID-token flow.
 5. Supabase's built-in email sender is limited to a few messages per hour. Before real launch, add your own SMTP provider under Authentication > SMTP Settings, otherwise sign-up emails will stall.
 
-### 4. Configure Cloudflare Pages environment variables
+### 3. Configure Cloudflare Pages environment variables
 
 In Cloudflare Pages, open the project and set these variables for the Production environment:
 
@@ -54,27 +58,28 @@ In Cloudflare Pages, open the project and set these variables for the Production
 |---|---|
 | `VITE_SUPABASE_URL` | your Supabase Project URL |
 | `VITE_SUPABASE_ANON_KEY` | your Supabase anon / publishable key |
+| `VITE_GOOGLE_CLIENT_ID` | your Google OAuth Web client ID |
 | `VITE_R2_MEDIA_BASE_URL` | the public base URL of the R2 media domain, with no trailing slash |
 
 The app is configured to use `/` as its permanent base path. Build with `npm run build`; the output directory is `dist`.
 
 Cloudflare Pages should deploy from the `main` branch using the project’s Git integration. GitHub is used only as the source repository; Cloudflare Pages is the hosting and deployment platform.
 
-### 5. Deploy
+### 4. Deploy
 
 1. Connect `DKTJONATHAN/mauamarketplace` to Cloudflare Pages.
 2. Set the build command to `npm run build` and the output directory to `dist`.
-3. Add the two `VITE_` variables above.
+3. Add the four `VITE_` variables above.
 4. Bind the R2 bucket to the Pages project using the binding name `MEDIA` (Settings > Bindings > Add > R2 bucket), then redeploy.
 
 Your site is then live at your Cloudflare Pages URL or custom domain. New photos go to R2 while the migration is in progress, and old Supabase Storage photos continue to work until they are migrated.
 
-The browser only needs the two Supabase `VITE_` values plus `VITE_R2_MEDIA_BASE_URL`. The Pages Function keeps the Supabase service credential server-side.
+The browser only needs the Supabase `VITE_` values, Google client ID, and `VITE_R2_MEDIA_BASE_URL`. The Pages Function keeps the Supabase service credential server-side.
 
 ## Local development
 
-```bash
-cp .env.example .env.local   # fill in the two Supabase values
+```sh
+cp .env.example .env.local   # fill in the Supabase values and Google Web client ID
 npm install
 npm run dev                  # http://localhost:5173
 npm test && npm run build
@@ -89,8 +94,7 @@ npm test && npm run build
 - **Launching Meru later:** copy the project, change `src/config/site.ts` (place and locations) and deploy it against its own Supabase project.
 - **Link previews:** because the site is a static single-page app, WhatsApp shows the same preview for every listing link.
 
-
-### 6. Cloudflare R2 media setup
+### 5. Cloudflare R2 media setup
 
 Create an R2 bucket, for example `maua-marketplace-media`. In the Pages project, bind it as an R2 bucket with the variable name **MEDIA**.
 
@@ -108,13 +112,13 @@ For production, connect a custom domain to the R2 bucket rather than using the `
 
 After saving the binding and variables, trigger a new Pages deployment. The browser uploads to `/api/media`; the Pages Function validates the signed-in Supabase user and writes the photo to R2. Supabase Auth and all existing database records remain unchanged.
 
-### 7. Migrate existing Supabase Storage photos
+### 6. Migrate existing Supabase Storage photos
 
-Do **not** delete the existing Supabase Storage bucket yet. The migration is deliberately dual-read: old paths continue loading from Supabase while migrated paths use R2.
+**Do not** delete the existing Supabase Storage bucket yet. The migration is deliberately dual-read: old paths continue loading from Supabase while migrated paths use R2.
 
 After the new deployment is live, run the migration endpoint in batches of up to 25:
 
-```bash
+```sh
 curl -X POST "https://mauamarketplace.pages.dev/api/media?action=migrate&limit=25" \
   -H "x-media-migration-secret: YOUR_MEDIA_MIGRATION_SECRET"
 ```
