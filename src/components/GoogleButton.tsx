@@ -1,181 +1,65 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { NEXT_KEY } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { supabase } from '../lib/supabase';
-
-interface GoogleCredentialResponse {
-  credential?: string;
-}
-
-interface GoogleButtonOptions {
-  theme: 'outline';
-  size: 'large';
-  text: 'continue_with';
-  shape: 'rectangular';
-  logo_alignment: 'left';
-  width: number;
-}
-
-interface GoogleIdentityApi {
-  initialize(options: {
-    client_id: string;
-    callback: (response: GoogleCredentialResponse) => void;
-    nonce: string;
-    ux_mode: 'popup';
-    context: 'signin';
-  }): void;
-  renderButton(element: HTMLElement, options: GoogleButtonOptions): void;
-  cancel(): void;
-}
-
-declare global {
-  interface Window {
-    google?: { accounts: { id: GoogleIdentityApi } };
-  }
-}
-
-let googleScriptPromise: Promise<void> | null = null;
-
-function loadGoogleIdentityScript(): Promise<void> {
-  if (window.google?.accounts?.id) return Promise.resolve();
-  if (googleScriptPromise) return googleScriptPromise;
-
-  googleScriptPromise = new Promise<void>((resolve, reject) => {
-    let script = document.querySelector<HTMLScriptElement>('script[data-google-identity]');
-    const onLoad = () => {
-      if (window.google?.accounts?.id) resolve();
-      else reject(new Error('Google sign-in did not initialise.'));
-    };
-    const onError = () => reject(new Error('Google sign-in could not be loaded.'));
-
-    if (!script) {
-      script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.async = true;
-      script.defer = true;
-      script.dataset.googleIdentity = 'true';
-      document.head.appendChild(script);
-    }
-
-    if (window.google?.accounts?.id) {
-      resolve();
-      return;
-    }
-
-    script.addEventListener('load', onLoad, { once: true });
-    script.addEventListener('error', onError, { once: true });
-  }).catch((error: unknown) => {
-    googleScriptPromise = null;
-    throw error;
-  });
-
-  return googleScriptPromise!;
-}
-
-function createNonce(): string {
-  const bytes = crypto.getRandomValues(new Uint8Array(32));
-  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
-}
-
-async function sha256Hex(value: string): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
-  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
-}
 
 function safeInternalPath(path: string): string {
   return path.startsWith('/') && !path.startsWith('//') ? path : '/';
 }
 
 export function GoogleButton({ next }: { next: string }) {
-  const hostRef = useRef<HTMLDivElement>(null);
   const toast = useToast();
   const [busy, setBusy] = useState(false);
-  const [unavailable, setUnavailable] = useState(false);
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-  useEffect(() => {
-    let active = true;
+  async function signIn() {
+    if (busy) return;
+    setBusy(true);
+    const destination = safeInternalPath(next);
+    sessionStorage.setItem(NEXT_KEY, destination);
 
-    if (!clientId) {
-      setUnavailable(true);
-      return () => { active = false; };
-    }
+    try {
+      const callback = new URL('/auth/confirm', window.location.origin);
+      callback.searchParams.set('next', destination);
 
-    void (async () => {
-      try {
-        await loadGoogleIdentityScript();
-        const nonce = createNonce();
-        const hashedNonce = await sha256Hex(nonce);
-        if (!active || !hostRef.current || !window.google?.accounts?.id) return;
-
-        const host = hostRef.current;
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          nonce: hashedNonce,
-          ux_mode: 'popup',
-          context: 'signin',
-          callback: async (response) => {
-            if (!response.credential || !active) {
-              if (active) toast.error('Google did not return a sign-in credential. Please try again.');
-              return;
-            }
-
-            setBusy(true);
-            sessionStorage.setItem(NEXT_KEY, safeInternalPath(next));
-            try {
-              const { error } = await supabase.auth.signInWithIdToken({
-                provider: 'google',
-                token: response.credential,
-                nonce,
-              });
-              if (error) throw error;
-              // AuthContext handles the SIGNED_IN event and restores the requested route.
-            } catch (error) {
-              sessionStorage.removeItem(NEXT_KEY);
-              setBusy(false);
-              toast.error(error instanceof Error
-                ? error.message
-                : 'Google sign-in could not be completed. Please try again.');
-            }
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: callback.toString(),
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'select_account',
           },
-        });
+        },
+      });
 
-        host.replaceChildren();
-        window.google.accounts.id.renderButton(host, {
-          theme: 'outline',
-          size: 'large',
-          text: 'continue_with',
-          shape: 'rectangular',
-          logo_alignment: 'left',
-          width: Math.min(400, Math.max(200, Math.floor(host.clientWidth || 400))),
-        });
-      } catch {
-        if (active) {
-          setUnavailable(true);
-          toast.error('Google sign-in could not load. Please use email and password for now.');
-        }
-      }
-    })();
-
-    return () => {
-      active = false;
-      hostRef.current?.replaceChildren();
-      window.google?.accounts?.id.cancel();
-    };
-  }, [clientId, next, toast]);
-
-  if (unavailable) {
-    return (
-      <p className="google-signin-unavailable" role="status">
-        Google sign-in is temporarily unavailable. You can still use your email and password.
-      </p>
-    );
+      if (error) throw error;
+      // Supabase redirects the browser to Google. The callback page completes
+      // the PKCE exchange and AuthContext restores the requested destination.
+    } catch (error) {
+      sessionStorage.removeItem(NEXT_KEY);
+      setBusy(false);
+      toast.error(error instanceof Error
+        ? error.message
+        : 'Google sign-in could not be started. Please try again.');
+    }
   }
 
   return (
     <div className="google-signin-wrap" aria-busy={busy}>
-      <div ref={hostRef} className="google-signin-button" />
-      {busy && <p className="google-signin-status" role="status">Signing you in securely...</p>}
+      <button
+        type="button"
+        className="google-signin-button"
+        onClick={signIn}
+        disabled={busy}
+      >
+        <svg aria-hidden="true" viewBox="0 0 48 48" width="20" height="20">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z" />
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6C44.42 37.96 46.98 31.86 46.98 24.55Z" />
+          <path fill="#FBBC05" d="M10.54 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.98-6.19Z" />
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.14 1.44-4.88 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z" />
+        </svg>
+        <span>{busy ? 'Connecting to Google...' : 'Continue with Google'}</span>
+      </button>
     </div>
   );
 }
