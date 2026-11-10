@@ -36,6 +36,8 @@ Google sign-in uses Google's popup credential flow and Supabase's `signInWithIdT
 6. Keep Google enabled under **Supabase Dashboard > Authentication > Sign In / Providers > Google** and configure the same Google Client ID and its client secret there. Supabase validates the ID token and creates the existing Supabase user session.
 7. Add `VITE_GOOGLE_CLIENT_ID` to the Cloudflare Pages project's **Production** and **Preview** environment variables, using the Web client ID from step 5. Redeploy after saving it.
 
+   **Important:** `VITE_GOOGLE_CLIENT_ID` is a Vite build-time variable. It must be present in the Pages **Build configurations > Environment variables** for the Production environment before the build starts; adding it only as a runtime Worker/Pages Function variable does not expose it to the browser bundle. After changing it, trigger a new Production deployment from the `main` branch. In the deployed browser bundle, the Google Identity Services script (`https://accounts.google.com/gsi/client`) should be requested; if the app immediately shows the unavailable message and that script is never requested, the production build did not receive a usable client ID.
+
 This popup-based ID-token flow does not send the browser through `<project-ref>.supabase.co/auth/v1/authorize` or require that Supabase URL as a Google redirect URI. Google still verifies the user's identity, and Supabase Auth remains the session and account provider. Keep your Supabase Google provider enabled.
 
 For local development, add the same variable to `.env.local`. See `.env.example`.
