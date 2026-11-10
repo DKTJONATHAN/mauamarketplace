@@ -19,8 +19,8 @@ export function GoogleButton({ next }: { next: string }) {
 
     try {
       const callback = new URL('/auth/confirm', window.location.origin);
-      callback.searchParams.set('next', destination);
-
+      // Keep the callback URL identical to the existing email-confirmation route
+      // so it uses the redirect URL already allowed in Supabase Auth settings.
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
