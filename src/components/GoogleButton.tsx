@@ -1,57 +1,181 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NEXT_KEY } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { siteUrl } from '../config/site';
 import { supabase } from '../lib/supabase';
 
-function GoogleG() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
-      <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z" />
-      <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z" />
-      <path fill="#FBBC05" d="M10.5 28.7c-.5-1.5-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C.9 16.5 0 20.1 0 24s.9 7.5 2.6 10.8l7.9-6.1z" />
-      <path fill="#34A853" d="M24 48c6.3 0 11.6-2.1 15.5-5.7l-7.5-5.8c-2.1 1.4-4.8 2.3-8 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z" />
-    </svg>
-  );
+interface GoogleCredentialResponse {
+  credential?: string;
+}
+
+interface GoogleButtonOptions {
+  theme: 'outline';
+  size: 'large';
+  text: 'continue_with';
+  shape: 'rectangular';
+  logo_alignment: 'left';
+  width: number;
+}
+
+interface GoogleIdentityApi {
+  initialize(options: {
+    client_id: string;
+    callback: (response: GoogleCredentialResponse) => void;
+    nonce: string;
+    ux_mode: 'popup';
+    context: 'signin';
+  }): void;
+  renderButton(element: HTMLElement, options: GoogleButtonOptions): void;
+  cancel(): void;
+}
+
+declare global {
+  interface Window {
+    google?: { accounts: { id: GoogleIdentityApi } };
+  }
+}
+
+let googleScriptPromise: Promise<void> | null = null;
+
+function loadGoogleIdentityScript(): Promise<void> {
+  if (window.google?.accounts?.id) return Promise.resolve();
+  if (googleScriptPromise) return googleScriptPromise;
+
+  googleScriptPromise = new Promise((resolve, reject) => {
+    let script = document.querySelector<HTMLScriptElement>('script[data-google-identity]');
+    const onLoad = () => {
+      if (window.google?.accounts?.id) resolve();
+      else reject(new Error('Google sign-in did not initialise.'));
+    };
+    const onError = () => reject(new Error('Google sign-in could not be loaded.'));
+
+    if (!script) {
+      script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.dataset.googleIdentity = 'true';
+      document.head.appendChild(script);
+    }
+
+    if (window.google?.accounts?.id) {
+      resolve();
+      return;
+    }
+
+    script.addEventListener('load', onLoad, { once: true });
+    script.addEventListener('error', onError, { once: true });
+  }).catch((error: unknown) => {
+    googleScriptPromise = null;
+    throw error;
+  });
+
+  return googleScriptPromise;
+}
+
+function createNonce(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
 function safeInternalPath(path: string): string {
-  // Only retain an app-local path; never store an external redirect target.
   return path.startsWith('/') && !path.startsWith('//') ? path : '/';
 }
 
 export function GoogleButton({ next }: { next: string }) {
+  const hostRef = useRef<HTMLDivElement>(null);
   const toast = useToast();
   const [busy, setBusy] = useState(false);
+  const [unavailable, setUnavailable] = useState(false);
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-  async function go() {
-    if (busy) return;
+  useEffect(() => {
+    let active = true;
 
-    setBusy(true);
-    try {
-      sessionStorage.setItem(NEXT_KEY, safeInternalPath(next));
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          // Return to the clean app root. Supabase completes the PKCE exchange from
-          // the OAuth code, then AuthContext sends the member to their target.
-          redirectTo: siteUrl(),
-        },
-      });
-
-      if (error) throw error;
-      // On success the browser navigates to Google, so leave the busy state on.
-    } catch {
-      sessionStorage.removeItem(NEXT_KEY);
-      setBusy(false);
-      toast.error('Could not start Google sign-in. Check your connection and make sure Google is enabled in Supabase Auth.');
+    if (!clientId) {
+      setUnavailable(true);
+      return () => { active = false; };
     }
+
+    void (async () => {
+      try {
+        await loadGoogleIdentityScript();
+        const nonce = createNonce();
+        const hashedNonce = await sha256Hex(nonce);
+        if (!active || !hostRef.current || !window.google?.accounts?.id) return;
+
+        const host = hostRef.current;
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          nonce: hashedNonce,
+          ux_mode: 'popup',
+          context: 'signin',
+          callback: async (response) => {
+            if (!response.credential || !active) {
+              if (active) toast.error('Google did not return a sign-in credential. Please try again.');
+              return;
+            }
+
+            setBusy(true);
+            sessionStorage.setItem(NEXT_KEY, safeInternalPath(next));
+            try {
+              const { error } = await supabase.auth.signInWithIdToken({
+                provider: 'google',
+                token: response.credential,
+                nonce,
+              });
+              if (error) throw error;
+              // AuthContext handles the SIGNED_IN event and restores the requested route.
+            } catch (error) {
+              sessionStorage.removeItem(NEXT_KEY);
+              setBusy(false);
+              toast.error(error instanceof Error
+                ? error.message
+                : 'Google sign-in could not be completed. Please try again.');
+            }
+          },
+        });
+
+        host.replaceChildren();
+        window.google.accounts.id.renderButton(host, {
+          theme: 'outline',
+          size: 'large',
+          text: 'continue_with',
+          shape: 'rectangular',
+          logo_alignment: 'left',
+          width: Math.min(400, Math.max(200, Math.floor(host.clientWidth || 400))),
+        });
+      } catch {
+        if (active) {
+          setUnavailable(true);
+          toast.error('Google sign-in could not load. Please use email and password for now.');
+        }
+      }
+    })();
+
+    return () => {
+      active = false;
+      hostRef.current?.replaceChildren();
+      window.google?.accounts?.id.cancel();
+    };
+  }, [clientId, next, toast]);
+
+  if (unavailable) {
+    return (
+      <p className="google-signin-unavailable" role="status">
+        Google sign-in is temporarily unavailable. You can still use your email and password.
+      </p>
+    );
   }
 
   return (
-    <button type="button" className="btn btn-google" onClick={go} disabled={busy}>
-      <GoogleG />
-      <span>{busy ? 'Opening Google...' : 'Continue with Google'}</span>
-    </button>
+    <div className="google-signin-wrap" aria-busy={busy}>
+      <div ref={hostRef} className="google-signin-button" />
+      {busy && <p className="google-signin-status" role="status">Signing you in securely...</p>}
+    </div>
   );
 }
