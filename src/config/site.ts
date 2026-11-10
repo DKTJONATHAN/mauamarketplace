@@ -20,7 +20,7 @@ export const site = {
   language: 'en',
   themeColor: '#0a4a31',
   /** Production origin (no trailing slash). Used for absolute URLs in meta tags when window is unavailable. */
-  productionOrigin: 'https://mauamarketplace.pages.dev',
+  productionOrigin: 'https://mauamarketplace.eu.cc',
   /** Twitter / X handle if you create one later (e.g. @mauamarket). Leave empty to omit. */
   twitterHandle: '',
 } as const;
