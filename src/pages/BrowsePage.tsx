@@ -38,8 +38,8 @@ export function BrowsePage() {
     title: browseTitle,
     description: browseDesc,
     path: '/browse',
-,
-    noindex: true
+    noindex: true,
+  });
 
   const [draft, setDraft] = useState(filters);
   const paramString = params.toString();
