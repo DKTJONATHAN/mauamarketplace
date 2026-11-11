@@ -1,3 +1,5 @@
+import { SITE_ORIGIN } from '../src/config/site-origin';
+
 interface SitemapEnv {
   SUPABASE_URL?: string;
   SUPABASE_ANON_KEY?: string;
@@ -8,40 +10,48 @@ interface SitemapEnv {
 interface PublicListing {
   id: string;
   title?: string | null;
-  created_at?: string | null;
+  description?: string | null;
+  price?: number | null;
+  location?: string | null;
+  category?: string | null;
+  images?: string[] | null;
 }
 
-const ORIGIN = 'https://mauamarketplace.pages.dev';
-const CATEGORY_SLUGS = ["phones","phone-accessories","computers","computer-accessories","tvs-audio","cameras","gaming","solar-power","furniture","appliances","kitchenware","beds-bedding","decor","building-materials","tools","clothing-women","clothing-men","clothing-kids","shoes","bags","jewellery-watches","baby","cars","motorbikes","trucks-vans","bicycles","vehicle-parts","school-items","books","farm-produce","livestock","farm-machinery","farm-inputs","pets","property-rent","property-sale","commercial-property","house-help","jobs","services","construction","cleaning","events","beauty","business-equipment","health-fitness","sports","music","art-crafts","free","wanted","other"];
+const STATIC_PATHS = [
+  '/',
+  '/categories',
+  '/safety',
+  '/rules',
+  '/privacy',
+  '/terms',
+  '/refund-policy',
+];
 
 function xmlEscape(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
 }
 
-function urlEntry(path: string, priority = '0.5', lastmod?: string): string {
-  const date = lastmod && Number.isFinite(Date.parse(lastmod)) ? `    <lastmod>${new Date(lastmod).toISOString()}</lastmod>\n` : '';
-  return `  <url>\n    <loc>${xmlEscape(`${ORIGIN}${path}`)}</loc>\n${date}    <changefreq>weekly</changefreq>\n    <priority>${priority}</priority>\n  </url>`;
+function urlEntry(path: string): string {
+  return `  <url>\n    <loc>${xmlEscape(`${SITE_ORIGIN}${path}`)}</loc>\n  </url>`;
+}
+
+function listingPath(listing: PublicListing): string {
+  const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  if (!uuid.test(listing.id)) return `/listing/${encodeURIComponent(listing.id)}`;
+  const slug = (listing.title || 'item').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70).replace(/-+$/g, '');
+  return `/listing/${slug || 'item'}-${listing.id}`;
 }
 
 export async function onRequest({ env }: { env: SitemapEnv }): Promise<Response> {
-  const entries = [
-    urlEntry('/', '1.0'),
-    urlEntry('/categories', '0.6'),
-    urlEntry('/browse', '0.6'),
-    urlEntry('/safety', '0.3'),
-    urlEntry('/rules', '0.3'),
-    urlEntry('/privacy', '0.2'),
-    urlEntry('/terms', '0.2'),
-    ...CATEGORY_SLUGS.map((slug: string) => urlEntry(`/category/${slug}`, '0.8')),
-  ];
-
+  const paths = new Set(STATIC_PATHS);
   let supabaseUrl = env.SUPABASE_URL || env.VITE_SUPABASE_URL || '';
   while (supabaseUrl.endsWith('/')) supabaseUrl = supabaseUrl.slice(0, -1);
   const supabaseKey = env.SUPABASE_ANON_KEY || env.VITE_SUPABASE_ANON_KEY || '';
+
   if (supabaseUrl && supabaseKey) {
     try {
       const params = new URLSearchParams({
-        select: 'id,title,created_at',
+        select: 'id,title,description,price,location,category,images',
         status: 'eq.active',
         order: 'created_at.desc',
         limit: '5000',
@@ -55,21 +65,27 @@ export async function onRequest({ env }: { env: SitemapEnv }): Promise<Response>
       });
       if (response.ok) {
         const listings = await response.json() as PublicListing[];
+        const categoryCounts = new Map<string, number>();
         for (const listing of listings) {
-          if (listing.id && /^[a-zA-Z0-9-]+$/.test(listing.id)) {
-            const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-            const slug = (listing.title || 'item').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70).replace(/-+$/g, '');
-            const path = uuid.test(listing.id) ? `/listing/${slug || 'item'}-${listing.id}` : `/listing/${listing.id}`;
-            entries.push(urlEntry(path, '0.7', listing.created_at ?? undefined));
+          if (listing.category) categoryCounts.set(listing.category, (categoryCounts.get(listing.category) || 0) + 1);
+          const hasUsefulDescription = Boolean(listing.description?.trim() && listing.description.trim().length >= 80);
+          const hasPrice = typeof listing.price === 'number' && Number.isFinite(listing.price) && listing.price > 0;
+          const hasImage = Array.isArray(listing.images) && listing.images.length > 0;
+          const hasLocation = Boolean(listing.location?.trim());
+          if (listing.id && listing.title?.trim() && hasUsefulDescription && hasPrice && hasImage && hasLocation) {
+            paths.add(listingPath(listing));
           }
+        }
+        for (const [category, count] of categoryCounts) {
+          if (count >= 5 && /^[a-z0-9-]+$/i.test(category)) paths.add(`/category/${category}`);
         }
       }
     } catch {
-      // The static page and category URLs remain available if the listing API is temporarily unavailable.
+      // Keep the real static public pages available if Supabase is temporarily unavailable.
     }
   }
 
-  const body = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries.join('\n')}\n</urlset>\n`;
+  const body = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[...paths].map(urlEntry).join('\n')}\n</urlset>\n`;
   return new Response(body, {
     headers: {
       'content-type': 'application/xml; charset=utf-8',
