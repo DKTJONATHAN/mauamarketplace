@@ -260,7 +260,7 @@ export async function onRequest(context: Context): Promise<Response> {
     && !path.startsWith('/category/') && !path.startsWith('/listing/')) return response;
   try {
     const html = await response.text();
-    return await renderPublicPage(path, html, context.env) || new Response(html, response);
+    return await renderPublicPage(path, html, context.env) || new Response(html, { status: response.status, statusText: response.statusText, headers: response.headers });
   } catch (error) {
     console.error('Maua public-page HTML rendering failed; serving the original app shell.', error);
     return response;
