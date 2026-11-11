@@ -16,11 +16,20 @@ export function CategoryPage() {
     ? `Find ${category.label.toLowerCase()} for sale in ${site.place}, ${site.region}, Kenya. Browse new and second-hand listings from local sellers on ${site.name}.`
     : `This category could not be found on ${site.name}.`;
 
+
+
+  const filters: BrowseFilters = { q: '', cat: valid ? slug : '', min: '', max: '', cond: '', loc: '', sort: 'new' };
+  const query = useQuery({
+    queryKey: ['category-landing', slug],
+    queryFn: () => fetchListings(filters, 0),
+    enabled: valid,
+  });
+
   useSeo({
     title,
     description,
     path: `/category/${slug}`,
-    noindex: !valid,
+    noindex: !valid || query.isError || (query.isSuccess && (query.data?.total ?? 0) < 5),
     jsonLd: valid ? [
       {
         '@context': 'https://schema.org',
@@ -40,13 +49,6 @@ export function CategoryPage() {
         ],
       },
     ] : undefined,
-  });
-
-  const filters: BrowseFilters = { q: '', cat: valid ? slug : '', min: '', max: '', cond: '', loc: '', sort: 'new' };
-  const query = useQuery({
-    queryKey: ['category-landing', slug],
-    queryFn: () => fetchListings(filters, 0),
-    enabled: valid,
   });
 
   if (!valid) {
