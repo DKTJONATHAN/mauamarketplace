@@ -1032,3 +1032,10 @@ input:focus, select:focus, textarea:focus { outline: 3px solid rgb(19 118 74 / .
   .chat-like.is-liked { color:#ff9aa9; background:#3b2027; border-color:#693440; }
   .chat-photo-preview { background:#17231c; }
 }
+
+
+/* Google Identity Services renders Google's official branded sign-in control. */
+.google-signin-wrap { display: grid; justify-items: center; gap: .45rem; width: 100%; min-height: 42px; }
+.google-signin-button-host { display: flex; justify-content: center; width: 100%; min-height: 40px; }
+.google-signin-button-host iframe { max-width: 100%; }
+.google-signin-status { margin: 0; color: var(--ink-soft); font-size: .86rem; text-align: center; }
