@@ -1,4 +1,5 @@
 import { env } from '../lib/env';
+import { SITE_ORIGIN } from './site-origin';
 
 /** Site-wide configuration and SEO defaults. */
 export const site = {
@@ -20,7 +21,7 @@ export const site = {
   language: 'en',
   themeColor: '#0a4a31',
   /** Production origin (no trailing slash). Used for absolute URLs in meta tags when window is unavailable. */
-  productionOrigin: 'https://mauamarketplace.eu.cc',
+  productionOrigin: SITE_ORIGIN,
   /** Twitter / X handle if you create one later (e.g. @mauamarket). Leave empty to omit. */
   twitterHandle: '',
 } as const;
@@ -38,13 +39,9 @@ export function mediaUrl(path: string): string {
  * Safe in the browser; falls back to the known production URL during SSR-less builds.
  */
 export function siteUrl(): string {
-  if (typeof window !== 'undefined' && window.location?.origin) {
-    const base = import.meta.env.BASE_URL || '/';
-    const origin = window.location.origin;
-    return `${origin}${base.endsWith('/') ? base : `${base}/`}`;
-  }
   const base = import.meta.env.BASE_URL || '/';
-  return `${site.productionOrigin}${base.endsWith('/') ? base : `${base}/`}`;
+  return `${SITE_ORIGIN}${base.endsWith('/') ? base : `${base}/`}`;
+
 }
 
 /** Absolute URL for a clean browser-router path (e.g. path = "/listing/abc"). */
