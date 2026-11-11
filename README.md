@@ -30,6 +30,7 @@ Google sign-in uses Google's official Identity Services button and credential fl
 3. Under **Clients**, create or use an OAuth client with application type **Web application**.
 4. Under **Authorized JavaScript origins**, add every origin where the app is served, for example:
    - `https://mauamarketplace.eu.cc`
+   - `https://www.mauamarketplace.eu.cc`
    - `https://mauamarketplace.pages.dev` (if you still use this address)
    - `http://localhost:5173` (local development only)
 5. Copy the OAuth **Client ID**. Do not put the client secret in the browser.
