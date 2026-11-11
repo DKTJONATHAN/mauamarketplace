@@ -46,7 +46,7 @@ export function ListingPage() {
           image: listing.images?.[0] ? mediaUrl(listing.images[0]) : undefined,
           type: 'product',
           noindex: listing.status === 'hidden',
-          jsonLd: listingJsonLd(listing),
+          jsonLd: listing.price != null && listing.price > 0 && Boolean(listing.images?.length) ? listingJsonLd(listing) : undefined,
         }
       : { title: 'Listing', path: `/listing/${id}`, noindex: true },
   );
