@@ -5,7 +5,7 @@ inside the app. The site never handles money and never verifies anyone, so it sh
 
 - React 19 + TypeScript + Vite, deployed to Cloudflare Pages
 - Supabase for accounts (email and Google), listings, messages and Row Level Security
-- Google Identity Services provides the branded Google sign-in button and returns an ID token directly to Supabase Auth. This avoids the Supabase-hosted browser redirect while retaining Supabase sessions.
+- Google Identity Services renders Google's official sign-in button and returns an ID token directly to Supabase Auth with `signInWithIdToken()`. This avoids the Supabase-hosted OAuth redirect and retains normal Supabase sessions.
 - Listing photos are stored in Cloudflare R2; uploads are handled by a Cloudflare Pages Function. Supabase remains the database/auth backend.
 - See `specs/marketplace_design.md` for the design decisions
 
@@ -23,7 +23,7 @@ You need a Supabase project (free tier is fine) and this repository to be public
 
 ### 1. Configure Google sign-in
 
-Google sign-in uses Google's popup credential flow and Supabase's `signInWithIdToken()` API. Supabase remains responsible for validating the Google ID token and issuing the normal app session.
+Google sign-in uses Google's official Identity Services button and credential flow, then Supabase's `signInWithIdToken()` API. Supabase remains responsible for validating the Google ID token and issuing the normal app session.
 
 1. In [Google Auth Platform](https://console.cloud.google.com/auth/overview), select the project that owns your OAuth client.
 2. Under **Branding**, set the app name to **Maua Marketplace**, upload the Maua Marketplace logo, and confirm the authorised domain and homepage.
@@ -49,7 +49,7 @@ For local development, add the same variable to `.env.local`. See `.env.example`
    - Site URL: your Cloudflare Pages URL or custom domain, e.g. `https://mauamarketplace.eu.cc/`
    - Redirect URLs: add the same URL, and `http://localhost:5173/` for local work.
 3. Authentication > Sign In / Providers > Email: keep **Confirm email** on. (Photo uploads require a confirmed email, which blocks throw-away sign-ups.)
-4. Authentication > Sign In / Providers > Google: enable it. Keep the Google Client ID and client secret configured as described above. The old callback URL may remain registered for compatibility, but this app's new Google button uses the popup ID-token flow.
+4. Authentication > Sign In / Providers > Google: enable it. Keep the Google Client ID and client secret configured as described above. The old Supabase OAuth callback URL may remain registered for other integrations, but this app's Google button uses the Google Identity Services credential flow and does not redirect through the Supabase hosted OAuth page.
 5. Supabase's built-in email sender is limited to a few messages per hour. Before real launch, add your own SMTP provider under Authentication > SMTP Settings, otherwise sign-up emails will stall.
 
 ### 3. Configure Cloudflare Pages environment variables
