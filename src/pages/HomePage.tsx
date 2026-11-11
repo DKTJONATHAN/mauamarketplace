@@ -18,7 +18,7 @@ export function HomePage() {
   useSeo({ title: 'Maua Soko in Maua Town, Meru', path: '/', description: site.description, jsonLd });
 
   const [showMore, setShowMore] = useState(false);
-  const recentIds = getRecentlyViewed();
+  const recentIds = getRecentlyViewed().slice(0, 2);
 
   const latest = useQuery({
     queryKey: ['latest'],
@@ -108,7 +108,7 @@ export function HomePage() {
             <h2 id="recent-title">Recently viewed</h2>
             <Link to="/browse">Browse more</Link>
           </div>
-          <ListingGrid listings={recent.data.slice(0, 6)} loading={false} empty={null} />
+          <ListingGrid listings={recent.data.slice(0, 2)} loading={false} empty={null} />
         </section>
       )}
 
