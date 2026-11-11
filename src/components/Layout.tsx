@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { CircleUser, Download, Heart, Home, MessageCircle, Plus, Search, X } from 'lucide-react';
+import { CircleUser, Heart, Home, MessageCircle, Plus, Search, X } from 'lucide-react';
 import { featuredCategorySlugs, getCategory } from '../config/categories';
 import { site } from '../config/site';
 import { useAuth } from '../context/AuthContext';
@@ -48,45 +48,6 @@ function HeaderSearch() {
     </form>
   );
 }
-
-const appDownloadUrl = 'https://github.com/DKTJONATHAN/mauamarketplace/releases/latest/download/Maua-Marketplace.apk';
-
-function isInstalledApp(): boolean {
-  return window.matchMedia('(display-mode: standalone)').matches ||
-    (navigator as Navigator & { standalone?: boolean }).standalone === true;
-}
-
-function AppDownloadButton() {
-  const [installed, setInstalled] = useState(false);
-
-  useEffect(() => {
-    const update = () => setInstalled(isInstalledApp());
-    update();
-    const media = window.matchMedia('(display-mode: standalone)');
-    media.addEventListener?.('change', update);
-    window.addEventListener('appinstalled', update);
-    return () => {
-      media.removeEventListener?.('change', update);
-      window.removeEventListener('appinstalled', update);
-    };
-  }, []);
-
-  if (!appDownloadUrl || installed) return null;
-
-  return (
-    <a
-      href={appDownloadUrl}
-      className="btn btn-app-download"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Get the Maua Marketplace app"
-    >
-      <Download aria-hidden />
-      <span>Get the app</span>
-    </a>
-  );
-}
-
 
 function AppUpdateNotice() {
   const [update, setUpdate] = useState<{ latestVersion: string; downloadUrl: string } | null>(null);
@@ -152,7 +113,7 @@ function Header({ unread }: { unread: number }) {
         {inChat ? <div className="brand-static" aria-label="Chat in progress"><Brand /></div> : <>
           <Brand /><HeaderSearch />
           <nav className="header-actions" aria-label="Account">
-            <AppDownloadButton />
+            <InstallPrompt />
             <MessageNotifications />
             <Link to="/saved" className="icon-link" aria-label="Saved listings"><Heart aria-hidden /></Link>
             <Link to="/messages" className="icon-link" aria-label={unread ? `Messages, ${unread} unread` : 'Messages'}><MessageCircle aria-hidden />{unread > 0 && <span className="badge">{unread > 9 ? '9+' : unread}</span>}</Link>
@@ -242,7 +203,6 @@ export function Layout() {
       <a href="#main" className="skip-link" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>Skip to content</a>
       <ScrollToTop />
       <DisclaimerStrip />
-      <InstallPrompt />
       <AppUpdateNotice />
       <Header unread={unread} />
       <main id="main" tabIndex={-1}><Outlet /></main>
