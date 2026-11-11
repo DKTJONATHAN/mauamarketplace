@@ -45,7 +45,7 @@ function loadGoogleIdentity(): Promise<void> {
   if (window.google?.accounts?.id) return Promise.resolve();
   if (googleScriptPromise) return googleScriptPromise;
 
-  googleScriptPromise = new Promise((resolve, reject) => {
+  googleScriptPromise = new Promise<void>((resolve, reject) => {
     const existing = document.querySelector<HTMLScriptElement>(
       'script[data-google-identity-services]',
     );
