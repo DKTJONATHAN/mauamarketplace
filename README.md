@@ -132,7 +132,7 @@ Repeat until the response reports `migrated: 0`. Verify the listings and their i
 
 Maua Marketplace's connected Supabase project is managed through the **Mauamarket** Supabase account.
 
-- **Supabase account email:** `hojo.m3@ggmail.com`
+- **Supabase account email:** `hojo.m3@gmail.com`
 - **Project reference:** `akrbmcptyjjcjoyxaxkl`
 - **Project URL:** `https://akrbmcptyjjcjoyxaxkl.supabase.co`
 
