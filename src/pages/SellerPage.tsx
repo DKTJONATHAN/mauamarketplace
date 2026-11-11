@@ -24,6 +24,7 @@ export function SellerPage() {
       ? `Listings from ${profile.data.display_name} on ${site.name} in ${site.place}.`
       : `Seller profile on ${site.name}.`,
     path: id ? `/seller/${id}` : '/seller',
+    noindex: !profile.data || listings.isError || (listings.isSuccess && (listings.data?.length ?? 0) < 3),
   });
 
   if (profile.isLoading) return <div className="wrap page" aria-busy="true">Loading...</div>;
