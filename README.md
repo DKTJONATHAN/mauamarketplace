@@ -126,3 +126,14 @@ curl -X POST "https://mauamarketplace.pages.dev/api/media?action=migrate&limit=2
 ```
 
 Repeat until the response reports `migrated: 0`. Verify the listings and their images in the website before removing the old Supabase Storage objects.
+
+
+## Account reference
+
+Maua Marketplace's connected Supabase project is managed through the **Mauamarket** Supabase account.
+
+- **Supabase account email:** `hojo.m3@ggmail.com`
+- **Project reference:** `akrbmcptyjjcjoyxaxkl`
+- **Project URL:** `https://akrbmcptyjjcjoyxaxkl.supabase.co`
+
+This is a reminder of the account associated with the project. Do not store passwords, API keys, database passwords, or service-role secrets in this README.
