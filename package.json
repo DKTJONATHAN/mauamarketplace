@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "verify:seo": "node scripts/verify-seo.mjs"
+    "verify:seo": "bash scripts/verify-seo.sh"
   },
   "dependencies": {
     "@fontsource-variable/archivo": "^5.2.0",
