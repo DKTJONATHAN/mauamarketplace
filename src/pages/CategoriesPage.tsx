@@ -9,8 +9,14 @@ export function CategoriesPage() {
     path: '/categories',
   });
   return (
-    <div className="wrap page">
-      <h1>All categories</h1>
+    <div className="wrap page categories-page">
+      <header className="page-intro">
+        <div>
+          <span className="page-eyebrow">FIND YOUR NEXT GOOD THING</span>
+          <h1>Explore all categories</h1>
+          <p>From farm produce and electronics to homes, vehicles and local services — discover what's available around Maua.</p>
+        </div>
+      </header>
       <CategoryDirectory />
     </div>
   );
