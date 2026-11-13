@@ -1,23 +1,27 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useMemo, useState, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ShieldCheck } from 'lucide-react';
+import { ArrowRight, MapPin, Search, ShieldCheck, Store } from 'lucide-react';
 import { site } from '../config/site';
+import { featuredCategorySlugs, getCategory } from '../config/categories';
 import { CategoryDirectory } from '../components/CategoryDirectory';
 import { ListingGrid } from '../components/ListingGrid';
 import { countActiveListings, fetchListings } from '../lib/api';
 import { getRecentlyViewed, useSeo } from '../hooks';
 import { websiteJsonLd } from '../lib/seo';
 import type { BrowseFilters } from '../lib/types';
+import './home-revamp.css';
 
 const latestFilters: BrowseFilters = { q: '', cat: '', min: '', max: '', cond: '', loc: '', sort: 'new' };
 const INITIAL_LISTINGS = 24;
 
 export function HomePage() {
+  const navigate = useNavigate();
   const jsonLd = useMemo(() => websiteJsonLd(), []);
   useSeo({ title: 'Maua Soko in Maua Town, Meru', path: '/', description: site.description, jsonLd });
 
   const [showMore, setShowMore] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const recentIds = getRecentlyViewed().slice(0, 2);
 
   const latest = useQuery({
@@ -50,19 +54,86 @@ export function HomePage() {
     ? Boolean(more.data?.hasMore)
     : Boolean(latest.data?.hasMore || firstListings.length > INITIAL_LISTINGS);
 
+  function submitSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const term = searchTerm.trim();
+    navigate(term ? `/browse?q=${encodeURIComponent(term)}` : '/browse');
+  }
+
   return (
     <>
+      <section className="home-hero" aria-labelledby="home-hero-title">
+        <div className="wrap home-hero-inner">
+          <div className="home-hero-copy">
+            <span className="home-hero-kicker"><MapPin size={15} aria-hidden /> MAUA TOWN · MERU COUNTY · KENYA</span>
+            <h1 id="home-hero-title">Find it in Maua.<br /><span>Sell it nearby.</span></h1>
+            <p className="home-hero-description">
+              Discover everyday finds, farm produce, property and local services from people in your community.
+              Browse freely, compare listings and talk directly with sellers.
+            </p>
+            <form className="home-hero-search" role="search" onSubmit={submitSearch}>
+              <label className="sr-only" htmlFor="home-market-search">What are you looking for?</label>
+              <Search size={20} aria-hidden />
+              <input
+                id="home-market-search"
+                type="search"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Try “maize”, “phone” or “bedsitter”"
+                maxLength={60}
+              />
+              <button className="btn btn-primary" type="submit">Search</button>
+            </form>
+            <div className="home-hero-actions">
+              <Link to="/sell" className="btn btn-tag">Post a listing <ArrowRight size={16} aria-hidden /></Link>
+              <span>Free to browse · No account needed to get started</span>
+            </div>
+          </div>
+
+          <aside className="home-hero-aside" aria-label="How Maua Marketplace works">
+            <div className="home-hero-aside-icon"><Store size={25} aria-hidden /></div>
+            <p className="home-hero-aside-label">Your community noticeboard</p>
+            <h2>Good finds are closer than you think.</h2>
+            <div className="home-hero-points">
+              <div><span className="home-hero-point-icon"><MapPin size={17} aria-hidden /></span><p><strong>Made for the neighbourhood</strong><span>Maua and nearby Meru communities</span></p></div>
+              <div><span className="home-hero-point-icon"><ShieldCheck size={17} aria-hidden /></span><p><strong>Buy with care</strong><span>Practical safety tips on every step</span></p></div>
+            </div>
+            <Link to="/safety" className="home-hero-safety-link">Read our safety guide <ArrowRight size={15} aria-hidden /></Link>
+          </aside>
+        </div>
+      </section>
+
+      <section className="wrap home-quick-categories" aria-labelledby="quick-categories-title">
+        <div className="home-section-heading">
+          <div><span className="home-section-kicker">START EXPLORING</span><h2 id="quick-categories-title">What are you looking for?</h2></div>
+          <Link to="/categories">All categories <ArrowRight size={15} aria-hidden /></Link>
+        </div>
+        <div className="home-category-shortcuts">
+          {featuredCategorySlugs.map((slug) => {
+            const category = getCategory(slug);
+            const Icon = category.icon;
+            return (
+              <Link className="home-category-shortcut" to={`/category/${slug}`} key={slug}>
+                <span><Icon size={21} aria-hidden /></span>
+                <strong>{category.label}</strong>
+                <ArrowRight size={15} aria-hidden />
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
       <section className="wrap section home-listings" aria-labelledby="latest-title">
         <div className="section-head home-listings-head">
           <div className="home-heading-copy">
-            <span className="home-eyebrow">MAUA TOWN · MERU COUNTY · KENYA</span>
-            <h1 id="latest-title">Maua Soko – Buy and Sell in Maua Town</h1>
-            <p className="home-heading-note">Welcome to {site.name}, Maua’s online market. Discover new and second-hand items, compare prices and connect directly with local sellers across Maua and Meru County.</p>
+            <span className="home-section-kicker">FRESH FROM THE COMMUNITY</span>
+            <h2 id="latest-title">Recently listed</h2>
+            <p className="home-heading-note">See what's new from sellers around Maua and Meru County.</p>
             {typeof count.data === 'number' && count.data > 0 && (
-              <p className="result-count">{count.data.toLocaleString('en-KE')} listings live right now</p>
+              <p className="result-count">{count.data.toLocaleString('en-KE')} active listings</p>
             )}
           </div>
-          <Link to="/browse" className="btn btn-quiet">Explore all listings</Link>
+          <Link to="/browse" className="btn btn-quiet">Explore all listings <ArrowRight size={15} aria-hidden /></Link>
         </div>
 
         <ListingGrid
@@ -76,8 +147,8 @@ export function HomePage() {
               </>
             ) : (
               <>
-                <h3>Nothing posted yet</h3>
-                <p>Be the first to list something for sale in {site.place}. It takes about two minutes.</p>
+                <h3>The market is waiting for its first listing</h3>
+                <p>Be the first to share something useful with the Maua community.</p>
                 <Link to="/sell" className="btn btn-primary">Post a listing</Link>
               </>
             )
@@ -91,7 +162,7 @@ export function HomePage() {
             )}
             <button
               type="button"
-              className="btn btn-tag btn-large"
+              className="btn btn-quiet btn-large"
               onClick={() => setShowMore((value) => !value)}
               disabled={more.isFetching}
               aria-expanded={showMore}
@@ -105,7 +176,7 @@ export function HomePage() {
       {recent.data && recent.data.length > 0 && (
         <section className="wrap section" aria-labelledby="recent-title">
           <div className="section-head">
-            <h2 id="recent-title">Recently viewed</h2>
+            <h2 id="recent-title">Pick up where you left off</h2>
             <Link to="/browse">Browse more</Link>
           </div>
           <ListingGrid listings={recent.data.slice(0, 2)} loading={false} empty={null} />
@@ -113,47 +184,48 @@ export function HomePage() {
       )}
 
       <section className="wrap section" aria-labelledby="cats-title">
-        <div className="section-head">
-          <h2 id="cats-title">Browse by category</h2>
+        <div className="home-section-heading">
+          <div><span className="home-section-kicker">A LITTLE BIT OF EVERYTHING</span><h2 id="cats-title">Browse all categories</h2></div>
+          <Link to="/browse">See all listings <ArrowRight size={15} aria-hidden /></Link>
         </div>
         <CategoryDirectory />
       </section>
 
       <section className="wrap section home-intro" aria-labelledby="local-market-title">
-        <h2 id="local-market-title">Maua Marketplace – your online Maua Soko</h2>
+        <span className="home-section-kicker">THE LOCAL MARKET, ONLINE</span>
+        <h2 id="local-market-title">A simpler way to buy and sell around Maua</h2>
         <p>
-          Looking for Maua market, Maua Soko or a marketplace in Maua town? {site.name} helps buyers and sellers across Maua, Igembe and nearby parts of {site.region}, Kenya, find each other online. Browse new products and second-hand bargains, compare prices, and discover items listed by people in your community.
+          Maua Marketplace, also known as Maua Soko, connects people looking for everyday goods and local services
+          with people offering them in Maua, Igembe and nearby parts of Meru County. Find phones and electronics,
+          furniture, clothes, farm produce, livestock, vehicles, property, jobs and skilled services in one place.
         </p>
         <p>
-          Shop for phones and electronics, sofas and furniture, clothes and shoes, household goods, farm produce,
-          tools, vehicles, property and local services. Whether you search for “Maua marketplace”, “Maua market”
-          or “Maua Soko”, you can browse local listings, post an item for sale and connect directly with interested
-          buyers in Maua and Meru County. Listings are free to browse. Meet safely and inspect goods before paying.
+          Listings are posted by community members. Review the photos, description, price and location, then contact
+          the seller through the marketplace to ask questions and arrange an in-person inspection.
+          <Link to="/categories"> Explore marketplace categories</Link> or <Link to="/browse">browse current listings</Link>.
         </p>
-        <p><Link to="/categories">Explore all Maua Marketplace categories</Link> or <Link to="/browse">browse every listing</Link>.</p>
       </section>
 
       <section className="wrap section home-bottom">
         <div className="sell-band">
           <div>
-            <h2>Got something to sell?</h2>
-            <p>Add photos, set a price and go live. Buyers contact you through the app.</p>
+            <span className="home-section-kicker">HAVE SOMETHING TO OFFER?</span>
+            <h2>Put it in front of your community.</h2>
+            <p>Add a few photos, set your price and connect with interested local buyers.</p>
           </div>
-          <Link to="/sell" className="btn btn-tag btn-large">Post a listing</Link>
+          <Link to="/sell" className="btn btn-tag btn-large">Post a listing <ArrowRight size={16} aria-hidden /></Link>
         </div>
 
         <aside className="home-safety" aria-labelledby="home-safety-title">
           <ShieldCheck aria-hidden />
           <div>
-            <h2 id="home-safety-title">Stay safe when buying or selling</h2>
+            <h2 id="home-safety-title">Keep every deal safe</h2>
             <p>
-              Deals are directly between you and the other person. {site.name} does not verify sellers, hold money,
+              Deals are directly between buyers and sellers. {site.name} does not verify members, hold money,
               inspect items or settle disputes.
             </p>
-            <p>
-              <strong>Meet in a busy public place, inspect the item first, and never send money before you have seen it.</strong>
-            </p>
-            <Link to="/safety">Read all safety tips</Link>
+            <p><strong>Meet in a busy public place, inspect the item first, and never send money before you have seen it.</strong></p>
+            <Link to="/safety">Read all safety tips <ArrowRight size={15} aria-hidden /></Link>
           </div>
         </aside>
       </section>
