@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { CircleUser, Heart, Home, MessageCircle, Plus, Search, X } from 'lucide-react';
 import { featuredCategorySlugs, getCategory } from '../config/categories';
@@ -34,7 +34,10 @@ function DisclaimerStrip() {
 
 function HeaderSearch() {
   const navigate = useNavigate();
-  const [q, setQ] = useState('');
+  const [searchParams] = useSearchParams();
+  const currentQuery = searchParams.get('q') ?? '';
+  const [q, setQ] = useState(currentQuery);
+  useEffect(() => setQ(currentQuery), [currentQuery]);
   function submit(e: FormEvent) {
     e.preventDefault();
     const term = q.trim();
