@@ -66,7 +66,7 @@ export function CategoryPage() {
       <nav aria-label="Breadcrumb" className="muted">
         <Link to="/">Home</Link> / <Link to="/categories">Categories</Link> / {category.label}
       </nav>
-      <header className="section-head">
+      <header className="section-head page-intro category-intro">
         <div>
           <h1>{category.label} for sale in {site.place}</h1>
           <p>{category.hint}. Discover listings from Maua and nearby towns in {site.region}, Kenya.</p>
