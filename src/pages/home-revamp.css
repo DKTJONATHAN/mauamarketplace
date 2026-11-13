@@ -1,0 +1,191 @@
+/* Maua Marketplace homepage refresh — local, useful, fast and responsive. */
+.home-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse at 82% 18%, rgb(232 185 75 / .16), transparent 35%),
+    linear-gradient(125deg, #103f2d 0%, #145b3c 58%, #1c6a47 100%);
+  color: #fff;
+}
+.home-hero::after {
+  position: absolute;
+  z-index: -1;
+  right: -7rem;
+  bottom: -13rem;
+  width: 34rem;
+  height: 34rem;
+  border: 1px solid rgb(255 255 255 / .1);
+  border-radius: 50%;
+  box-shadow: 0 0 0 3rem rgb(255 255 255 / .025), 0 0 0 6rem rgb(255 255 255 / .02);
+  content: "";
+}
+.home-hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(17rem, .65fr);
+  align-items: center;
+  gap: clamp(2rem, 6vw, 5.5rem);
+  padding-block: clamp(3rem, 7vw, 6rem);
+}
+.home-hero-copy { max-width: 47rem; }
+.home-hero-kicker, .home-section-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  color: #f2cf79;
+  font-size: .73rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  line-height: 1.4;
+}
+.home-hero h1 {
+  max-width: 13ch;
+  margin: .95rem 0 1rem;
+  color: #fff;
+  font-size: clamp(2.65rem, 6vw, 5rem);
+  font-weight: 760;
+  letter-spacing: -.065em;
+  line-height: .99;
+}
+.home-hero h1 span { color: #f2cf79; }
+.home-hero-description {
+  max-width: 39rem;
+  margin: 0;
+  color: rgb(255 255 255 / .84);
+  font-size: clamp(1rem, 1.45vw, 1.13rem);
+  line-height: 1.7;
+}
+.home-hero-search {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  max-width: 43rem;
+  margin-top: 1.65rem;
+  padding: .45rem;
+  border: 1px solid rgb(255 255 255 / .2);
+  border-radius: 13px;
+  background: #fff;
+  color: #4d5c52;
+  box-shadow: 0 12px 36px rgb(0 0 0 / .16);
+}
+.home-hero-search > svg { flex: none; margin-left: .75rem; color: #607267; }
+.home-hero-search input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: .65rem .25rem;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #17231c;
+  font-size: .98rem;
+}
+.home-hero-search input:focus { outline: 0; box-shadow: none; }
+.home-hero-search:focus-within { outline: 3px solid #f2cf79; outline-offset: 3px; }
+.home-hero-search .btn { min-height: 48px; padding-inline: 1.35rem; border-radius: 9px; }
+.home-hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .85rem 1rem; margin-top: 1.1rem; }
+.home-hero-actions .btn { display: inline-flex; align-items: center; gap: .5rem; min-height: 46px; }
+.home-hero-actions > span { color: rgb(255 255 255 / .72); font-size: .84rem; }
+.home-hero-aside {
+  position: relative;
+  padding: clamp(1.35rem, 3vw, 2rem);
+  border: 1px solid rgb(255 255 255 / .17);
+  border-radius: 18px;
+  background: rgb(255 255 255 / .09);
+  box-shadow: 0 18px 50px rgb(0 0 0 / .1);
+  backdrop-filter: blur(8px);
+}
+.home-hero-aside-icon {
+  display: grid;
+  width: 3.2rem;
+  height: 3.2rem;
+  place-items: center;
+  border: 1px solid rgb(242 207 121 / .35);
+  border-radius: 12px;
+  background: rgb(242 207 121 / .12);
+  color: #f2cf79;
+}
+.home-hero-aside-label { margin: 1.15rem 0 .35rem; color: #f2cf79; font-size: .75rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.home-hero-aside h2 { max-width: 15ch; margin: 0; color: #fff; font-size: clamp(1.45rem, 2.3vw, 2rem); letter-spacing: -.04em; line-height: 1.12; }
+.home-hero-points { display: grid; gap: 1rem; margin-top: 1.5rem; padding-top: 1.3rem; border-top: 1px solid rgb(255 255 255 / .17); }
+.home-hero-points > div { display: flex; align-items: flex-start; gap: .75rem; }
+.home-hero-point-icon { display: grid; width: 2.2rem; height: 2.2rem; flex: none; place-items: center; border-radius: 9px; background: rgb(255 255 255 / .11); color: #f2cf79; }
+.home-hero-points p { display: grid; gap: .15rem; margin: 0; }
+.home-hero-points strong { color: #fff; font-size: .9rem; }
+.home-hero-points p span { color: rgb(255 255 255 / .7); font-size: .8rem; line-height: 1.45; }
+.home-hero-safety-link { display: inline-flex; align-items: center; gap: .4rem; margin-top: 1.3rem; color: #f2cf79; font-size: .85rem; font-weight: 700; text-decoration: none; }
+.home-hero-safety-link:hover { color: #fff; }
+.home-quick-categories { padding-block: 2rem .5rem; }
+.home-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.home-section-heading > div { min-width: 0; }
+.home-section-heading .home-section-kicker, .home-intro > .home-section-kicker, .sell-band .home-section-kicker { color: #53735f; }
+.home-section-heading h2 { margin: .25rem 0 0; font-size: clamp(1.3rem, 2.2vw, 1.7rem); }
+.home-section-heading > a { display: inline-flex; flex: none; align-items: center; gap: .35rem; color: #145b3c; font-size: .88rem; font-weight: 700; text-decoration: none; }
+.home-category-shortcuts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .7rem; }
+.home-category-shortcut {
+  display: flex;
+  min-width: 0;
+  min-height: 4.3rem;
+  align-items: center;
+  gap: .65rem;
+  padding: .7rem .8rem;
+  border: 1px solid #dce5dd;
+  border-radius: 12px;
+  background: #fff;
+  color: #202923;
+  text-decoration: none;
+  transition: border-color .16s ease, background-color .16s ease, transform .16s ease;
+}
+.home-category-shortcut:hover { transform: translateY(-2px); border-color: #9bb5a2; background: #f8fbf8; }
+.home-category-shortcut > span { display: grid; width: 2.55rem; height: 2.55rem; flex: none; place-items: center; border-radius: 9px; background: #edf4ef; color: #145b3c; }
+.home-category-shortcut strong { min-width: 0; flex: 1; font-size: .82rem; line-height: 1.25; }
+.home-category-shortcut > svg { flex: none; color: #718579; }
+.home-listings { padding-top: 2.5rem; }
+.home-listings-head { align-items: end; }
+.home-heading-copy h2 { margin: .25rem 0 .4rem; font-size: clamp(1.55rem, 3vw, 2.1rem); }
+.home-heading-note { margin: 0; color: #68736b; }
+.home-listings-head .btn { display: inline-flex; align-items: center; gap: .4rem; }
+.home-intro { max-width: 78rem; }
+.home-intro h2 { max-width: 30ch; margin: .35rem 0 .8rem; }
+.home-intro p { max-width: 78ch; }
+.home-bottom { display: grid; gap: 1rem; }
+.home-bottom .sell-band { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+.home-bottom .sell-band h2 { margin: .3rem 0; }
+.home-bottom .sell-band p { margin: 0; }
+.home-bottom .sell-band .btn { display: inline-flex; align-items: center; gap: .45rem; flex: none; }
+.home-safety { display: flex; align-items: flex-start; gap: 1rem; }
+.home-safety > svg { flex: none; width: 1.6rem; height: 1.6rem; color: #176344; }
+.home-safety a { display: inline-flex; align-items: center; gap: .35rem; font-weight: 700; }
+@media (max-width: 900px) {
+  .home-hero-inner { grid-template-columns: minmax(0, 1fr) minmax(15rem, .72fr); gap: 1.5rem; }
+  .home-category-shortcuts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 680px) {
+  .home-hero-inner { grid-template-columns: 1fr; gap: 1.5rem; padding-block: 2.5rem 2rem; }
+  .home-hero h1 { font-size: clamp(2.6rem, 12vw, 4rem); }
+  .home-hero-aside { max-width: none; }
+  .home-hero-search { gap: .4rem; }
+  .home-hero-search .btn { padding-inline: .9rem; }
+  .home-category-shortcuts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; }
+  .home-category-shortcut { min-height: 4rem; padding: .55rem; gap: .5rem; }
+  .home-category-shortcut > span { width: 2.25rem; height: 2.25rem; }
+  .home-category-shortcut strong { font-size: .78rem; }
+  .home-section-heading { align-items: flex-start; }
+  .home-listings-head { align-items: flex-start; }
+  .home-listings-head > .btn { width: auto; }
+  .home-bottom .sell-band { align-items: flex-start; flex-direction: column; }
+  .home-bottom .sell-band .btn { width: 100%; justify-content: center; }
+}
+@media (max-width: 380px) {
+  .home-hero-search { flex-wrap: wrap; padding: .5rem; }
+  .home-hero-search > svg { margin-left: .5rem; }
+  .home-hero-search input { flex: 1; width: calc(100% - 3rem); }
+  .home-hero-search .btn { width: 100%; }
+  .home-category-shortcuts { gap: .45rem; }
+  .home-category-shortcut { min-height: 3.7rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-category-shortcut { transition: none; }
+  .home-category-shortcut:hover { transform: none; }
+}
