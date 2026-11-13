@@ -88,10 +88,6 @@ export function BrowsePage() {
         </summary>
         <form onSubmit={submit} className="filter-grid">
           <label className="field">
-            <span>Search</span>
-            <input type="search" value={draft.q} maxLength={60} onChange={(e) => setDraft({ ...draft, q: e.target.value })} />
-          </label>
-          <label className="field">
             <span>Category</span>
             <select value={draft.cat} onChange={(e) => { const next = { ...draft, cat: e.target.value }; setDraft(next); apply(next); }}>
               <option value="">All categories</option>
