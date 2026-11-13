@@ -26,8 +26,8 @@ export function MyListingsPage() {
   });
 
   return (
-    <div className="wrap page">
-      <div className="section-head">
+    <div className="wrap page my-listings-page">
+      <div className="section-head page-intro">
         <h1>My listings</h1>
         <Link to="/sell" className="btn btn-primary">Post a listing</Link>
       </div>
