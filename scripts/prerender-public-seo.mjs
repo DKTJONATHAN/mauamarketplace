@@ -1,6 +1,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { SITE_ORIGIN } from '../src/config/site-origin.ts';
+const originConfig = readFileSync(new URL('../src/config/site-origin.ts', import.meta.url), 'utf8');
+const SITE_ORIGIN = originConfig.match(/SITE_ORIGIN\\s*=\\s*['\"]([^'\"]+)['\"]/)?.[1];
+if (!SITE_ORIGIN) throw new Error('Could not read SITE_ORIGIN');
 
 const dist = join(process.cwd(), 'dist');
 const template = readFileSync(join(dist, 'index.html'), 'utf8');
