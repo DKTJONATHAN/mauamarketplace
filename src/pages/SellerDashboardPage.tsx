@@ -20,15 +20,15 @@ export function SellerDashboardPage() {
   const sold = listings.filter((l) => l.status === 'sold').length;
 
   return (
-    <div className="wrap page">
-      <div className="section-head">
+    <div className="wrap page seller-dashboard">
+      <div className="section-head page-intro">
         <div><h1>Seller dashboard</h1><p className="muted">Manage your marketplace activity in one place.</p></div>
         <Link to="/sell" className="btn btn-primary"><PlusCircle aria-hidden /> Post a listing</Link>
       </div>
 
       {query.isLoading ? <p aria-busy="true">Loading your dashboard...</p> : (
         <>
-          <div className="grid" style={{ marginBottom: '1.5rem' }}>
+          <div className="grid dashboard-stats">
             <section className="panel"><Package aria-hidden /><h2>{active}</h2><p className="muted">Active listings</p></section>
             <section className="panel"><BarChart3 aria-hidden /><h2>{sold}</h2><p className="muted">Sold listings</p></section>
             <section className="panel"><MessageCircle aria-hidden /><h2>{unread}</h2><p className="muted">Unread messages</p></section>
