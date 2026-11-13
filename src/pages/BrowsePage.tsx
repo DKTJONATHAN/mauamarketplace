@@ -72,19 +72,21 @@ export function BrowsePage() {
   const filtered = Object.entries(filters).some(([k, v]) => v && !(k === 'sort' && v === 'new'));
 
   return (
-    <div className="wrap page">
-      <h1>{category ? category.label : filters.q ? `Results for "${filters.q}"` : `Everything in ${site.place}`}</h1>
-      {category && <p className="muted">{category.hint}</p>}
+    <div className="wrap page browse-page">
+      <header className="page-intro browse-intro">
+        <div>
+          <span className="page-eyebrow">THE MAUA MARKETPLACE</span>
+          <h1>{category ? category.label : filters.q ? `Results for "${filters.q}"` : `Explore the market`}</h1>
+          <p>{category ? category.hint : filters.q ? `Showing local matches for “${filters.q}” around ${site.place}.` : `Find useful things from people and businesses around ${site.place} and Meru County.`}</p>
+        </div>
+        <Link to="/sell" className="btn btn-tag">Post a listing</Link>
+      </header>
 
       <details className="filters" open={filtered}>
         <summary>
           <SlidersHorizontal aria-hidden /> Search and filters
         </summary>
         <form onSubmit={submit} className="filter-grid">
-          <label className="field">
-            <span>Search</span>
-            <input type="search" value={draft.q} maxLength={60} onChange={(e) => setDraft({ ...draft, q: e.target.value })} />
-          </label>
           <label className="field">
             <span>Category</span>
             <select value={draft.cat} onChange={(e) => { const next = { ...draft, cat: e.target.value }; setDraft(next); apply(next); }}>

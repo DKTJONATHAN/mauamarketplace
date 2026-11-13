@@ -1,7 +1,7 @@
-import { useMemo, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, MapPin, Search, ShieldCheck, Store } from 'lucide-react';
+import { ArrowRight, MapPin, ShieldCheck, Store } from 'lucide-react';
 import { site } from '../config/site';
 import { featuredCategorySlugs, getCategory } from '../config/categories';
 import { CategoryDirectory } from '../components/CategoryDirectory';
@@ -16,12 +16,10 @@ const latestFilters: BrowseFilters = { q: '', cat: '', min: '', max: '', cond: '
 const INITIAL_LISTINGS = 24;
 
 export function HomePage() {
-  const navigate = useNavigate();
   const jsonLd = useMemo(() => websiteJsonLd(), []);
   useSeo({ title: 'Maua Soko in Maua Town, Meru', path: '/', description: site.description, jsonLd });
 
   const [showMore, setShowMore] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
   const recentIds = getRecentlyViewed().slice(0, 2);
 
   const latest = useQuery({
@@ -54,12 +52,6 @@ export function HomePage() {
     ? Boolean(more.data?.hasMore)
     : Boolean(latest.data?.hasMore || firstListings.length > INITIAL_LISTINGS);
 
-  function submitSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const term = searchTerm.trim();
-    navigate(term ? `/browse?q=${encodeURIComponent(term)}` : '/browse');
-  }
-
   return (
     <>
       <section className="home-hero" aria-labelledby="home-hero-title">
@@ -71,20 +63,11 @@ export function HomePage() {
               Discover everyday finds, farm produce, property and local services from people in your community.
               Browse freely, compare listings and talk directly with sellers.
             </p>
-            <form className="home-hero-search" role="search" onSubmit={submitSearch}>
-              <label className="sr-only" htmlFor="home-market-search">What are you looking for?</label>
-              <Search size={20} aria-hidden />
-              <input
-                id="home-market-search"
-                type="search"
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Try “maize”, “phone” or “bedsitter”"
-                maxLength={60}
-              />
-              <button className="btn btn-primary" type="submit">Search</button>
-            </form>
-            <div className="home-hero-actions">
+            <div className="home-hero-actions home-hero-primary-actions">
+              <Link to="/browse" className="btn btn-primary btn-large">Explore local listings <ArrowRight size={17} aria-hidden /></Link>
+              <Link to="/categories" className="btn btn-quiet btn-large">Browse categories</Link>
+            </div>
+            <div className="home-hero-actions home-hero-secondary-actions">
               <Link to="/sell" className="btn btn-tag">Post a listing <ArrowRight size={16} aria-hidden /></Link>
               <span>Free to browse · No account needed to get started</span>
             </div>
