@@ -109,7 +109,7 @@ export function ListingPage() {
   }
 
   return (
-    <div className="wrap page listing-page">
+    <div className="wrap page listing-page">\n      <nav className="listing-breadcrumb" aria-label="Breadcrumb"><Link to="/">Home</Link><span>/</span><Link to="/browse">Browse</Link><span>/</span><Link to={`/category/${listing.category}`}>{category.label}</Link></nav>
       {isOwner && listing.status === 'hidden' && (
         <p className="banner banner-warn" role="status">
           <TriangleAlert aria-hidden /> Several members reported this listing, so it is hidden from everyone else.
