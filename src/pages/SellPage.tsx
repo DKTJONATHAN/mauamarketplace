@@ -354,9 +354,14 @@ export function SellPage() {
   const describedBy = (key: keyof Errors) => (errors[key] ? `err-${key}` : undefined);
 
   return (
-    <div className="wrap page narrow">
-      <h1>{editing ? 'Edit your listing' : 'Post a listing'}</h1>
-      <p className="muted">Free to post. Your listing stays live until you mark it sold or delete it.</p>
+    <div className="wrap page narrow sell-page">
+      <header className="page-intro sell-intro">
+        <div>
+          <span className="page-eyebrow">{editing ? 'UPDATE YOUR OFFER' : 'REACH LOCAL BUYERS'}</span>
+          <h1>{editing ? 'Edit your listing' : 'Post a listing'}</h1>
+          <p>Free to post. Add clear details and good photos so people around Maua know exactly what you are offering.</p>
+        </div>
+      </header>
 
       <form onSubmit={submit} className="form stack-lg" noValidate>
         <label className="field">
