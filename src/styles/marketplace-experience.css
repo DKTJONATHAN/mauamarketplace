@@ -159,3 +159,15 @@ main { min-height: 62vh; }
   .header-actions .icon-link { width: 38px; }
   .header-actions .btn-tag { min-height: 40px; padding-inline: .75rem; }
 }
+
+.dashboard-stats { margin-bottom: 1.5rem; }
+.dashboard-stats > .panel { min-height: 150px; display: flex; flex-direction: column; justify-content: center; gap: .35rem; }
+.dashboard-stats > .panel > .lucide { color: var(--mm-forest-2); width: 1.5rem; height: 1.5rem; }
+.dashboard-stats > .panel h2 { color: var(--mm-forest); font-size: clamp(2rem, 4vw, 2.7rem); }
+.sell-intro { margin-bottom: 1.4rem; }
+.sell-page .form { padding: clamp(1rem, 2.5vw, 1.6rem); border: 1px solid var(--mm-border); border-radius: 18px; background: #fff; box-shadow: var(--mm-shadow); }
+.my-listings-page .page-intro, .saved-page .page-intro { margin-bottom: 1.5rem; }
+@media (max-width: 760px) {
+  .seller-dashboard .page-intro { align-items: stretch; }
+  .seller-dashboard .page-intro .btn { width: 100%; }
+}
