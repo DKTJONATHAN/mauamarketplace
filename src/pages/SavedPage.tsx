@@ -23,8 +23,8 @@ export function SavedPage() {
   }
 
   return (
-    <div className="wrap page">
-      <h1>Saved listings</h1>
+    <div className="wrap page saved-page">
+      <header className="page-intro"><div><span className="page-eyebrow">YOUR SHORTLIST</span><h1>Saved listings</h1><p>Keep the finds you like in one place and come back when you are ready.</p></div><Link to="/browse" className="btn btn-quiet">Find more</Link></header>
       <ListingGrid
         listings={query.data}
         loading={query.isLoading}
