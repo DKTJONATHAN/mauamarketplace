@@ -82,7 +82,7 @@ for (const page of pages) {
   html = html.replace(/<meta\s+property="og:url"[^>]*>/i, `<meta property="og:url" content="${canonical}" />`);
   html = html.replace(/<meta\s+name="twitter:title"[^>]*>/i, `<meta name="twitter:title" content="${escapeHtml(page.title)}" />`);
   html = html.replace(/<meta\s+name="twitter:description"[^>]*>/i, `<meta name="twitter:description" content="${escapeHtml(page.description)}" />`);
-  html = html.replace(/<div id="root">[\\s\\S]*?<\\/div>/i, `<div id="root">${body}</div>`);
+  html = html.replace(/<div id="root">[\s\S]*?<\/div>/i, `<div id="root">${body}</div>`);
   const target = page.path === '/' ? join(dist, 'index.html') : join(dist, page.path.slice(1), 'index.html');
   mkdirSync(dirname(target), { recursive: true });
   writeFileSync(target, html, 'utf8');
