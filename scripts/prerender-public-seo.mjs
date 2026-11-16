@@ -17,7 +17,7 @@ const pages = [
       'Maua Marketplace, also known as Maua Soko, helps people in Maua town and across Meru County discover local goods, farm produce, property and services. Browse public listings, compare details and contact sellers directly.',
       'Find new and second-hand items from people and businesses in the local community. Listings are provided by members; check the details, inspect items and follow the marketplace safety guidance before arranging a transaction.'
     ],
-    links: [['Browse local listings','/browse'],['Explore categories','/categories'],['Marketplace safety','/safety'],['Community rules','/rules']]
+    links: [['Browse local listings','/browse'],['Explore categories','/categories'],['Promote a listing','/my-listings'],['Advertise your business','/advertise'],['Marketplace safety','/safety'],['Community rules','/rules']]
   },
   {
     path: '/browse',
@@ -29,6 +29,17 @@ const pages = [
       'Review each listing description, price, condition, photos and location. Contact the seller through the marketplace to ask questions and arrange an inspection before you buy.'
     ],
     links: [['View all categories','/categories'],['How to stay safe','/safety'],['Read marketplace rules','/rules']]
+  },
+  {
+    path: '/advertise',
+    title: 'Advertise Your Business in Maua and Meru | Maua Marketplace',
+    description: 'Promote your business to people browsing Maua Marketplace. Compare homepage, category and business spotlight advertising options with clear KSh pricing.',
+    heading: 'Advertise your business in Maua and Meru',
+    paragraphs: [
+      'Reach people browsing products, services and local businesses around Maua and nearby communities. Maua Marketplace offers clearly labelled homepage, category and business spotlight advertising placements.',
+      'Choose a seven-day or thirty-day campaign, submit your business details and approve the M-Pesa payment prompt on your phone. Campaigns are scheduled after payment confirmation, creative review and placement availability.'
+    ],
+    links: [['Browse local listings','/browse'],['Post a free listing','/sell'],['Promote an existing listing','/my-listings']]
   },
   {
     path: '/categories',
