@@ -37,7 +37,13 @@ export async function fetchListings(filters: BrowseFilters, page: number) {
 
   if (filters.cat) query = query.eq('category', filters.cat);
   const term = cleanSearchTerm(filters.q);
-  if (term) query = query.or(`title.ilike.%${term}%,description.ilike.%${term}%`);
+  const featuredFilter = `featured_until.is.null,featured_until.gt.${new Date().toISOString()}`;
+  if (term) {
+    query = query.or(`and(${featuredFilter},or(title.ilike.%${term}%,description.ilike.%${term}%))`);
+  } else {
+    query = query.or(featuredFilter);
+  }
+  query = query.order('featured_until', { ascending: false, nullsFirst: false });
   const loc = cleanSearchTerm(filters.loc);
   if (loc) query = query.ilike('location', `%${loc}%`);
   const min = Number(filters.min);
