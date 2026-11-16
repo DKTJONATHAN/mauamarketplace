@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { BadgeCheck, Megaphone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -86,14 +86,22 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
     },
   });
 
+  const reconciliationAttempts = useRef(0);
+  useEffect(() => {
+    reconciliationAttempts.current = 0;
+  }, [paymentId]);
+
   const reconciliationQuery = useQuery({
     queryKey: ['boost-daraja-reconciliation', paymentId],
-    queryFn: () => requestDarajaQuery(paymentId as string),
+    queryFn: async () => {
+      reconciliationAttempts.current += 1;
+      return requestDarajaQuery(paymentId as string);
+    },
     enabled: Boolean(paymentId) && (
       statusQuery.data?.status === 'pending' ||
       (statusQuery.data?.status === 'failed' && statusQuery.data.resultCode === 4999)
     ),
-    refetchInterval: (query) => query.state.dataUpdateCount + query.state.errorUpdateCount < 8 ? 15000 : false,
+    refetchInterval: () => reconciliationAttempts.current < 8 ? 15000 : false,
     refetchIntervalInBackground: false,
     retry: false,
   });
@@ -226,7 +234,7 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
           )}
           {(statusQuery.data?.status === 'pending' || statusQuery.data?.status === 'failed') && (
             <div className="boost-daraja-diagnostic">
-              {((statusQuery.data?.status === 'failed' && statusQuery.data.resultCode !== 4999) || reconciliationQuery.dataUpdateCount + reconciliationQuery.errorUpdateCount >= 8) && (
+              {((statusQuery.data?.status === 'failed' && statusQuery.data.resultCode !== 4999) || reconciliationAttempts.current >= 8) && (
                 <button type="button" className="btn btn-quiet" onClick={() => void querySafaricom()} disabled={queryingDaraja || reconciliationQuery.isFetching}>
                   {queryingDaraja || reconciliationQuery.isFetching ? 'Querying Safaricom…' : 'Check transaction with Safaricom'}
                 </button>
