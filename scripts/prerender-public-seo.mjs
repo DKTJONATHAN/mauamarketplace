@@ -76,13 +76,18 @@ const pages = [
   }
 ];
 
+const prerenderedPaths = new Set(pages.map(({ path }) => path));
+function canonicalPath(path) {
+  return path === '/' || !prerenderedPaths.has(path) ? path : `${path}/`;
+}
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 }
 
 for (const page of pages) {
-  const canonical = page.path === '/' ? SITE_ORIGIN + '/' : SITE_ORIGIN + page.path;
-  const links = page.links.map(([label, href]) => `<li><a href="${href}">${escapeHtml(label)}</a></li>`).join('');
+  const canonical = SITE_ORIGIN + canonicalPath(page.path);
+  const links = page.links.map(([label, href]) => `<li><a href="${canonicalPath(href)}">${escapeHtml(label)}</a></li>`).join('');
   const body = `<main id="seo-prerender" class="wrap page"><nav aria-label="Breadcrumb"><a href="/">Maua Marketplace</a> / <span>${escapeHtml(page.heading)}</span></nav><h1>${escapeHtml(page.heading)}</h1>${page.paragraphs.map((p) => `<p>${escapeHtml(p)}</p>`).join('')}<nav aria-label="Useful marketplace pages"><ul>${links}</ul></nav></main>`;
   let html = template;
   html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(page.title)}</title>`);
