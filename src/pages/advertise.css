@@ -63,3 +63,10 @@
   .advertise-boost-callout { align-items: stretch; flex-direction: column; }
   .advertise-boost-callout .btn { justify-content: center; }
 }
+
+.advertise-payment-state { display: grid; align-content: start; gap: .55rem; padding: 1.1rem; border: 1px solid #d7c48b; background: #fffaf0; }
+.advertise-payment-state strong { color: var(--green-deep); font-size: 1rem; }
+.advertise-payment-state p { margin: 0; color: var(--ink-soft); font-size: .9rem; line-height: 1.5; }
+.advertise-payment-state .btn { justify-self: start; }
+.advertise-payment-state.is-paid { border-color: #8eb69b; background: #f0f7f1; }
+@media (max-width: 760px) { .advertise-payment-state { grid-column: 1; } }
