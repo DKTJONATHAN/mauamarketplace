@@ -93,7 +93,7 @@ export function HomePage() {
         <div className="home-growth-copy">
           <span className="home-section-kicker">MORE VISIBILITY. MORE OPPORTUNITY.</span>
           <h2>Give your listing a better chance to be seen.</h2>
-          <p>Feature an active listing or put your business in front of people browsing around Maua.</p>
+          <p>Boost an active listing for KSh 250 / 30 days, or book a sponsored business placement from KSh 250 / 7 days.</p>
         </div>
         <div className="home-growth-actions">
           <Link to="/my-listings" className="btn btn-primary">Promote your listing <ArrowRight size={16} aria-hidden /></Link>
