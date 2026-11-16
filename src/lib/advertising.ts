@@ -44,13 +44,13 @@ export interface AdvertisingRequestInput {
   notes: string;
 }
 
-export async function submitAdvertisingRequest(input: AdvertisingRequestInput): Promise<void> {
+export async function submitAdvertisingRequest(input: AdvertisingRequestInput): Promise<string> {
   const pkg = adPackages[input.placement];
   const amount = input.durationDays === 7 ? pkg.weeklyPrice : pkg.monthlyPrice;
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) throw new Error('Please sign in to request an advertising slot.');
 
-  const { error } = await supabase.from('advertising_requests').insert({
+  const { data, error } = await supabase.from('advertising_requests').insert({
     user_id: user.id,
     business_name: input.businessName.trim(),
     contact_phone: input.contactPhone.trim(),
@@ -68,4 +68,40 @@ export async function submitAdvertisingRequest(input: AdvertisingRequestInput): 
     }
     throw new Error(error.message || 'Your advertising request could not be submitted.');
   }
+}
+
+export interface AdvertisingPaymentStatus {
+  status: 'unpaid' | 'pending' | 'paid' | 'failed';
+  resultCode: number | null;
+  message: string;
+  paidAt: string | null;
+}
+
+async function authorizedFetch(url: string, init: RequestInit = {}): Promise<Response> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) throw new Error('Please sign in again.');
+  return fetch(url, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+      ...(init.headers ?? {}),
+    },
+  });
+}
+
+export async function startAdvertisingPayment(requestId: string, phone: string): Promise<void> {
+  const response = await authorizedFetch('/api/boost', {
+    method: 'POST',
+    body: JSON.stringify({ action: 'advertise', requestId, phone }),
+  });
+  const payload = await response.json().catch(() => ({})) as { error?: string };
+  if (!response.ok) throw new Error(payload.error || 'Could not send the M-PESA prompt.');
+}
+
+export async function fetchAdvertisingPaymentStatus(requestId: string): Promise<AdvertisingPaymentStatus> {
+  const response = await authorizedFetch(`/api/boost?advertisingRequestId=${encodeURIComponent(requestId)}`, { method: 'GET' });
+  const payload = await response.json().catch(() => ({})) as AdvertisingPaymentStatus & { error?: string };
+  if (!response.ok) throw new Error(payload.error || 'Could not check payment status.');
+  return payload;
 }
