@@ -22,7 +22,6 @@ type DbPayment = {
 };
 
 const PRICE_KES = 250;
-const DURATION_DAYS = 30;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function json(data: unknown, status = 200): Response {
@@ -55,8 +54,7 @@ async function db<T>(env: Env, path: string, init: RequestInit = {}): Promise<T>
     headers: { ...supabaseHeaders(env), ...(init.headers ?? {}) },
   });
   if (!response.ok) {
-    const detail = (await response.text()).slice(0, 300);
-    throw new Error(`Database request failed (${response.status}): ${detail}`);
+    throw new Error(`Database request failed (${response.status}).`);
   }
   if (response.status === 204) return undefined as T;
   return await response.json() as T;
@@ -138,6 +136,11 @@ async function initiate(request: Request, env: Env, user: { id: string }): Promi
   const listing = listings[0];
   if (!listing || listing.seller_id !== user.id) return json({ error: 'That listing was not found in your account.' }, 404);
   if (listing.status !== 'active') return json({ error: 'Only active listings can be promoted.' }, 409);
+
+  const pending = await db<{ id: string }[]>(env,
+    `listing_boost_payments?select=id&listing_id=eq.${encodeURIComponent(listing.id)}&status=in.(initiating,pending)&limit=1`,
+  );
+  if (pending.length) return json({ error: 'A payment request is already waiting for this listing. Complete it or wait for it to expire before trying again.' }, 409);
 
   const reference = `MAUA${crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase()}`;
   const created = await db<{ id: string }[]>(env, 'listing_boost_payments', {
