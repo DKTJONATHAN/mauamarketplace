@@ -3,6 +3,7 @@ import { Route, Routes, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ProtectedRoute } from './components/ProtectedRoute';
+const AdvertisePage = lazy(() => import('./pages/AdvertisePage').then((m) => ({ default: m.AdvertisePage })));
 const AccountPage = lazy(() => import('./pages/AccountPage').then((m) => ({ default: m.AccountPage })));
 const AuthPage = lazy(() => import('./pages/AuthPage').then((m) => ({ default: m.AuthPage })));
 const BrowsePage = lazy(() => import('./pages/BrowsePage').then((m) => ({ default: m.BrowsePage })));
@@ -42,6 +43,7 @@ export function App() {
       <Route element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="browse" element={<BrowsePage />} />
+        <Route path="advertise" element={<AdvertisePage />} />
         <Route path="categories" element={<CategoriesPage />} />
         <Route path="category/:slug" element={<CategoryPage />} />
         <Route path="listing/:id" element={<ListingPage />} />

@@ -240,6 +240,90 @@ async function initiate(request: Request, env: Env, user: { id: string }): Promi
   }
 }
 
+async function initiateAdvertising(request: Request, env: Env, user: { id: string }): Promise<Response> {
+  const body = await request.json() as { requestId?: unknown; phone?: unknown };
+  if (typeof body.requestId !== 'string' || !UUID_RE.test(body.requestId)) {
+    return json({ error: 'Choose a valid advertising request.' }, 400);
+  }
+  const phone = normalizePhone(body.phone);
+  if (!phone) return json({ error: 'Enter a valid Kenyan M-PESA number, for example 0712345678.' }, 400);
+
+  const rows = await db<{
+    id: string; user_id: string; amount_kes: number; payment_status: string;
+    contact_phone: string; start_date: string;
+  }[]>(env, `advertising_requests?select=id,user_id,amount_kes,payment_status,contact_phone,start_date&id=eq.${encodeURIComponent(body.requestId)}&limit=1`);
+  const booking = rows[0];
+  if (!booking || booking.user_id !== user.id) return json({ error: 'Advertising request not found.' }, 404);
+  if (booking.payment_status === 'paid') return json({ error: 'This advertising request has already been paid.' }, 409);
+  if (phone !== normalizePhone(booking.contact_phone)) return json({ error: 'Use the same M-PESA number entered in your advertising request.' }, 400);
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Nairobi' }).format(new Date());
+  if (booking.start_date < today) return json({ error: 'Choose today or a future date for your advertising campaign.' }, 400);
+  if (booking.payment_status === 'pending') return json({ error: 'A payment prompt is already pending for this advertising request.' }, 409);
+
+  if (!['sandbox', 'production'].includes(env.MPESA_ENVIRONMENT?.toLowerCase() || '')) {
+    return json({ error: 'M-PESA payments are not configured. Please contact Maua Marketplace.' }, 503);
+  }
+  if (!env.MPESA_SHORTCODE || !env.MPESA_PASSKEY || !env.MPESA_CALLBACK_URL || !env.MPESA_CALLBACK_TOKEN) {
+    return json({ error: 'M-PESA payments are not configured yet. Please contact Maua Marketplace support.' }, 503);
+  }
+  try {
+    const callback = new URL(env.MPESA_CALLBACK_URL);
+    if (callback.protocol !== 'https:' || callback.searchParams.get('k') !== env.MPESA_CALLBACK_TOKEN || env.MPESA_CALLBACK_TOKEN.length < 32) {
+      return json({ error: 'The M-PESA callback URL is not configured correctly.' }, 503);
+    }
+  } catch {
+    return json({ error: 'The M-PESA callback URL is invalid.' }, 503);
+  }
+
+  const token = await darajaToken(env);
+  const timestamp = nairobiTimestamp();
+  const password = btoa(`${env.MPESA_SHORTCODE}${env.MPESA_PASSKEY}${timestamp}`);
+  const isPayBill = env.MPESA_TRANSACTION_TYPE === 'CustomerPayBillOnline';
+  if (!isPayBill && !env.MPESA_TILL_NUMBER) return json({ error: 'The M-PESA Till number is not configured.' }, 503);
+  const reference = `MAUAAD${crypto.randomUUID().replace(/-/g, '').slice(0, 6).toUpperCase()}`;
+  const response = await fetch(`${apiBase(env)}/mpesa/stkpush/v1/processrequest`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      BusinessShortCode: env.MPESA_SHORTCODE,
+      Password: password,
+      Timestamp: timestamp,
+      TransactionType: isPayBill ? 'CustomerPayBillOnline' : 'CustomerBuyGoodsOnline',
+      Amount: booking.amount_kes,
+      PartyA: phone,
+      PartyB: isPayBill ? env.MPESA_SHORTCODE : env.MPESA_TILL_NUMBER,
+      PhoneNumber: phone,
+      CallBackURL: env.MPESA_CALLBACK_URL,
+      AccountReference: reference,
+      TransactionDesc: 'MauaAdvert',
+    }),
+  });
+  const result = await response.json().catch(() => ({})) as {
+    ResponseCode?: string; ResponseDescription?: string; CustomerMessage?: string;
+    MerchantRequestID?: string; CheckoutRequestID?: string; errorMessage?: string;
+  };
+  if (!response.ok || result.ResponseCode !== '0' || !result.CheckoutRequestID) {
+    return json({ error: result.errorMessage || result.ResponseDescription || 'Safaricom did not accept the payment request.' }, 502);
+  }
+
+  await db(env, `advertising_requests?id=eq.${encodeURIComponent(booking.id)}&payment_status=in.(unpaid,failed)`, {
+    method: 'PATCH',
+    headers: { Prefer: 'return=minimal' },
+    body: JSON.stringify({
+      payment_status: 'pending',
+      checkout_request_id: result.CheckoutRequestID,
+      merchant_request_id: result.MerchantRequestID ?? null,
+      payment_description: 'Waiting for M-PESA confirmation.',
+      payment_result_code: null,
+    }),
+  });
+  return json({
+    requestId: booking.id,
+    status: 'pending',
+    message: result.CustomerMessage || 'Check your phone and approve the M-PESA payment prompt.',
+  });
+}
+
 function callbackValue(items: { Name?: string; Value?: string | number }[] | undefined, name: string): string | number | null {
   const value = items?.find(item => item.Name === name)?.Value;
   return typeof value === 'string' || typeof value === 'number' ? value : null;
@@ -268,13 +352,66 @@ async function handleCallback(request: Request, env: Env): Promise<Response> {
     `listing_boost_payments?select=id,user_id,listing_id,phone,amount,status,checkout_request_id&checkout_request_id=eq.${encodeURIComponent(callback.CheckoutRequestID)}&limit=1`,
   );
   const payment = rows[0];
-  if (!payment) return json({ ResultCode: 1, ResultDesc: 'Payment reference not found.' }, 404);
-
   const items = callback.CallbackMetadata?.Item;
   const amount = callbackValue(items, 'Amount');
   const receipt = callbackValue(items, 'MpesaReceiptNumber');
   const paidPhone = normalizePhone(String(callbackValue(items, 'PhoneNumber') ?? ''));
   const validAmount = typeof amount === 'number' ? amount : Number(amount);
+
+  if (!payment) {
+    const adRows = await db<{
+      id: string; user_id: string; contact_phone: string; amount_kes: number;
+      payment_status: string; checkout_request_id: string; business_name: string;
+      website_url: string | null; creative_url: string | null; placement: string;
+      start_date: string; duration_days: number; notes: string | null;
+    }[]>(env, `advertising_requests?select=id,user_id,contact_phone,amount_kes,payment_status,checkout_request_id,business_name,website_url,creative_url,placement,start_date,duration_days,notes&checkout_request_id=eq.${encodeURIComponent(callback.CheckoutRequestID)}&limit=1`);
+    const booking = adRows[0];
+    if (!booking) return json({ ResultCode: 1, ResultDesc: 'Payment reference not found.' }, 404);
+    if (booking.payment_status === 'paid') return json({ ResultCode: 0, ResultDesc: 'Already confirmed.' });
+    if (callback.ResultCode === 0) {
+      if (typeof receipt !== 'string' || receipt.length < 6 ||
+        validAmount !== booking.amount_kes || paidPhone !== normalizePhone(booking.contact_phone)) {
+        return json({ ResultCode: 1, ResultDesc: 'Advertising payment details could not be verified.' }, 409);
+      }
+      const startDate = new Date(`${booking.start_date}T00:00:00.000Z`);
+      const endDate = new Date(startDate.getTime() + (booking.duration_days - 1) * 86400000).toISOString().slice(0, 10);
+      await db(env, 'advertisements?on_conflict=request_id', {
+        method: 'POST',
+        headers: { Prefer: 'resolution=ignore-duplicates,return=minimal' },
+        body: JSON.stringify({
+          request_id: booking.id,
+          business_name: booking.business_name,
+          headline: booking.business_name,
+          body: booking.notes,
+          website_url: booking.website_url,
+          creative_url: booking.creative_url,
+          placement: booking.placement,
+          start_date: booking.start_date,
+          end_date: endDate,
+          status: 'pending_review',
+        }),
+      });
+      await db(env, `advertising_requests?id=eq.${encodeURIComponent(booking.id)}&checkout_request_id=eq.${encodeURIComponent(callback.CheckoutRequestID)}&payment_status=eq.pending`, {
+        method: 'PATCH',
+        headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify({
+          payment_status: 'paid', status: 'paid', mpesa_receipt_number: receipt,
+          payment_result_code: 0, payment_description: callback.ResultDesc ?? 'Payment confirmed',
+          paid_at: new Date().toISOString(),
+        }),
+      });
+      return json({ ResultCode: 0, ResultDesc: 'Accepted' });
+    }
+    await db(env, `advertising_requests?id=eq.${encodeURIComponent(booking.id)}&payment_status=eq.pending`, {
+      method: 'PATCH',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        payment_status: 'failed', payment_result_code: callback.ResultCode,
+        payment_description: (callback.ResultDesc ?? 'Payment was not completed.').slice(0, 500),
+      }),
+    });
+    return json({ ResultCode: 0, ResultDesc: 'Accepted' });
+  }
 
   const rpcResult = await db<boolean>(env, 'rpc/apply_listing_boost_payment', {
     method: 'POST',
@@ -384,6 +521,73 @@ async function paymentStatus(request: Request, env: Env, user: { id: string }): 
   });
 }
 
+async function queryAdvertisingPayment(env: Env, user: { id: string }, requestId: unknown): Promise<Response> {
+  if (typeof requestId !== 'string' || !UUID_RE.test(requestId)) return json({ error: 'Invalid advertising request.' }, 400);
+  if (!env.MPESA_SHORTCODE || !env.MPESA_PASSKEY) return json({ error: 'M-PESA query credentials are not configured.' }, 503);
+  const rows = await db<{
+    id: string; user_id: string; checkout_request_id: string | null; payment_status: string;
+  }[]>(env, `advertising_requests?select=id,user_id,checkout_request_id,payment_status&id=eq.${encodeURIComponent(requestId)}&limit=1`);
+  const booking = rows[0];
+  if (!booking || booking.user_id !== user.id) return json({ error: 'Advertising request not found.' }, 404);
+  if (booking.payment_status === 'paid') return json({ status: 'paid', resultCode: 0, resultDescription: 'Payment confirmed.' });
+  if (!booking.checkout_request_id || booking.payment_status !== 'pending') {
+    return json({ status: booking.payment_status, resultCode: null, resultDescription: 'No pending M-PESA request to check.' });
+  }
+
+  const token = await darajaToken(env);
+  const timestamp = nairobiTimestamp();
+  const password = btoa(`${env.MPESA_SHORTCODE}${env.MPESA_PASSKEY}${timestamp}`);
+  const response = await fetch(`${apiBase(env)}/mpesa/stkpushquery/v1/query`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      BusinessShortCode: env.MPESA_SHORTCODE,
+      Password: password,
+      Timestamp: timestamp,
+      CheckoutRequestID: booking.checkout_request_id,
+    }),
+  });
+  const result = await response.json().catch(() => ({})) as {
+    ResponseCode?: string; ResponseDescription?: string; ResultCode?: string | number;
+    ResultDesc?: string; errorMessage?: string;
+  };
+  if (!response.ok) return json({ error: result.errorMessage || result.ResponseDescription || 'Safaricom could not check this payment.' }, 502);
+  const resultCode = result.ResultCode === undefined ? null : Number(result.ResultCode);
+  if (resultCode !== null && Number.isInteger(resultCode) && resultCode !== 0 && resultCode !== 4999) {
+    await db(env, `advertising_requests?id=eq.${encodeURIComponent(booking.id)}&payment_status=eq.pending`, {
+      method: 'PATCH',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        payment_status: 'failed',
+        payment_result_code: resultCode,
+        payment_description: (result.ResultDesc || 'Payment was not completed.').slice(0, 500),
+      }),
+    });
+  }
+  return json({
+    status: resultCode === 0 || resultCode === 4999 || resultCode === null ? 'pending' : 'failed',
+    resultCode,
+    resultDescription: result.ResultDesc || result.ResponseDescription || 'Waiting for M-PESA callback confirmation.',
+  });
+}
+
+async function advertisingPaymentStatus(request: Request, env: Env, user: { id: string }): Promise<Response> {
+  const requestId = new URL(request.url).searchParams.get('advertisingRequestId');
+  if (!requestId || !UUID_RE.test(requestId)) return json({ error: 'Invalid advertising request.' }, 400);
+  const rows = await db<{
+    id: string; user_id: string; payment_status: string; payment_result_code: number | null;
+    payment_description: string | null; paid_at: string | null;
+  }[]>(env, `advertising_requests?select=id,user_id,payment_status,payment_result_code,payment_description,paid_at&id=eq.${encodeURIComponent(requestId)}&limit=1`);
+  const booking = rows[0];
+  if (!booking || booking.user_id !== user.id) return json({ error: 'Advertising request not found.' }, 404);
+  return json({
+    status: booking.payment_status,
+    resultCode: booking.payment_result_code,
+    message: booking.payment_description || (booking.payment_status === 'paid' ? 'Payment confirmed.' : 'Waiting for M-PESA confirmation.'),
+    paidAt: booking.paid_at,
+  });
+}
+
 async function latestPaymentForListing(request: Request, env: Env, user: { id: string }): Promise<Response> {
   const listingId = new URL(request.url).searchParams.get('listingId');
   if (!listingId || !UUID_RE.test(listingId)) return json({ error: 'Invalid listing reference.' }, 400);
@@ -413,12 +617,14 @@ type PagesContext = { request: Request; env: Env };
 
 export const onRequestPost = async ({ request, env }: PagesContext) => {
   try {
-    const body = await request.clone().json() as { Body?: { stkCallback?: unknown }; action?: string; paymentId?: unknown };
+    const body = await request.clone().json() as { Body?: { stkCallback?: unknown }; action?: string; paymentId?: unknown; requestId?: unknown };
     if (body?.Body?.stkCallback) return await handleCallback(request, env);
     const user = await requireUser(request, env);
     if (!user) return json({ error: 'Please sign in again.' }, 401);
     const action = body?.action;
     if (action === 'query') return await queryDarajaPayment(env, user, body?.paymentId);
+    if (action === 'advertise') return await initiateAdvertising(request, env, user);
+    if (action === 'query_advertising') return await queryAdvertisingPayment(env, user, body?.requestId);
     return await initiate(request, env, user);
   } catch (error) {
     console.error('Maua Boost request failed:', error instanceof Error ? error.message : 'Unknown error');
@@ -430,6 +636,7 @@ export const onRequestGet = async ({ request, env }: PagesContext) => {
   try {
     const user = await requireUser(request, env);
     if (!user) return json({ error: 'Please sign in again.' }, 401);
+    if (new URL(request.url).searchParams.has('advertisingRequestId')) return await advertisingPaymentStatus(request, env, user);
     if (new URL(request.url).searchParams.has('paymentId')) return await paymentStatus(request, env, user);
     return await latestPaymentForListing(request, env, user);
   } catch (error) {

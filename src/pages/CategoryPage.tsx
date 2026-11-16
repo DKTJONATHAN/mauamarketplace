@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ListingGrid } from '../components/ListingGrid';
+import { AdSlot } from '../components/AdSlot';
 import { getCategory, isValidCategory } from '../config/categories';
 import { absoluteUrl, site } from '../config/site';
 import { fetchListings } from '../lib/api';
@@ -78,6 +79,7 @@ export function CategoryPage() {
         </div>
         <Link to={`/browse?cat=${slug}`} className="btn btn-quiet">Filter listings</Link>
       </header>
+      <AdSlot placement="category_feature" />
       {typeof query.data?.total === 'number' && (
         <p className="result-count">{query.data.total.toLocaleString('en-KE')} {query.data.total === 1 ? 'listing' : 'listings'} in this category</p>
       )}

@@ -202,3 +202,23 @@
   white-space: nowrap;
   border: 0;
 }
+
+
+.home-growth-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid #dce5dd;
+}
+.home-growth-copy { min-width: 0; }
+.home-growth-copy h2 { margin: .35rem 0 .35rem; color: #103f2d; font-size: clamp(1.35rem, 2.5vw, 1.9rem); letter-spacing: -.035em; }
+.home-growth-copy p { margin: 0; color: #56645b; font-size: .92rem; }
+.home-growth-actions { display: flex; flex: none; flex-wrap: wrap; gap: .65rem; }
+.home-growth-actions .btn { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; }
+@media (max-width: 680px) {
+  .home-growth-strip { align-items: stretch; flex-direction: column; }
+  .home-growth-actions { display: grid; grid-template-columns: 1fr; }
+}

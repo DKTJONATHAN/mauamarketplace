@@ -142,7 +142,7 @@ function Footer() {
       <div className="wrap footer-grid">
         <div><Brand /><p className="muted">A free notice board for {site.place}, {site.region}. We do not handle payments, verify sellers or settle disputes, so please read the safety tips.</p></div>
         <nav aria-label="Footer"><ul>
-          <li><Link to="/sell">Post a listing</Link></li><li><Link to="/categories">All categories</Link></li>
+          <li><Link to="/sell">Post a listing</Link></li><li><Link to="/my-listings">Promote a listing</Link></li><li><Link to="/advertise">Advertise with us</Link></li><li><Link to="/categories">All categories</Link></li>
           <li><Link to="/safety">Safety tips</Link></li><li><Link to="/rules">Community rules</Link></li><li><Link to="/privacy">Privacy Policy</Link></li><li><Link to="/terms">Terms and Conditions</Link></li><li><Link to="/refund-policy">Refund Policy</Link></li>
         </ul></nav>
       </div>

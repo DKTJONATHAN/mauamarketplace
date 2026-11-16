@@ -5,6 +5,7 @@ import { ArrowRight, MapPin, ShieldCheck, Store } from 'lucide-react';
 import { site } from '../config/site';
 import { featuredCategorySlugs, getCategory } from '../config/categories';
 import { CategoryDirectory } from '../components/CategoryDirectory';
+import { AdSlot } from '../components/AdSlot';
 import { ListingGrid } from '../components/ListingGrid';
 import { countActiveListings, fetchListings } from '../lib/api';
 import { getRecentlyViewed, useSeo } from '../hooks';
@@ -83,6 +84,20 @@ export function HomePage() {
             </div>
             <Link to="/safety" className="home-hero-safety-link">Read our safety guide <ArrowRight size={15} aria-hidden /></Link>
           </aside>
+        </div>
+      </section>
+
+      <div className="wrap"><AdSlot placement="homepage_banner" /></div>
+
+      <section className="wrap home-growth-strip" aria-label="Grow your sales">
+        <div className="home-growth-copy">
+          <span className="home-section-kicker">MORE VISIBILITY. MORE OPPORTUNITY.</span>
+          <h2>Give your listing a better chance to be seen.</h2>
+          <p>Boost an active listing for KSh 250 / 30 days, or book a sponsored business placement from KSh 250 / 7 days.</p>
+        </div>
+        <div className="home-growth-actions">
+          <Link to="/my-listings" className="btn btn-primary">Promote your listing <ArrowRight size={16} aria-hidden /></Link>
+          <Link to="/advertise" className="btn btn-quiet">Advertise your business <ArrowRight size={16} aria-hidden /></Link>
         </div>
       </section>
 
