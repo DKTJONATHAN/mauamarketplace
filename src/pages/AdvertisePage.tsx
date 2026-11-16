@@ -138,7 +138,7 @@ export function AdvertisePage() {
           <h3>Campaign details</h3>
           {!user || isAnonymous ? <p className="advertise-signin-note">Sign in to submit and track an advertising request.</p> : null}
           <label>Business or organisation name<input required minLength={2} maxLength={100} value={businessName} onChange={e => setBusinessName(e.target.value)} placeholder="e.g. Maua Fresh Produce" /></label>
-          <label>M-PESA phone number<input required type="tel" inputMode="tel" autoComplete="tel" maxLength={16} value={phone} onChange={e => setPhone(e.target.value)} placeholder="07XX XXX XXX" /><small className="advertise-optional">We send the payment prompt to this number. Enter your PIN only on your phone.</small></label>
+          <label>M-PESA phone number<input required type="tel" inputMode="tel" autoComplete="tel" maxLength={16} value={phone} onChange={e => setPhone(e.target.value)} placeholder="07XX XXX XXX" disabled={Boolean(bookingId)} /><small className="advertise-optional">We send the payment prompt to this number. Enter your PIN only on your phone.</small></label>
           <label>Website or social page <span className="advertise-optional">Optional</span><input type="url" value={website} onChange={e => setWebsite(e.target.value)} placeholder="https://" /></label>
           <div className="advertise-form-row">
             <label>Campaign length<select value={duration} onChange={e => setDuration(Number(e.target.value) as AdDuration)}><option value={7}>7 days</option><option value={30}>30 days</option></select></label>
@@ -146,7 +146,7 @@ export function AdvertisePage() {
           </div>
           <label>Artwork or image URL <span className="advertise-optional">Optional</span><input type="url" value={creativeUrl} onChange={e => setCreativeUrl(e.target.value)} placeholder="Link to your banner or advert image" /></label>
           <label>What would you like customers to know? <span className="advertise-optional">Optional</span><textarea rows={3} maxLength={1000} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Describe your offer, service or campaign..." /></label>
-          <button className="btn btn-primary advertise-submit" type="submit" disabled={submitting}>{submitting ? 'Submitting request…' : !user || isAnonymous ? 'Sign in to continue' : 'Request this ad slot · KSh ' + price.toLocaleString('en-KE')} <ArrowRight size={16} aria-hidden /></button>
+          <button className="btn btn-primary advertise-submit" type="submit" disabled={submitting || Boolean(bookingId)}>{submitting ? 'Submitting request…' : bookingId ? 'Request submitted' : !user || isAnonymous ? 'Sign in to continue' : 'Request this ad slot · KSh ' + price.toLocaleString('en-KE')} <ArrowRight size={16} aria-hidden /></button>
           <p className="advertise-payment-note">An M-PESA prompt is sent after submission. Your advert is scheduled only after payment is confirmed and the artwork is approved.</p>
         </form>
         {bookingId && (
@@ -158,6 +158,7 @@ export function AdvertisePage() {
               <button type="button" className="btn btn-primary" onClick={() => void retryPayment()} disabled={startingPayment || !phone.trim()}>{startingPayment ? 'Sending prompt…' : 'Send M-PESA prompt again'}</button>
             )}
             {payment.data?.status === 'pending' && <button type="button" className="btn btn-quiet" onClick={() => void payment.refetch()} disabled={payment.isFetching}>{payment.isFetching ? 'Checking…' : 'Check payment status'}</button>}
+            {payment.data?.status === 'paid' && <button type="button" className="btn btn-quiet" onClick={() => { setBookingId(null); setPaymentStartError(''); }}>Book another campaign</button>}
           </div>
         )}
       </section>
