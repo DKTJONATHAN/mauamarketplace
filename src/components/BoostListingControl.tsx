@@ -85,6 +85,15 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
     },
   });
 
+  const reconciliationQuery = useQuery({
+    queryKey: ['boost-daraja-reconciliation', paymentId],
+    queryFn: () => requestDarajaQuery(paymentId as string),
+    enabled: Boolean(paymentId) && statusQuery.data?.status === 'pending',
+    refetchInterval: (query) => query.state.dataUpdateCount < 8 ? 15000 : false,
+    refetchIntervalInBackground: false,
+    retry: false,
+  });
+
   const isFeatured = Boolean(listing.featured_until && new Date(listing.featured_until).getTime() > Date.now());
 
   async function startPayment(event: FormEvent<HTMLFormElement>) {
@@ -149,6 +158,7 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
     setDarajaQuery(null);
     try {
       setDarajaQuery(await requestDarajaQuery(paymentId));
+      await statusQuery.refetch();
     } catch (cause) {
       setDarajaQueryError(cause instanceof Error ? cause.message : 'Could not query Safaricom.');
     } finally {
@@ -210,20 +220,28 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
               {statusQuery.isFetching ? 'Checking…' : 'Check payment status'}
             </button>
           )}
-          {statusQuery.data?.status === 'failed' && (
+          {(statusQuery.data?.status === 'pending' || statusQuery.data?.status === 'failed') && (
             <div className="boost-daraja-diagnostic">
-              <button type="button" className="btn btn-quiet" onClick={() => void querySafaricom()} disabled={queryingDaraja}>
-                {queryingDaraja ? 'Querying Safaricom…' : 'Get Safaricom transaction details'}
-              </button>
-              {darajaQueryError && <p className="field-error" role="alert">{darajaQueryError}</p>}
-              {darajaQuery && (
-                <div className="muted" role="status">
-                  <p><strong>Safaricom query response:</strong> {darajaQuery.responseDescription || 'No response description returned.'}</p>
-                  {darajaQuery.responseCode !== null && <p>Response code: {darajaQuery.responseCode}</p>}
-                  {darajaQuery.resultCode !== null && <p>Transaction result code: {darajaQuery.resultCode}</p>}
-                  {darajaQuery.resultDescription && <p>Transaction result: {darajaQuery.resultDescription}</p>}
-                </div>
+              {(statusQuery.data?.status === 'failed' || reconciliationQuery.dataUpdateCount >= 8) && (
+                <button type="button" className="btn btn-quiet" onClick={() => void querySafaricom()} disabled={queryingDaraja}>
+                  {queryingDaraja ? 'Querying Safaricom…' : 'Check transaction with Safaricom'}
+                </button>
               )}
+              {darajaQueryError && <p className="field-error" role="alert">{darajaQueryError}</p>}
+              {(darajaQuery || reconciliationQuery.data) && (() => {
+                const latest = darajaQuery || reconciliationQuery.data;
+                return latest ? (
+                  <div className="muted" role="status">
+                    <p><strong>Safaricom query response:</strong> {latest.responseDescription || 'No response description returned.'}</p>
+                    {latest.responseCode !== null && <p>Response code: {latest.responseCode}</p>}
+                    {latest.resultCode !== null && <p>Transaction result code: {latest.resultCode}</p>}
+                    {latest.resultDescription && <p>Transaction result: {latest.resultDescription}</p>}
+                    {statusQuery.data?.status === 'pending' && <p>We are waiting for the final payment callback. Your listing will not be boosted until payment is verified.</p>}
+                  </div>
+                ) : null;
+              })()}
+              {statusQuery.data?.status === 'pending' && reconciliationQuery.isFetching && <p className="muted">Checking transaction status with Safaricom…</p>}
+              {reconciliationQuery.isError && <p className="field-error">Automatic Safaricom check could not complete. Your payment remains under review.</p>}
             </div>
           )}
           {(statusQuery.data?.status === 'paid' || statusQuery.data?.status === 'failed') && (
