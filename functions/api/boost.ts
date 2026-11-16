@@ -5,8 +5,10 @@ interface Env {
   MPESA_CONSUMER_KEY?: string;
   MPESA_CONSUMER_SECRET?: string;
   MPESA_SHORTCODE?: string;
+  MPESA_TILL_NUMBER?: string;
   MPESA_PASSKEY?: string;
   MPESA_CALLBACK_URL?: string;
+  MPESA_CALLBACK_TOKEN?: string;
   MPESA_ENVIRONMENT?: string;
   MPESA_TRANSACTION_TYPE?: string;
 }
@@ -122,12 +124,15 @@ async function initiate(request: Request, env: Env, user: { id: string }): Promi
   if (!['sandbox', 'production'].includes(env.MPESA_ENVIRONMENT?.toLowerCase() || '')) {
     return json({ error: 'Set MPESA_ENVIRONMENT to sandbox or production before accepting payments.' }, 503);
   }
-  if (!env.MPESA_SHORTCODE || !env.MPESA_PASSKEY || !env.MPESA_CALLBACK_URL) {
+  if (!env.MPESA_SHORTCODE || !env.MPESA_PASSKEY || !env.MPESA_CALLBACK_URL || !env.MPESA_CALLBACK_TOKEN) {
     return json({ error: 'M-PESA payments are not configured yet. Please contact Maua Marketplace support.' }, 503);
   }
   try {
     const callback = new URL(env.MPESA_CALLBACK_URL);
     if (callback.protocol !== 'https:') return json({ error: 'The M-PESA callback URL must use HTTPS.' }, 503);
+    if (callback.searchParams.get('k') !== env.MPESA_CALLBACK_TOKEN || env.MPESA_CALLBACK_TOKEN.length < 32) {
+      return json({ error: 'The M-PESA callback URL must include the configured callback token.' }, 503);
+    }
   } catch {
     return json({ error: 'The M-PESA callback URL is invalid.' }, 503);
   }
@@ -165,9 +170,13 @@ async function initiate(request: Request, env: Env, user: { id: string }): Promi
     const token = await darajaToken(env);
     const timestamp = nairobiTimestamp();
     const password = btoa(`${env.MPESA_SHORTCODE}${env.MPESA_PASSKEY}${timestamp}`);
-    const transactionType = env.MPESA_TRANSACTION_TYPE === 'CustomerPayBillOnline'
-      ? 'CustomerPayBillOnline'
-      : 'CustomerBuyGoodsOnline';
+    const isPayBill = env.MPESA_TRANSACTION_TYPE === 'CustomerPayBillOnline';
+    if (!isPayBill && !env.MPESA_TILL_NUMBER) {
+      await markInitiationFailed(env, paymentId, 'M-PESA Till number is not configured.');
+      return json({ error: 'Configure the M-PESA Till number before accepting Buy Goods payments.' }, 503);
+    }
+    const transactionType = isPayBill ? 'CustomerPayBillOnline' : 'CustomerBuyGoodsOnline';
+    const partyB = isPayBill ? env.MPESA_SHORTCODE : env.MPESA_TILL_NUMBER;
 
     const response = await fetch(`${apiBase(env)}/mpesa/stkpush/v1/processrequest`, {
       method: 'POST',
@@ -179,7 +188,7 @@ async function initiate(request: Request, env: Env, user: { id: string }): Promi
         TransactionType: transactionType,
         Amount: PRICE_KES,
         PartyA: phone,
-        PartyB: env.MPESA_SHORTCODE,
+        PartyB: partyB,
         PhoneNumber: phone,
         CallBackURL: env.MPESA_CALLBACK_URL,
         AccountReference: reference,
@@ -227,6 +236,10 @@ function callbackValue(items: { Name?: string; Value?: string | number }[] | und
 }
 
 async function handleCallback(request: Request, env: Env): Promise<Response> {
+  const callbackToken = new URL(request.url).searchParams.get('k');
+  if (!env.MPESA_CALLBACK_TOKEN || callbackToken !== env.MPESA_CALLBACK_TOKEN) {
+    return json({ ResultCode: 1, ResultDesc: 'Not allowed.' }, 403);
+  }
   const body = await request.json() as {
     Body?: { stkCallback?: {
       CheckoutRequestID?: string;
