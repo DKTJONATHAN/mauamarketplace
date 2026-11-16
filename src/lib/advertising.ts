@@ -61,13 +61,14 @@ export async function submitAdvertisingRequest(input: AdvertisingRequestInput): 
     start_date: input.startDate,
     creative_url: input.creativeUrl.trim() || null,
     notes: input.notes.trim() || null,
-  });
+  }).select('id').single();
   if (error) {
     if (error.code === '42P01' || error.code === 'PGRST205') {
       throw new Error('Advertising bookings are not enabled yet. Please try again later.');
     }
     throw new Error(error.message || 'Your advertising request could not be submitted.');
   }
+  return (data as { id: string }).id;
 }
 
 export interface AdvertisingPaymentStatus {
