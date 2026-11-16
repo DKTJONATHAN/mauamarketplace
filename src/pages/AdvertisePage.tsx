@@ -178,7 +178,7 @@ export function AdvertisePage() {
       </section>
 
       <section className="advertise-boost-callout">
-        <div><Megaphone size={22} aria-hidden /><div><h2>Just want more eyes on one listing?</h2><p>Boost an active product or service listing instead of booking a business advert.</p></div></div>
+        <div><Megaphone size={22} aria-hidden /><div><h2>Just want more eyes on one listing?</h2><p>Boost an active product or service listing for KSh 250 / 30 days instead of booking a business advert.</p></div></div>
         <Link to="/my-listings" className="btn btn-tag">Promote a listing <ArrowRight size={16} aria-hidden /></Link>
       </section>
     </div>
