@@ -5,6 +5,7 @@ import { SlidersHorizontal } from 'lucide-react';
 import { categoryGroups, getCategory, isValidCategory } from '../config/categories';
 import { site } from '../config/site';
 import { ListingGrid } from '../components/ListingGrid';
+import { AdSlot } from '../components/AdSlot';
 import { ListingCard } from '../components/ListingCard';
 import { fetchListings } from '../lib/api';
 import { conditionLabels, type BrowseFilters } from '../lib/types';
@@ -81,6 +82,8 @@ export function BrowsePage() {
         </div>
         <Link to="/sell" className="btn btn-tag">Post a listing</Link>
       </header>
+
+      <AdSlot placement="business_spotlight" />
 
       <details className="filters" open={filtered}>
         <summary>
