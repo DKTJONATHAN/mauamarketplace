@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import './ad-slot.css';
 
 type AdPlacement = 'homepage_banner' | 'category_feature' | 'business_spotlight';
 interface Advertisement {
