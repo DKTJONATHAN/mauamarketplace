@@ -31,6 +31,18 @@ type DarajaQueryResult = {
   resultDescription: string | null;
 };
 
+async function requestLatestPayment(listingId: string): Promise<{ paymentId: string | null }> {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error('Please sign in again.');
+  const response = await fetch(`/api/boost?listingId=${encodeURIComponent(listingId)}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const result = await response.json() as { paymentId?: string | null; error?: string };
+  if (!response.ok) throw new Error(result.error || 'Could not load the latest payment.');
+  return { paymentId: result.paymentId ?? null };
+}
+
 async function requestDarajaQuery(paymentId: string): Promise<DarajaQueryResult> {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
@@ -61,6 +73,7 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
   const [darajaQuery, setDarajaQuery] = useState<DarajaQueryResult | null>(null);
   const [darajaQueryError, setDarajaQueryError] = useState('');
   const [queryingDaraja, setQueryingDaraja] = useState(false);
+  const [initialLookupDone, setInitialLookupDone] = useState(false);
 
   const statusQuery = useQuery({
     queryKey: ['boost-payment', paymentId],
@@ -100,6 +113,23 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
       setSubmitting(false);
     }
   }
+
+  useEffect(() => {
+    let active = true;
+    async function loadLatestPayment() {
+      if (!user || paymentId || initialLookupDone) return;
+      try {
+        const latest = await requestLatestPayment(listing.id);
+        if (active && latest.paymentId) setPaymentId(latest.paymentId);
+      } catch {
+        // Payment history is optional here; the boost form remains available.
+      } finally {
+        if (active) setInitialLookupDone(true);
+      }
+    }
+    void loadLatestPayment();
+    return () => { active = false; };
+  }, [listing.id, user, paymentId, initialLookupDone]);
 
   useEffect(() => {
     if (statusQuery.data?.status === 'paid') {
