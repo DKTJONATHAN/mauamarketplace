@@ -294,7 +294,7 @@ async function handleCallback(request: Request, env: Env): Promise<Response> {
   return json({ ResultCode: 0, ResultDesc: 'Accepted' });
 }
 
-async function queryDarajaPayment(request: Request, env: Env, user: { id: string }, paymentId: unknown): Promise<Response> {
+async function queryDarajaPayment(env: Env, user: { id: string }, paymentId: unknown): Promise<Response> {
   if (typeof paymentId !== 'string' || !UUID_RE.test(paymentId)) {
     return json({ error: 'Invalid payment reference.' }, 400);
   }
@@ -375,12 +375,12 @@ type PagesContext = { request: Request; env: Env };
 
 export const onRequestPost = async ({ request, env }: PagesContext) => {
   try {
-    const body = await request.clone().json() as { Body?: { stkCallback?: unknown } };
+    const body = await request.clone().json() as { Body?: { stkCallback?: unknown }; action?: string; paymentId?: unknown };
     if (body?.Body?.stkCallback) return await handleCallback(request, env);
     const user = await requireUser(request, env);
     if (!user) return json({ error: 'Please sign in again.' }, 401);
     const action = body?.action;
-    if (action === 'query') return await queryDarajaPayment(request, env, user, body?.paymentId);
+    if (action === 'query') return await queryDarajaPayment(env, user, body?.paymentId);
     return await initiate(request, env, user);
   } catch (error) {
     console.error('Maua Boost request failed:', error instanceof Error ? error.message : 'Unknown error');
