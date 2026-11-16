@@ -24,6 +24,27 @@ async function requestPaymentStatus(paymentId: string): Promise<PaymentStatus> {
   return result;
 }
 
+type DarajaQueryResult = {
+  responseCode: string | null;
+  responseDescription: string | null;
+  resultCode: string | number | null;
+  resultDescription: string | null;
+};
+
+async function requestDarajaQuery(paymentId: string): Promise<DarajaQueryResult> {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error('Please sign in again.');
+  const response = await fetch('/api/boost', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'query', paymentId }),
+  });
+  const result = await response.json() as DarajaQueryResult & { error?: string };
+  if (!response.ok) throw new Error(result.error || 'Could not query Safaricom.');
+  return result;
+}
+
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat('en-KE', { dateStyle: 'medium' }).format(new Date(value));
 }
@@ -37,6 +58,9 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [darajaQuery, setDarajaQuery] = useState<DarajaQueryResult | null>(null);
+  const [darajaQueryError, setDarajaQueryError] = useState('');
+  const [queryingDaraja, setQueryingDaraja] = useState(false);
 
   const statusQuery = useQuery({
     queryKey: ['boost-payment', paymentId],
@@ -87,6 +111,20 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
       ]);
     }
   }, [statusQuery.data?.status, queryClient, user?.id]);
+
+  async function querySafaricom() {
+    if (!paymentId) return;
+    setQueryingDaraja(true);
+    setDarajaQueryError('');
+    setDarajaQuery(null);
+    try {
+      setDarajaQuery(await requestDarajaQuery(paymentId));
+    } catch (cause) {
+      setDarajaQueryError(cause instanceof Error ? cause.message : 'Could not query Safaricom.');
+    } finally {
+      setQueryingDaraja(false);
+    }
+  }
 
   async function refreshStatus() {
     const result = await statusQuery.refetch();
@@ -141,6 +179,22 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
             <button type="button" className="btn btn-quiet" onClick={() => void refreshStatus()} disabled={statusQuery.isFetching}>
               {statusQuery.isFetching ? 'Checking…' : 'Check payment status'}
             </button>
+          )}
+          {statusQuery.data?.status === 'failed' && (
+            <div className="boost-daraja-diagnostic">
+              <button type="button" className="btn btn-quiet" onClick={() => void querySafaricom()} disabled={queryingDaraja}>
+                {queryingDaraja ? 'Querying Safaricom…' : 'Get Safaricom transaction details'}
+              </button>
+              {darajaQueryError && <p className="field-error" role="alert">{darajaQueryError}</p>}
+              {darajaQuery && (
+                <div className="muted" role="status">
+                  <p><strong>Safaricom query response:</strong> {darajaQuery.responseDescription || 'No response description returned.'}</p>
+                  {darajaQuery.responseCode !== null && <p>Response code: {darajaQuery.responseCode}</p>}
+                  {darajaQuery.resultCode !== null && <p>Transaction result code: {darajaQuery.resultCode}</p>}
+                  {darajaQuery.resultDescription && <p>Transaction result: {darajaQuery.resultDescription}</p>}
+                </div>
+              )}
+            </div>
           )}
           {(statusQuery.data?.status === 'paid' || statusQuery.data?.status === 'failed') && (
             <button type="button" className="btn btn-quiet" onClick={() => { setPaymentId(null); setExpanded(false); setPhone(''); }}>
