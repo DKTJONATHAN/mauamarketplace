@@ -294,6 +294,65 @@ async function handleCallback(request: Request, env: Env): Promise<Response> {
   return json({ ResultCode: 0, ResultDesc: 'Accepted' });
 }
 
+async function queryDarajaPayment(request: Request, env: Env, user: { id: string }, paymentId: unknown): Promise<Response> {
+  if (typeof paymentId !== 'string' || !UUID_RE.test(paymentId)) {
+    return json({ error: 'Invalid payment reference.' }, 400);
+  }
+  if (!env.MPESA_SHORTCODE || !env.MPESA_PASSKEY) {
+    return json({ error: 'M-PESA query credentials are not configured.' }, 503);
+  }
+  const rows = await db<{
+    id: string;
+    user_id: string;
+    checkout_request_id: string | null;
+    status: string;
+  }[]>(env,
+    `listing_boost_payments?select=id,user_id,checkout_request_id,status&id=eq.${encodeURIComponent(paymentId)}&user_id=eq.${encodeURIComponent(user.id)}&limit=1`,
+  );
+  const payment = rows[0];
+  if (!payment) return json({ error: 'Payment not found.' }, 404);
+  if (!payment.checkout_request_id) {
+    return json({ error: 'Safaricom has not issued a CheckoutRequestID for this payment, so it cannot be queried.' }, 409);
+  }
+  if (!['pending', 'failed'].includes(payment.status)) {
+    return json({ error: 'Only pending or failed payments can be queried.' }, 409);
+  }
+
+  const token = await darajaToken(env);
+  const timestamp = nairobiTimestamp();
+  const password = btoa(`${env.MPESA_SHORTCODE}${env.MPESA_PASSKEY}${timestamp}`);
+  const response = await fetch(`${apiBase(env)}/mpesa/stkpushquery/v1/query`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      BusinessShortCode: env.MPESA_SHORTCODE,
+      Password: password,
+      Timestamp: timestamp,
+      CheckoutRequestID: payment.checkout_request_id,
+    }),
+  });
+  const result = await response.json().catch(() => ({})) as {
+    ResponseCode?: string;
+    ResponseDescription?: string;
+    ResultCode?: string | number;
+    ResultDesc?: string;
+    errorCode?: string;
+    errorMessage?: string;
+  };
+  if (!response.ok) {
+    const reason = result.errorMessage || result.ResponseDescription || 'Safaricom rejected the query request.';
+    return json({
+      error: `Daraja STK Push Query failed (HTTP ${response.status}${result.errorCode ? `, code ${result.errorCode}` : ''}): ${reason}`,
+    }, 502);
+  }
+  return json({
+    responseCode: result.ResponseCode ?? null,
+    responseDescription: result.ResponseDescription ?? null,
+    resultCode: result.ResultCode ?? null,
+    resultDescription: result.ResultDesc ?? null,
+  });
+}
+
 async function paymentStatus(request: Request, env: Env, user: { id: string }): Promise<Response> {
   const paymentId = new URL(request.url).searchParams.get('paymentId');
   if (!paymentId || !UUID_RE.test(paymentId)) return json({ error: 'Invalid payment reference.' }, 400);
@@ -320,6 +379,8 @@ export const onRequestPost = async ({ request, env }: PagesContext) => {
     if (body?.Body?.stkCallback) return await handleCallback(request, env);
     const user = await requireUser(request, env);
     if (!user) return json({ error: 'Please sign in again.' }, 401);
+    const action = body?.action;
+    if (action === 'query') return await queryDarajaPayment(request, env, user, body?.paymentId);
     return await initiate(request, env, user);
   } catch (error) {
     console.error('Maua Boost request failed:', error instanceof Error ? error.message : 'Unknown error');
