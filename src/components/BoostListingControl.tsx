@@ -25,7 +25,7 @@ async function requestPaymentStatus(paymentId: string): Promise<PaymentStatus> {
 }
 
 type DarajaQueryResult = {
-  responseCode: string | null;
+  responseCode: string | number | null;
   responseDescription: string | null;
   resultCode: string | number | null;
   resultDescription: string | null;
