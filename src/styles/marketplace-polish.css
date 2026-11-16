@@ -1,0 +1,30 @@
+/* Cohesive, restrained marketplace finish. Keep the forest / maize / paper identity. */
+:root {
+  --green: #176344;
+  --green-deep: #103f2d;
+  --green-wash: #edf4ef;
+  --tag: #f2c044;
+  --paper: #f5f6f2;
+  --surface: #fff;
+  --line: #dce3dc;
+  --ink: #17231c;
+  --ink-soft: #56645b;
+}
+html, body { color-scheme: light; background: var(--paper); }
+.page-intro { border-radius: 4px; box-shadow: none; background: #fff; }
+.panel, .filters, .account-profile-hero, .inbox-panel, .sell-band, .home-safety, .card,
+.empty, .boost-form, .boost-payment { border-radius: 4px; box-shadow: none; }
+.btn, input, select, textarea, .icon-btn, .icon-link, .rail a, .category-chip { border-radius: 4px; }
+.btn { box-shadow: none !important; transform: none !important; }
+.card { transition: border-color .15s ease; }
+.card:hover { transform: none; box-shadow: none; }
+.home-hero { background: var(--green-deep); }
+.home-hero::after { display: none; }
+.home-hero-aside { border-radius: 4px; background: rgb(255 255 255 / .07); box-shadow: none; backdrop-filter: none; }
+.home-category-shortcut { border-radius: 4px; box-shadow: none; }
+.home-category-shortcut:hover { transform: none; box-shadow: none; }
+.sell-band { border-radius: 4px; box-shadow: none; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
