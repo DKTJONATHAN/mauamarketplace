@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { BadgeCheck, Megaphone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -50,7 +50,7 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
 
   const isFeatured = Boolean(listing.featured_until && new Date(listing.featured_until).getTime() > Date.now());
 
-  async function startPayment(event: React.FormEvent<HTMLFormElement>) {
+  async function startPayment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
     setSubmitting(true);
@@ -76,6 +76,17 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
       setSubmitting(false);
     }
   }
+
+  useEffect(() => {
+    if (statusQuery.data?.status === 'paid') {
+      void Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['my-listings', user?.id] }),
+        queryClient.invalidateQueries({ queryKey: ['seller-dashboard', user?.id] }),
+        queryClient.invalidateQueries({ queryKey: ['latest'] }),
+        queryClient.invalidateQueries({ queryKey: ['category-landing'] }),
+      ]);
+    }
+  }, [statusQuery.data?.status, queryClient, user?.id]);
 
   async function refreshStatus() {
     const result = await statusQuery.refetch();
