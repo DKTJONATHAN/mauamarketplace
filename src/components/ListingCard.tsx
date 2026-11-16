@@ -14,6 +14,7 @@ export function ListingCard({ listing }: { listing: ListingSummary }) {
       <Link to={listingPath(listing.title, listing.id)} className="card-link">
         <div className="card-media">
           <ListingImage path={listing.images[0]} category={listing.category} alt="" />
+          {listing.featured_until && new Date(listing.featured_until).getTime() > Date.now() && <span className="featured-flag">Featured</span>}
           <span className="price-tag">{formatPrice(listing.price, category.priceSuffix)}</span>
           {listing.status === 'sold' && <span className="sold-flag">Sold</span>}
         </div>

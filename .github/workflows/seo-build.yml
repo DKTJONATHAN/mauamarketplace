@@ -27,4 +27,4 @@ jobs:
       - name: Type-check and build
         run: npm run build
       - name: Type-check Cloudflare Pages SEO functions
-        run: npx tsc --noEmit --target ES2022 --module ESNext --moduleResolution bundler --lib ES2023,DOM --skipLibCheck functions/sitemap.xml.ts functions/_middleware.ts
+        run: npx tsc --noEmit --target ES2022 --module ESNext --moduleResolution bundler --lib ES2023,DOM --skipLibCheck functions/sitemap.xml.ts functions/_middleware.ts functions/api/boost.ts

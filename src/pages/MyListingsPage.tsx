@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getCategory } from '../config/categories';
 import { ListingImage } from '../components/ListingImage';
 import { OwnerActions } from '../components/OwnerActions';
+import { BoostListingControl } from '../components/BoostListingControl';
 import { formatPrice } from '../lib/format';
 import { fetchMyListings } from '../lib/api';
 import { useDocumentTitle } from '../hooks';
@@ -50,6 +51,7 @@ export function MyListingsPage() {
               <h2><Link to={`/listing/${l.id}`}>{l.title}</Link></h2>
               <p className="price-line">{formatPrice(l.price, getCategory(l.category).priceSuffix)}</p>
               <p className={`status status-${l.status}`}>{statusText(l)}</p>
+              {l.status === 'active' && <BoostListingControl listing={l} />}
             </div>
             <OwnerActions listing={l} />
           </li>

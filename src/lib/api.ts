@@ -6,7 +6,7 @@ import type {
 export const PAGE_SIZE = 24;
 
 const SUMMARY_COLUMNS =
-  'id,seller_id,title,price,negotiable,category,condition,location,images,status,created_at';
+  'id,seller_id,title,price,negotiable,category,condition,location,images,status,created_at,featured_until';
 
 interface DbError {
   message: string;
@@ -35,7 +35,13 @@ export async function fetchListings(filters: BrowseFilters, page: number) {
 
   if (filters.cat) query = query.eq('category', filters.cat);
   const term = cleanSearchTerm(filters.q);
-  if (term) query = query.or(`title.ilike.%${term}%,description.ilike.%${term}%`);
+  const featuredFilter = `or(featured_until.is.null,featured_until.gt.${new Date().toISOString()})`;
+  if (term) {
+    query = query.or(`and(${featuredFilter},or(title.ilike.%${term}%,description.ilike.%${term}%))`);
+  } else {
+    query = query.or(`featured_until.is.null,featured_until.gt.${new Date().toISOString()}`);
+  }
+  query = query.order('featured_until', { ascending: false, nullsFirst: false });
   const loc = cleanSearchTerm(filters.loc);
   if (loc) query = query.ilike('location', `%${loc}%`);
   const min = Number(filters.min);
@@ -80,6 +86,8 @@ export async function fetchSellerListings(sellerId: string): Promise<ListingSumm
     .select(SUMMARY_COLUMNS)
     .eq('seller_id', sellerId)
     .eq('status', 'active')
+    .or(`featured_until.is.null,featured_until.gt.${new Date().toISOString()}`)
+    .order('featured_until', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
     .limit(48);
   fail(error);
