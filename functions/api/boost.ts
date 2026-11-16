@@ -289,7 +289,9 @@ async function paymentStatus(request: Request, env: Env, user: { id: string }): 
   });
 }
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+type PagesContext = { request: Request; env: Env };
+
+export const onRequestPost = async ({ request, env }: PagesContext) => {
   try {
     const body = await request.clone().json() as { Body?: { stkCallback?: unknown } };
     if (body?.Body?.stkCallback) return await handleCallback(request, env);
@@ -302,7 +304,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   }
 };
 
-export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
+export const onRequestGet = async ({ request, env }: PagesContext) => {
   try {
     const user = await requireUser(request, env);
     if (!user) return json({ error: 'Please sign in again.' }, 401);
