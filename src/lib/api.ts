@@ -86,6 +86,7 @@ export async function fetchSellerListings(sellerId: string): Promise<ListingSumm
     .select(SUMMARY_COLUMNS)
     .eq('seller_id', sellerId)
     .eq('status', 'active')
+    .or(`featured_until.is.null,featured_until.gt.${new Date().toISOString()}`)
     .order('featured_until', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
     .limit(48);
