@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getCategory } from '../config/categories';
 import { ListingImage } from '../components/ListingImage';
 import { OwnerActions } from '../components/OwnerActions';
+import { BoostListingControl } from '../components/BoostListingControl';
 import { formatPrice } from '../lib/format';
 import { fetchMyListings } from '../lib/api';
 import { useDocumentTitle } from '../hooks';
