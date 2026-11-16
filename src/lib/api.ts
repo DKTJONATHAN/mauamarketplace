@@ -6,7 +6,7 @@ import type {
 export const PAGE_SIZE = 24;
 
 const SUMMARY_COLUMNS =
-  'id,seller_id,title,price,negotiable,category,condition,location,images,status,created_at';
+  'id,seller_id,title,price,negotiable,category,condition,location,images,status,created_at,featured_until';
 
 interface DbError {
   message: string;
@@ -31,7 +31,9 @@ export async function fetchListings(filters: BrowseFilters, page: number) {
   let query = supabase
     .from('listings')
     .select(SUMMARY_COLUMNS, { count: 'exact' })
-    .eq('status', 'active');
+    .eq('status', 'active')
+    .or(`featured_until.is.null,featured_until.gt.${new Date().toISOString()}`)
+    .order('featured_until', { ascending: false, nullsFirst: false });
 
   if (filters.cat) query = query.eq('category', filters.cat);
   const term = cleanSearchTerm(filters.q);
@@ -80,6 +82,7 @@ export async function fetchSellerListings(sellerId: string): Promise<ListingSumm
     .select(SUMMARY_COLUMNS)
     .eq('seller_id', sellerId)
     .eq('status', 'active')
+    .order('featured_until', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
     .limit(48);
   fail(error);
