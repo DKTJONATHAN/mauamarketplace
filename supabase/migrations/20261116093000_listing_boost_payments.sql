@@ -44,6 +44,9 @@ create table if not exists public.listing_boost_payments (
   updated_at timestamptz not null default now()
 );
 
+create unique index if not exists listing_boost_one_pending_per_listing_idx
+  on public.listing_boost_payments (listing_id)
+  where status in ('initiating', 'pending');
 create unique index if not exists listing_boost_receipt_unique_idx
   on public.listing_boost_payments (mpesa_receipt_number)
   where mpesa_receipt_number is not null;
