@@ -106,3 +106,12 @@ export async function fetchAdvertisingPaymentStatus(requestId: string): Promise<
   if (!response.ok) throw new Error(payload.error || 'Could not check payment status.');
   return payload;
 }
+
+export async function queryAdvertisingPayment(requestId: string): Promise<void> {
+  const response = await authorizedFetch('/api/boost', {
+    method: 'POST',
+    body: JSON.stringify({ action: 'query_advertising', requestId }),
+  });
+  const payload = await response.json().catch(() => ({})) as { error?: string };
+  if (!response.ok) throw new Error(payload.error || 'Safaricom payment status could not be checked.');
+}
