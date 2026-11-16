@@ -8,6 +8,7 @@ import type { ListingSummary } from '../lib/types';
 
 type PaymentStatus = {
   status: 'initiating' | 'pending' | 'paid' | 'failed';
+  resultCode?: number | null;
   message: string;
   paidAt: string | null;
 };
@@ -88,8 +89,11 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
   const reconciliationQuery = useQuery({
     queryKey: ['boost-daraja-reconciliation', paymentId],
     queryFn: () => requestDarajaQuery(paymentId as string),
-    enabled: Boolean(paymentId) && statusQuery.data?.status === 'pending',
-    refetchInterval: (query) => query.state.dataUpdateCount < 8 ? 15000 : false,
+    enabled: Boolean(paymentId) && (
+      statusQuery.data?.status === 'pending' ||
+      (statusQuery.data?.status === 'failed' && statusQuery.data.resultCode === 4999)
+    ),
+    refetchInterval: (query) => query.state.dataUpdateCount + query.state.errorUpdateCount < 8 ? 15000 : false,
     refetchIntervalInBackground: false,
     retry: false,
   });
@@ -222,9 +226,9 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
           )}
           {(statusQuery.data?.status === 'pending' || statusQuery.data?.status === 'failed') && (
             <div className="boost-daraja-diagnostic">
-              {(statusQuery.data?.status === 'failed' || reconciliationQuery.dataUpdateCount >= 8) && (
-                <button type="button" className="btn btn-quiet" onClick={() => void querySafaricom()} disabled={queryingDaraja}>
-                  {queryingDaraja ? 'Querying Safaricom…' : 'Check transaction with Safaricom'}
+              {((statusQuery.data?.status === 'failed' && statusQuery.data.resultCode !== 4999) || reconciliationQuery.dataUpdateCount + reconciliationQuery.errorUpdateCount >= 8) && (
+                <button type="button" className="btn btn-quiet" onClick={() => void querySafaricom()} disabled={queryingDaraja || reconciliationQuery.isFetching}>
+                  {queryingDaraja || reconciliationQuery.isFetching ? 'Querying Safaricom…' : 'Check transaction with Safaricom'}
                 </button>
               )}
               {darajaQueryError && <p className="field-error" role="alert">{darajaQueryError}</p>}
@@ -236,7 +240,8 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
                     {latest.responseCode !== null && <p>Response code: {latest.responseCode}</p>}
                     {latest.resultCode !== null && <p>Transaction result code: {latest.resultCode}</p>}
                     {latest.resultDescription && <p>Transaction result: {latest.resultDescription}</p>}
-                    {statusQuery.data?.status === 'pending' && <p>We are waiting for the final payment callback. Your listing will not be boosted until payment is verified.</p>}
+                    {Number(latest.resultCode) === 4999 && <p>Safaricom returned 4999. We are treating this as still processing and checking again; it is not proof of payment.</p>}
+                    {(statusQuery.data?.status === 'pending' || statusQuery.data?.resultCode === 4999) && <p>We are waiting for the final payment callback. Your listing will not be boosted until payment is verified.</p>}
                   </div>
                 ) : null;
               })()}
@@ -244,7 +249,7 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
               {reconciliationQuery.isError && <p className="field-error">Automatic Safaricom check could not complete. Your payment remains under review.</p>}
             </div>
           )}
-          {(statusQuery.data?.status === 'paid' || statusQuery.data?.status === 'failed') && (
+          {(statusQuery.data?.status === 'paid' || (statusQuery.data?.status === 'failed' && statusQuery.data.resultCode !== 4999)) && (
             <button type="button" className="btn btn-quiet" onClick={() => { setPaymentId(null); setExpanded(false); setPhone(''); }}>
               Done
             </button>
