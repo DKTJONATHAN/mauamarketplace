@@ -371,6 +371,31 @@ async function paymentStatus(request: Request, env: Env, user: { id: string }): 
   });
 }
 
+async function latestPaymentForListing(request: Request, env: Env, user: { id: string }): Promise<Response> {
+  const listingId = new URL(request.url).searchParams.get('listingId');
+  if (!listingId || !UUID_RE.test(listingId)) return json({ error: 'Invalid listing reference.' }, 400);
+  const rows = await db<{
+    id: string;
+    status: string;
+    result_description: string | null;
+    paid_at: string | null;
+  }[]>(env,
+    `listing_boost_payments?select=id,status,result_description,paid_at&user_id=eq.${encodeURIComponent(user.id)}&listing_id=eq.${encodeURIComponent(listingId)}&order=created_at.desc&limit=1`,
+  );
+  const payment = rows[0];
+  if (!payment || !['pending', 'failed'].includes(payment.status)) {
+    return json({ paymentId: null });
+  }
+  return json({
+    paymentId: payment.id,
+    status: payment.status,
+    message: payment.status === 'failed'
+      ? (payment.result_description || 'Payment was not completed.')
+      : 'Waiting for Safaricom to confirm your payment.',
+    paidAt: payment.paid_at,
+  });
+}
+
 type PagesContext = { request: Request; env: Env };
 
 export const onRequestPost = async ({ request, env }: PagesContext) => {
@@ -392,7 +417,8 @@ export const onRequestGet = async ({ request, env }: PagesContext) => {
   try {
     const user = await requireUser(request, env);
     if (!user) return json({ error: 'Please sign in again.' }, 401);
-    return await paymentStatus(request, env, user);
+    if (new URL(request.url).searchParams.has('paymentId')) return await paymentStatus(request, env, user);
+    return await latestPaymentForListing(request, env, user);
   } catch (error) {
     console.error('Maua Boost status lookup failed:', error instanceof Error ? error.message : 'Unknown error');
     return json({ error: 'Could not check payment status. Please try again.' }, 500);
