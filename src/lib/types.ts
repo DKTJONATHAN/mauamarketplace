@@ -28,7 +28,7 @@ export interface ListingSummary {
   images: string[];
   status: ListingStatus;
   created_at: string;
-  featured_until: string | null;
+  featured_until?: string | null;
 }
 
 export interface Listing extends ListingSummary {
