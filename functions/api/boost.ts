@@ -357,8 +357,10 @@ async function handleCallback(request: Request, env: Env): Promise<Response> {
   if (!payment) {
     const adRows = await db<{
       id: string; user_id: string; contact_phone: string; amount_kes: number;
-      payment_status: string; checkout_request_id: string;
-    }[]>(env, `advertising_requests?select=id,user_id,contact_phone,amount_kes,payment_status,checkout_request_id&checkout_request_id=eq.${encodeURIComponent(callback.CheckoutRequestID)}&limit=1`);
+      payment_status: string; checkout_request_id: string; business_name: string;
+      website_url: string | null; creative_url: string | null; placement: string;
+      start_date: string; duration_days: number; notes: string | null;
+    }[]>(env, `advertising_requests?select=id,user_id,contact_phone,amount_kes,payment_status,checkout_request_id,business_name,website_url,creative_url,placement,start_date,duration_days,notes&checkout_request_id=eq.${encodeURIComponent(callback.CheckoutRequestID)}&limit=1`);
     const booking = adRows[0];
     if (!booking) return json({ ResultCode: 1, ResultDesc: 'Payment reference not found.' }, 404);
     if (booking.payment_status === 'paid') return json({ ResultCode: 0, ResultDesc: 'Already confirmed.' });
@@ -367,6 +369,24 @@ async function handleCallback(request: Request, env: Env): Promise<Response> {
         validAmount !== booking.amount_kes || paidPhone !== normalizePhone(booking.contact_phone)) {
         return json({ ResultCode: 1, ResultDesc: 'Advertising payment details could not be verified.' }, 409);
       }
+      const startDate = new Date(`${booking.start_date}T00:00:00.000Z`);
+      const endDate = new Date(startDate.getTime() + (booking.duration_days - 1) * 86400000).toISOString().slice(0, 10);
+      await db(env, 'advertisements?on_conflict=request_id', {
+        method: 'POST',
+        headers: { Prefer: 'resolution=ignore-duplicates,return=minimal' },
+        body: JSON.stringify({
+          request_id: booking.id,
+          business_name: booking.business_name,
+          headline: booking.business_name,
+          body: booking.notes,
+          website_url: booking.website_url,
+          creative_url: booking.creative_url,
+          placement: booking.placement,
+          start_date: booking.start_date,
+          end_date: endDate,
+          status: 'pending_review',
+        }),
+      });
       await db(env, `advertising_requests?id=eq.${encodeURIComponent(booking.id)}&checkout_request_id=eq.${encodeURIComponent(callback.CheckoutRequestID)}&payment_status=eq.pending`, {
         method: 'PATCH',
         headers: { Prefer: 'return=minimal' },
