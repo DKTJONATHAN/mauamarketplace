@@ -345,6 +345,18 @@ async function queryDarajaPayment(env: Env, user: { id: string }, paymentId: unk
       error: `Daraja STK Push Query failed (HTTP ${response.status}${result.errorCode ? `, code ${result.errorCode}` : ''}): ${reason}`,
     }, 502);
   }
+  const queryResultCode = result.ResultCode === undefined ? null : Number(result.ResultCode);
+  if (queryResultCode !== null && Number.isInteger(queryResultCode) && queryResultCode >= 0) {
+    await db<boolean>(env, 'rpc/reconcile_listing_boost_query', {
+      method: 'POST',
+      body: JSON.stringify({
+        p_payment_id: payment.id,
+        p_checkout_request_id: payment.checkout_request_id,
+        p_result_code: queryResultCode,
+        p_result_description: result.ResultDesc ?? '',
+      }),
+    });
+  }
   return json({
     responseCode: result.ResponseCode ?? null,
     responseDescription: result.ResponseDescription ?? null,
