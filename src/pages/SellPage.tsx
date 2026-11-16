@@ -363,6 +363,16 @@ export function SellPage() {
         </div>
       </header>
 
+      {!editing && (
+        <aside className="sell-advertising-note">
+          <div>
+            <strong>Offering a service or promoting a whole business?</strong>
+            <p>Use a business advert to reach people browsing Maua Marketplace. Listing posts remain free.</p>
+          </div>
+          <Link to="/advertise">Explore advertising options <span aria-hidden>→</span></Link>
+        </aside>
+      )}
+
       <form onSubmit={submit} className="form stack-lg" noValidate>
         <label className="field">
           <span>Category</span>
