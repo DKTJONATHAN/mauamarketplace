@@ -62,6 +62,45 @@ function formatDate(value: string): string {
   return new Intl.DateTimeFormat('en-KE', { dateStyle: 'medium' }).format(new Date(value));
 }
 
+function paymentFeedback(payment?: PaymentStatus): { title: string; message: string } {
+  if (!payment || payment.status === 'initiating' || payment.status === 'pending') {
+    return {
+      title: 'Waiting for M-PESA confirmation',
+      message: 'A payment prompt has been sent to your phone. Enter your M-PESA PIN on your phone to approve it. We will update this message when Safaricom responds.',
+    };
+  }
+
+  if (payment.status === 'paid') {
+    return {
+      title: 'Payment confirmed',
+      message: 'Your KSh 250 payment was received successfully. Your listing boost is now active.',
+    };
+  }
+
+  switch (Number(payment.resultCode)) {
+    case 1:
+      return {
+        title: 'Insufficient funds in your M-PESA',
+        message: 'M-PESA could not complete this payment because your balance is too low. Top up your M-PESA account and try again.',
+      };
+    case 1038:
+      return {
+        title: 'M-PESA prompt timed out',
+        message: 'Safaricom did not receive a response from your phone before the prompt expired. Request a new prompt and approve it on your phone.',
+      };
+    case 1032:
+      return {
+        title: 'Payment cancelled',
+        message: 'The M-PESA payment was cancelled on your phone. You can request a new prompt when you are ready.',
+      };
+    default:
+      return {
+        title: 'Payment rejected',
+        message: payment.message || 'Safaricom could not complete this payment. Please try again or contact support if the problem continues.',
+      };
+  }
+}
+
 export function BoostListingControl({ listing }: { listing: ListingSummary }) {
   const { user } = useAuth();
   const toast = useToast();
@@ -225,8 +264,8 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
       )}
       {paymentId && (
         <div className={`boost-payment boost-payment-${statusQuery.data?.status || 'pending'}`} aria-live="polite">
-          <strong>{statusQuery.data?.status === 'paid' ? 'Payment confirmed' : statusQuery.data?.status === 'failed' ? 'Payment not completed' : 'Waiting for M-PESA confirmation'}</strong>
-          <p>{statusQuery.data?.message || 'Check your phone and enter your PIN in the M-PESA prompt to approve payment.'}</p>
+          <strong>{paymentFeedback(statusQuery.data).title}</strong>
+          <p>{paymentFeedback(statusQuery.data).message}</p>
           {(statusQuery.data?.status === 'pending' || statusQuery.data?.status === 'initiating' || statusQuery.isError) && (
             <button type="button" className="btn btn-quiet" onClick={() => void refreshStatus()} disabled={statusQuery.isFetching}>
               {statusQuery.isFetching ? 'Checking…' : 'Check payment status'}
