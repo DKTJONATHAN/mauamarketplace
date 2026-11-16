@@ -98,9 +98,16 @@ async function darajaToken(env: Env): Promise<string> {
   const response = await fetch(`${apiBase(env)}/oauth/v1/generate?grant_type=client_credentials`, {
     headers: { Authorization: `Basic ${credentials}` },
   });
-  const payload = await response.json() as { access_token?: string; errorMessage?: string };
+  const payload = await response.json().catch(() => ({})) as {
+    access_token?: string;
+    errorMessage?: string;
+    error?: string;
+    error_description?: string;
+    message?: string;
+  };
   if (!response.ok || !payload.access_token) {
-    throw new Error(payload.errorMessage || 'Could not authenticate with M-PESA.');
+    const reason = payload.errorMessage || payload.error_description || payload.error || payload.message;
+    throw new Error(`Daraja OAuth authentication failed (HTTP ${response.status}): ${reason || 'Safaricom returned no access token.'}`);
   }
   return payload.access_token;
 }
@@ -195,18 +202,21 @@ async function initiate(request: Request, env: Env, user: { id: string }): Promi
         TransactionDesc: 'MauaBoost',
       }),
     });
-    const result = await response.json() as {
+    const result = await response.json().catch(() => ({})) as {
       ResponseCode?: string;
       ResponseDescription?: string;
       CustomerMessage?: string;
       MerchantRequestID?: string;
       CheckoutRequestID?: string;
       errorMessage?: string;
+      errorCode?: string;
+      requestId?: string;
     };
     if (!response.ok || result.ResponseCode !== '0' || !result.CheckoutRequestID) {
       const reason = result.errorMessage || result.ResponseDescription || 'Safaricom did not accept the payment request.';
-      await markInitiationFailed(env, paymentId, reason);
-      return json({ error: reason }, 502);
+      const diagnostic = `Daraja STK Push rejected the request (HTTP ${response.status}${result.errorCode ? `, code ${result.errorCode}` : ''}): ${reason}`;
+      await markInitiationFailed(env, paymentId, diagnostic);
+      return json({ error: diagnostic }, 502);
     }
 
     await db(env, `listing_boost_payments?id=eq.${encodeURIComponent(paymentId)}`, {
