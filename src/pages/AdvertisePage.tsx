@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Check, Megaphone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { adPackages, submitAdvertisingRequest, type AdDuration, type AdPlacement } from '../lib/advertising';
+import { adPackages, fetchAdvertisingPaymentStatus, startAdvertisingPayment, submitAdvertisingRequest, type AdDuration, type AdPlacement } from '../lib/advertising';
 import { useDocumentTitle } from '../hooks';
 import './advertise.css';
 
@@ -23,10 +24,34 @@ export function AdvertisePage() {
   const [creativeUrl, setCreativeUrl] = useState('');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [bookingId, setBookingId] = useState<string | null>(null);
+  const [startingPayment, setStartingPayment] = useState(false);
+  const [paymentStartError, setPaymentStartError] = useState('');
+  const payment = useQuery({
+    queryKey: ['advertising-payment', bookingId],
+    queryFn: () => fetchAdvertisingPaymentStatus(bookingId as string),
+    enabled: Boolean(bookingId),
+    refetchInterval: query => query.state.data?.status === 'pending' ? 5000 : false,
+    retry: false,
+  });
 
   const selected = adPackages[placement];
   const price = duration === 7 ? selected.weeklyPrice : selected.monthlyPrice;
   const minimumDate = new Date().toLocaleDateString('en-CA', { timeZone: 'Africa/Nairobi' });
+
+  async function retryPayment() {
+    if (!bookingId || !phone.trim()) return;
+    setStartingPayment(true);
+    setPaymentStartError('');
+    try {
+      await startAdvertisingPayment(bookingId, phone);
+      await payment.refetch();
+    } catch (error) {
+      setPaymentStartError(error instanceof Error ? error.message : 'Could not start M-PESA payment.');
+    } finally {
+      setStartingPayment(false);
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -36,12 +61,21 @@ export function AdvertisePage() {
     }
     setSubmitting(true);
     try {
-      await submitAdvertisingRequest({
+      const requestId = await submitAdvertisingRequest({
         businessName, contactPhone: phone, websiteUrl: website, placement,
         durationDays: duration, startDate, creativeUrl, notes,
       });
-      toast.success('Advertising request received. We will contact you to arrange payment and confirm your slot.');
-      setBusinessName(''); setPhone(''); setWebsite(''); setCreativeUrl(''); setNotes('');
+      setBookingId(requestId);
+      setPaymentStartError('');
+      try {
+        await startAdvertisingPayment(requestId, phone);
+        toast.success('M-PESA prompt sent. Approve it on your phone to pay for the slot.');
+      } catch (paymentError) {
+        const message = paymentError instanceof Error ? paymentError.message : 'Could not start M-PESA payment.';
+        setPaymentStartError(message);
+        toast.error(`Your request was saved, but payment could not start: ${message}`);
+      }
+      setBusinessName(''); setWebsite(''); setCreativeUrl(''); setNotes('');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Could not submit your request.');
     } finally {
@@ -104,7 +138,7 @@ export function AdvertisePage() {
           <h3>Campaign details</h3>
           {!user || isAnonymous ? <p className="advertise-signin-note">Sign in to submit and track an advertising request.</p> : null}
           <label>Business or organisation name<input required minLength={2} maxLength={100} value={businessName} onChange={e => setBusinessName(e.target.value)} placeholder="e.g. Maua Fresh Produce" /></label>
-          <label>Contact phone<input required type="tel" inputMode="tel" autoComplete="tel" maxLength={16} value={phone} onChange={e => setPhone(e.target.value)} placeholder="07XX XXX XXX" /></label>
+          <label>M-PESA phone number<input required type="tel" inputMode="tel" autoComplete="tel" maxLength={16} value={phone} onChange={e => setPhone(e.target.value)} placeholder="07XX XXX XXX" /><small className="advertise-optional">We send the payment prompt to this number. Enter your PIN only on your phone.</small></label>
           <label>Website or social page <span className="advertise-optional">Optional</span><input type="url" value={website} onChange={e => setWebsite(e.target.value)} placeholder="https://" /></label>
           <div className="advertise-form-row">
             <label>Campaign length<select value={duration} onChange={e => setDuration(Number(e.target.value) as AdDuration)}><option value={7}>7 days</option><option value={30}>30 days</option></select></label>
@@ -113,8 +147,19 @@ export function AdvertisePage() {
           <label>Artwork or image URL <span className="advertise-optional">Optional</span><input type="url" value={creativeUrl} onChange={e => setCreativeUrl(e.target.value)} placeholder="Link to your banner or advert image" /></label>
           <label>What would you like customers to know? <span className="advertise-optional">Optional</span><textarea rows={3} maxLength={1000} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Describe your offer, service or campaign..." /></label>
           <button className="btn btn-primary advertise-submit" type="submit" disabled={submitting}>{submitting ? 'Submitting request…' : !user || isAnonymous ? 'Sign in to continue' : 'Request this ad slot · KSh ' + price.toLocaleString('en-KE')} <ArrowRight size={16} aria-hidden /></button>
-          <p className="advertise-payment-note">This submits a booking request, not a payment. We will confirm availability and send M-Pesa payment instructions before the campaign is scheduled.</p>
+          <p className="advertise-payment-note">An M-PESA prompt is sent after submission. Your advert is scheduled only after payment is confirmed and the artwork is approved.</p>
         </form>
+        {bookingId && (
+          <div className={payment.data?.status === 'paid' ? 'advertise-payment-state is-paid' : 'advertise-payment-state'} role="status" aria-live="polite">
+            <strong>{payment.data?.status === 'paid' ? 'Payment confirmed' : payment.data?.status === 'pending' ? 'Waiting for M-PESA confirmation' : payment.data?.status === 'failed' ? (payment.data.resultCode === 1 ? 'Insufficient M-PESA funds' : payment.data.resultCode === 1038 ? 'M-PESA prompt timed out' : payment.data.resultCode === 1032 ? 'Payment cancelled' : 'Payment rejected') : 'Advertising request saved'}</strong>
+            <p>{payment.data?.status === 'paid' ? 'Your slot request is paid and awaiting artwork review and scheduling.' : payment.data?.status === 'pending' ? 'Check your phone and enter your M-PESA PIN to approve the payment.' : payment.data?.status === 'failed' ? (payment.data.resultCode === 1 ? 'Top up your M-PESA account, then send a new payment prompt.' : payment.data.resultCode === 1038 ? 'The prompt expired without a response. Send a new prompt when ready.' : payment.data.resultCode === 1032 ? 'You cancelled the payment. You can try again when ready.' : payment.data.message || 'Safaricom could not complete the payment. Try again.') : paymentStartError || 'Send the M-PESA prompt to complete payment for this advertising slot.'}</p>
+            {paymentStartError && <p className="field-error">{paymentStartError}</p>}
+            {payment.data?.status !== 'paid' && payment.data?.status !== 'pending' && (
+              <button type="button" className="btn btn-primary" onClick={() => void retryPayment()} disabled={startingPayment || !phone.trim()}>{startingPayment ? 'Sending prompt…' : 'Send M-PESA prompt again'}</button>
+            )}
+            {payment.data?.status === 'pending' && <button type="button" className="btn btn-quiet" onClick={() => void payment.refetch()} disabled={payment.isFetching}>{payment.isFetching ? 'Checking…' : 'Check payment status'}</button>}
+          </div>
+        )}
       </section>
 
       <section className="advertise-boost-callout">
