@@ -119,6 +119,9 @@ async function initiate(request: Request, env: Env, user: { id: string }): Promi
   const phone = normalizePhone(body.phone);
   if (!phone) return json({ error: 'Enter a valid Kenyan M-PESA number, for example 0712345678.' }, 400);
 
+  if (!['sandbox', 'production'].includes(env.MPESA_ENVIRONMENT?.toLowerCase() || '')) {
+    return json({ error: 'Set MPESA_ENVIRONMENT to sandbox or production before accepting payments.' }, 503);
+  }
   if (!env.MPESA_SHORTCODE || !env.MPESA_PASSKEY || !env.MPESA_CALLBACK_URL) {
     return json({ error: 'M-PESA payments are not configured yet. Please contact Maua Marketplace support.' }, 503);
   }
