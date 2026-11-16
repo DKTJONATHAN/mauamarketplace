@@ -10,12 +10,14 @@ const template = readFileSync(join(dist, 'index.html'), 'utf8');
 const pages = [
   {
     path: '/',
-    title: 'Maua Marketplace (Maua Soko) | Buy and Sell in Maua Town, Meru',
+    title: 'Maua Marketplace (Maua Soko) | Maua, Meru',
     description: 'Discover Maua Soko, the local online marketplace for Maua town and Meru County. Browse goods, farm produce, property and services from local sellers.',
     heading: 'Maua Marketplace — your local market, online',
     paragraphs: [
       'Maua Marketplace, also known as Maua Soko, helps people in Maua town and across Meru County discover local goods, farm produce, property and services. Browse public listings, compare details and contact sellers directly.',
-      'Find new and second-hand items from people and businesses in the local community. Listings are provided by members; check the details, inspect items and follow the marketplace safety guidance before arranging a transaction.'
+      'Find new and second-hand items from people and businesses in the local community. Listings are provided by members; check the details, inspect items and follow the marketplace safety guidance before arranging a transaction.',
+      'Browse phones and tablets, home and living, clothing, vehicles, farm produce and livestock, property, jobs and local services. Choose a category to narrow your search, then compare the seller’s description, price, photos and location.',
+      'Maua Marketplace is a listing platform, not an escrow or payment service. Buyers and sellers arrange inspections and payments directly, so keep your M-Pesa PIN and verification codes private.'
     ],
     links: [['Browse local listings','/browse'],['Explore categories','/categories'],['Promote a listing','/my-listings'],['Advertise your business','/advertise'],['Marketplace safety','/safety'],['Community rules','/rules']]
   },
@@ -26,7 +28,9 @@ const pages = [
     heading: 'Browse listings in Maua and Meru',
     paragraphs: [
       'Explore public marketplace listings from Maua town and nearby communities in Meru County. Browse products, household items, farm produce, livestock, property, jobs and local services.',
-      'Review each listing description, price, condition, photos and location. Contact the seller through the marketplace to ask questions and arrange an inspection before you buy.'
+      'Review each listing description, price, condition, photos and location. Contact the seller through the marketplace to ask questions and arrange an inspection before you buy.',
+      'Ask the seller to confirm that an item is still available and clarify collection or delivery arrangements before travelling. Compare the full details rather than choosing only by the lowest asking price.',
+      'For electronics, test the device and check proof of ownership. For vehicles, verify the documents and arrange an independent inspection. For property, confirm ownership and the person’s authority to let or sell before paying.'
     ],
     links: [['View all categories','/categories'],['How to stay safe','/safety'],['Read marketplace rules','/rules']]
   },
@@ -48,7 +52,9 @@ const pages = [
     heading: 'Explore marketplace categories',
     paragraphs: [
       'Find local listings by the kind of item or service you need. Maua Marketplace brings together everyday goods, second-hand items, farm produce, livestock, property, jobs and services for the Maua community.',
-      'Choose a category to narrow your search, then check the listing details and contact the seller directly.'
+      'Choose a category to narrow your search, then check the listing details and contact the seller directly.',
+      'Popular sections include phones and tablets, laptops, TVs and audio; furniture, appliances and kitchenware; clothing, shoes and baby items; cars, motorbikes and vehicle parts; farm produce, livestock and farm equipment; property, jobs and services.',
+      'Select the category that best describes the item so nearby buyers can find it. Use the closest matching category and write important details in the listing title and description instead of adding unrelated keywords.'
     ],
     links: [['Browse all listings','/browse'],['Marketplace safety','/safety'],['Community rules','/rules']]
   },
@@ -59,7 +65,9 @@ const pages = [
     heading: 'Buy and sell more safely',
     paragraphs: [
       'Maua Marketplace helps buyers and sellers find one another, but it does not process payments, hold money or provide escrow. Members are responsible for checking listings and making safe arrangements.',
-      'Inspect an item before paying, meet in a public place where practical, avoid advance-payment pressure, never share passwords or verification codes, and be cautious of offers that seem too good to be true. Report suspicious listings or messages.'
+      'Inspect an item before paying, meet in a public place where practical, avoid advance-payment pressure, never share passwords or verification codes, and be cautious of offers that seem too good to be true. Report suspicious listings or messages.',
+      'For electronics, test the screen, camera, charging and other important functions. For vehicles, check the logbook and seller identity and arrange official checks and a mechanic inspection. For rental or sale property, view the premises and verify the owner or authorised agent before paying.',
+      'Treat requests for deposits before viewing, pressure to pay immediately, copied photos, unusually low prices, M-Pesa PIN requests, one-time-code requests and job registration fees as warning signs. Keep records of important messages and report suspicious activity.'
     ],
     links: [['Browse listings','/browse'],['Read the marketplace rules','/rules'],['Explore categories','/categories']]
   },
@@ -70,7 +78,9 @@ const pages = [
     heading: 'Marketplace community rules',
     paragraphs: [
       'Use Maua Marketplace honestly and respectfully. Publish accurate descriptions, fair prices and genuine photos, and only list goods or services you are permitted to offer.',
-      'Do not post scams, misleading claims, prohibited goods, abusive content or another person’s private information. Keep communication respectful and report suspicious activity so the community can respond.'
+      'Do not post scams, misleading claims, prohibited or unlawful goods, abusive content or another person’s private information. Keep communication respectful and report suspicious activity so the community can respond.',
+      'Use a clear title, the closest accurate category, genuine photos, an honest description and a realistic price. Do not use unrelated keywords, duplicate the same listing to gain attention or claim that an item is available when it has already been sold.',
+      'Only list goods and services you are legally allowed to offer. Do not publish misleading job offers, impersonate another seller, harass members or share someone else’s private details without permission.'
     ],
     links: [['Read the safety guide','/safety'],['Browse listings','/browse'],['Explore categories','/categories']]
   }
