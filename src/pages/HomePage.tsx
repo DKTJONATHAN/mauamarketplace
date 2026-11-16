@@ -5,6 +5,7 @@ import { ArrowRight, MapPin, ShieldCheck, Store } from 'lucide-react';
 import { site } from '../config/site';
 import { featuredCategorySlugs, getCategory } from '../config/categories';
 import { CategoryDirectory } from '../components/CategoryDirectory';
+import { AdSlot } from '../components/AdSlot';
 import { ListingGrid } from '../components/ListingGrid';
 import { countActiveListings, fetchListings } from '../lib/api';
 import { getRecentlyViewed, useSeo } from '../hooks';
@@ -85,6 +86,8 @@ export function HomePage() {
           </aside>
         </div>
       </section>
+
+      <div className="wrap"><AdSlot placement="homepage_banner" /></div>
 
       <section className="wrap home-growth-strip" aria-label="Grow your sales">
         <div className="home-growth-copy">
