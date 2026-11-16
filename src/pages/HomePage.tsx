@@ -86,6 +86,18 @@ export function HomePage() {
         </div>
       </section>
 
+      <section className="wrap home-growth-strip" aria-label="Grow your sales">
+        <div className="home-growth-copy">
+          <span className="home-section-kicker">MORE VISIBILITY. MORE OPPORTUNITY.</span>
+          <h2>Give your listing a better chance to be seen.</h2>
+          <p>Feature an active listing or put your business in front of people browsing around Maua.</p>
+        </div>
+        <div className="home-growth-actions">
+          <Link to="/my-listings" className="btn btn-primary">Promote your listing <ArrowRight size={16} aria-hidden /></Link>
+          <Link to="/advertise" className="btn btn-quiet">Advertise your business <ArrowRight size={16} aria-hidden /></Link>
+        </div>
+      </section>
+
       <section className="wrap home-quick-categories" aria-labelledby="quick-categories-title">
         <div className="home-section-heading">
           <div><span className="home-section-kicker">START EXPLORING</span><h2 id="quick-categories-title">What are you looking for?</h2></div>
