@@ -521,6 +521,56 @@ async function paymentStatus(request: Request, env: Env, user: { id: string }): 
   });
 }
 
+async function queryAdvertisingPayment(env: Env, user: { id: string }, requestId: unknown): Promise<Response> {
+  if (typeof requestId !== 'string' || !UUID_RE.test(requestId)) return json({ error: 'Invalid advertising request.' }, 400);
+  if (!env.MPESA_SHORTCODE || !env.MPESA_PASSKEY) return json({ error: 'M-PESA query credentials are not configured.' }, 503);
+  const rows = await db<{
+    id: string; user_id: string; checkout_request_id: string | null; payment_status: string;
+  }[]>(env, `advertising_requests?select=id,user_id,checkout_request_id,payment_status&id=eq.${encodeURIComponent(requestId)}&limit=1`);
+  const booking = rows[0];
+  if (!booking || booking.user_id !== user.id) return json({ error: 'Advertising request not found.' }, 404);
+  if (booking.payment_status === 'paid') return json({ status: 'paid', resultCode: 0, resultDescription: 'Payment confirmed.' });
+  if (!booking.checkout_request_id || booking.payment_status !== 'pending') {
+    return json({ status: booking.payment_status, resultCode: null, resultDescription: 'No pending M-PESA request to check.' });
+  }
+
+  const token = await darajaToken(env);
+  const timestamp = nairobiTimestamp();
+  const password = btoa(`${env.MPESA_SHORTCODE}${env.MPESA_PASSKEY}${timestamp}`);
+  const response = await fetch(`${apiBase(env)}/mpesa/stkpushquery/v1/query`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      BusinessShortCode: env.MPESA_SHORTCODE,
+      Password: password,
+      Timestamp: timestamp,
+      CheckoutRequestID: booking.checkout_request_id,
+    }),
+  });
+  const result = await response.json().catch(() => ({})) as {
+    ResponseCode?: string; ResponseDescription?: string; ResultCode?: string | number;
+    ResultDesc?: string; errorMessage?: string;
+  };
+  if (!response.ok) return json({ error: result.errorMessage || result.ResponseDescription || 'Safaricom could not check this payment.' }, 502);
+  const resultCode = result.ResultCode === undefined ? null : Number(result.ResultCode);
+  if (resultCode !== null && Number.isInteger(resultCode) && resultCode !== 0 && resultCode !== 4999) {
+    await db(env, `advertising_requests?id=eq.${encodeURIComponent(booking.id)}&payment_status=eq.pending`, {
+      method: 'PATCH',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        payment_status: 'failed',
+        payment_result_code: resultCode,
+        payment_description: (result.ResultDesc || 'Payment was not completed.').slice(0, 500),
+      }),
+    });
+  }
+  return json({
+    status: resultCode === 0 || resultCode === 4999 || resultCode === null ? 'pending' : 'failed',
+    resultCode,
+    resultDescription: result.ResultDesc || result.ResponseDescription || 'Waiting for M-PESA callback confirmation.',
+  });
+}
+
 async function advertisingPaymentStatus(request: Request, env: Env, user: { id: string }): Promise<Response> {
   const requestId = new URL(request.url).searchParams.get('advertisingRequestId');
   if (!requestId || !UUID_RE.test(requestId)) return json({ error: 'Invalid advertising request.' }, 400);
@@ -574,6 +624,7 @@ export const onRequestPost = async ({ request, env }: PagesContext) => {
     const action = body?.action;
     if (action === 'query') return await queryDarajaPayment(env, user, body?.paymentId);
     if (action === 'advertise') return await initiateAdvertising(request, env, user);
+    if (action === 'query_advertising') return await queryAdvertisingPayment(env, user, body?.requestId);
     return await initiate(request, env, user);
   } catch (error) {
     console.error('Maua Boost request failed:', error instanceof Error ? error.message : 'Unknown error');
