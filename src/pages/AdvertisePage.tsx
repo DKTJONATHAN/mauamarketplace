@@ -5,13 +5,13 @@ import { ArrowRight, Check, Megaphone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { adPackages, fetchAdvertisingPaymentStatus, startAdvertisingPayment, submitAdvertisingRequest, type AdDuration, type AdPlacement } from '../lib/advertising';
-import { useDocumentTitle } from '../hooks';
+import { useSeo } from '../hooks';
 import './advertise.css';
 
 const placements: AdPlacement[] = ['homepage_banner', 'category_feature', 'business_spotlight'];
 
 export function AdvertisePage() {
-  useDocumentTitle('Advertise with Maua Marketplace');
+  useSeo({ title: 'Advertise Your Business in Maua and Meru | Maua Marketplace', path: '/advertise', description: 'Promote your business to people browsing Maua Marketplace. Compare homepage, category and business spotlight advertising options with clear KSh pricing.' });
   const { user, isAnonymous } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
