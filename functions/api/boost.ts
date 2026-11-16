@@ -368,14 +368,15 @@ async function queryDarajaPayment(env: Env, user: { id: string }, paymentId: unk
 async function paymentStatus(request: Request, env: Env, user: { id: string }): Promise<Response> {
   const paymentId = new URL(request.url).searchParams.get('paymentId');
   if (!paymentId || !UUID_RE.test(paymentId)) return json({ error: 'Invalid payment reference.' }, 400);
-  const rows = await db<{ id: string; user_id: string; status: string; result_description: string | null; paid_at: string | null }[]>(
+  const rows = await db<{ id: string; user_id: string; status: string; result_code: number | null; result_description: string | null; paid_at: string | null }[]>(
     env,
-    `listing_boost_payments?select=id,user_id,status,result_description,paid_at&id=eq.${encodeURIComponent(paymentId)}&limit=1`,
+    `listing_boost_payments?select=id,user_id,status,result_code,result_description,paid_at&id=eq.${encodeURIComponent(paymentId)}&limit=1`,
   );
   const payment = rows[0];
   if (!payment || payment.user_id !== user.id) return json({ error: 'Payment not found.' }, 404);
   return json({
     status: payment.status,
+    resultCode: payment.result_code,
     message: payment.status === 'paid' ? 'Payment confirmed. Your listing is now Featured.' :
       payment.status === 'failed' ? (payment.result_description || 'Payment was not completed.') :
       'Waiting for Safaricom to confirm your payment.',
