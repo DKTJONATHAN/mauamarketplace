@@ -19,11 +19,11 @@ interface PublicListing {
 
 const STATIC_PATHS = [
   '/',
-  '/browse',
-  '/advertise',
-  '/categories',
-  '/safety',
-  '/rules',
+  '/browse/',
+  '/advertise/',
+  '/categories/',
+  '/safety/',
+  '/rules/',
   '/privacy',
   '/terms',
   '/refund-policy',
