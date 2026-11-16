@@ -617,7 +617,7 @@ type PagesContext = { request: Request; env: Env };
 
 export const onRequestPost = async ({ request, env }: PagesContext) => {
   try {
-    const body = await request.clone().json() as { Body?: { stkCallback?: unknown }; action?: string; paymentId?: unknown };
+    const body = await request.clone().json() as { Body?: { stkCallback?: unknown }; action?: string; paymentId?: unknown; requestId?: unknown };
     if (body?.Body?.stkCallback) return await handleCallback(request, env);
     const user = await requireUser(request, env);
     if (!user) return json({ error: 'Please sign in again.' }, 401);
