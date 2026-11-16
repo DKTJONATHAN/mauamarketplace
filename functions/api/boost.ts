@@ -250,10 +250,14 @@ async function initiateAdvertising(request: Request, env: Env, user: { id: strin
 
   const rows = await db<{
     id: string; user_id: string; amount_kes: number; payment_status: string;
-  }[]>(env, `advertising_requests?select=id,user_id,amount_kes,payment_status&id=eq.${encodeURIComponent(body.requestId)}&limit=1`);
+    contact_phone: string; start_date: string;
+  }[]>(env, `advertising_requests?select=id,user_id,amount_kes,payment_status,contact_phone,start_date&id=eq.${encodeURIComponent(body.requestId)}&limit=1`);
   const booking = rows[0];
   if (!booking || booking.user_id !== user.id) return json({ error: 'Advertising request not found.' }, 404);
   if (booking.payment_status === 'paid') return json({ error: 'This advertising request has already been paid.' }, 409);
+  if (phone !== normalizePhone(booking.contact_phone)) return json({ error: 'Use the same M-PESA number entered in your advertising request.' }, 400);
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Nairobi' }).format(new Date());
+  if (booking.start_date < today) return json({ error: 'Choose today or a future date for your advertising campaign.' }, 400);
   if (booking.payment_status === 'pending') return json({ error: 'A payment prompt is already pending for this advertising request.' }, 409);
 
   if (!['sandbox', 'production'].includes(env.MPESA_ENVIRONMENT?.toLowerCase() || '')) {
@@ -276,7 +280,7 @@ async function initiateAdvertising(request: Request, env: Env, user: { id: strin
   const password = btoa(`${env.MPESA_SHORTCODE}${env.MPESA_PASSKEY}${timestamp}`);
   const isPayBill = env.MPESA_TRANSACTION_TYPE === 'CustomerPayBillOnline';
   if (!isPayBill && !env.MPESA_TILL_NUMBER) return json({ error: 'The M-PESA Till number is not configured.' }, 503);
-  const reference = `MAUAAD${crypto.randomUUID().replace(/-/g, '').slice(0, 7).toUpperCase()}`;
+  const reference = `MAUAAD${crypto.randomUUID().replace(/-/g, '').slice(0, 6).toUpperCase()}`;
   const response = await fetch(`${apiBase(env)}/mpesa/stkpush/v1/processrequest`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
