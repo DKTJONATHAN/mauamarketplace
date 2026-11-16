@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Check, Megaphone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { adPackages, fetchAdvertisingPaymentStatus, startAdvertisingPayment, submitAdvertisingRequest, type AdDuration, type AdPlacement } from '../lib/advertising';
+import { adPackages, fetchAdvertisingPaymentStatus, queryAdvertisingPayment, startAdvertisingPayment, submitAdvertisingRequest, type AdDuration, type AdPlacement } from '../lib/advertising';
 import { useGoToLogin, useSeo } from '../hooks';
 import './advertise.css';
 
@@ -26,6 +26,7 @@ export function AdvertisePage() {
   const [submitting, setSubmitting] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [startingPayment, setStartingPayment] = useState(false);
+  const [checkingPayment, setCheckingPayment] = useState(false);
   const [paymentStartError, setPaymentStartError] = useState('');
   const payment = useQuery({
     queryKey: ['advertising-payment', bookingId],
@@ -50,6 +51,19 @@ export function AdvertisePage() {
       setPaymentStartError(error instanceof Error ? error.message : 'Could not start M-PESA payment.');
     } finally {
       setStartingPayment(false);
+    }
+  }
+
+  async function checkSafaricomStatus() {
+    if (!bookingId) return;
+    setCheckingPayment(true);
+    try {
+      await queryAdvertisingPayment(bookingId);
+      await payment.refetch();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not check Safaricom payment status.');
+    } finally {
+      setCheckingPayment(false);
     }
   }
 
@@ -157,7 +171,7 @@ export function AdvertisePage() {
             {(payment.data?.status === 'unpaid' || payment.data?.status === 'failed' || paymentStartError || payment.isError) && (
               <button type="button" className="btn btn-primary" onClick={() => void retryPayment()} disabled={startingPayment || !phone.trim()}>{startingPayment ? 'Sending prompt…' : 'Send M-PESA prompt again'}</button>
             )}
-            {payment.data?.status === 'pending' && <button type="button" className="btn btn-quiet" onClick={() => void payment.refetch()} disabled={payment.isFetching}>{payment.isFetching ? 'Checking…' : 'Check payment status'}</button>}
+            {payment.data?.status === 'pending' && <button type="button" className="btn btn-quiet" onClick={() => void checkSafaricomStatus()} disabled={checkingPayment || payment.isFetching}>{checkingPayment || payment.isFetching ? 'Checking with Safaricom…' : 'Check with Safaricom'}</button>}
             {payment.data?.status === 'paid' && <button type="button" className="btn btn-quiet" onClick={() => { setBookingId(null); setPaymentStartError(''); }}>Book another campaign</button>}
           </div>
         )}
