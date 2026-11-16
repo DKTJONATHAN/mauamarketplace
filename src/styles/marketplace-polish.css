@@ -28,3 +28,22 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+.sell-advertising-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--tag);
+  background: #fff;
+}
+.sell-advertising-note strong { color: var(--green-deep); font-size: .95rem; }
+.sell-advertising-note p { margin: .25rem 0 0; color: var(--ink-soft); font-size: .86rem; line-height: 1.5; }
+.sell-advertising-note a { display: inline-flex; align-items: center; gap: .4rem; flex: none; color: var(--green); font-size: .86rem; font-weight: 750; text-decoration: none; }
+.sell-advertising-note a:hover { text-decoration: underline; }
+@media (max-width: 560px) {
+  .sell-advertising-note { align-items: flex-start; flex-direction: column; }
+}
