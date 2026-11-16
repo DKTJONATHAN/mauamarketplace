@@ -31,17 +31,15 @@ export async function fetchListings(filters: BrowseFilters, page: number) {
   let query = supabase
     .from('listings')
     .select(SUMMARY_COLUMNS, { count: 'exact' })
-    .eq('status', 'active')
-    .or(`featured_until.is.null,featured_until.gt.${new Date().toISOString()}`)
-    .order('featured_until', { ascending: false, nullsFirst: false });
+    .eq('status', 'active');
 
   if (filters.cat) query = query.eq('category', filters.cat);
   const term = cleanSearchTerm(filters.q);
-  const featuredFilter = `featured_until.is.null,featured_until.gt.${new Date().toISOString()}`;
+  const featuredFilter = `or(featured_until.is.null,featured_until.gt.${new Date().toISOString()})`;
   if (term) {
     query = query.or(`and(${featuredFilter},or(title.ilike.%${term}%,description.ilike.%${term}%))`);
   } else {
-    query = query.or(featuredFilter);
+    query = query.or(`featured_until.is.null,featured_until.gt.${new Date().toISOString()}`);
   }
   query = query.order('featured_until', { ascending: false, nullsFirst: false });
   const loc = cleanSearchTerm(filters.loc);
