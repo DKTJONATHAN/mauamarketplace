@@ -331,3 +331,8 @@ async function initiateAdvertising(env: Env, user: { id: string }, body: { reque
     message: result.CustomerMessage || 'Check your phone and approve the M-PESA payment prompt.',
   });
 }
+
+function callbackValue(items: { Name?: string; Value?: string | number }[] | undefined, name: string): string | number | null {
+  const value = items?.find(item => item.Name === name)?.Value;
+  return typeof value === 'string' || typeof value === 'number' ? value : null;
+}
