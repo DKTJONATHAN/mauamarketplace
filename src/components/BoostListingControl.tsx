@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { BadgeCheck, Megaphone } from 'lucide-react';
+import { MpesaPayButton } from './MpesaPayButton';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { supabase } from '../lib/supabase';
@@ -58,7 +59,7 @@ function paymentFeedback(payment?: PaymentStatus): { title: string; message: str
   if (!payment || payment.status === 'initiating' || payment.status === 'pending') {
     return {
       title: 'Waiting for M-PESA confirmation',
-      message: 'A payment prompt has been sent to your phone. Enter your M-PESA PIN on your phone to approve it.',
+      message: 'A Lipa na M-PESA prompt has been sent to your phone. Enter your PIN on the phone to approve it.',
     };
   }
 
@@ -119,7 +120,6 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
     reconciliationAttempts.current = 0;
   }, [paymentId]);
 
-  // Quiet background reconciliation for stuck pending / 4999 without diagnostic UI
   useQuery({
     queryKey: ['boost-daraja-reconciliation', paymentId],
     queryFn: async () => {
@@ -241,11 +241,13 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
               maxLength={16}
             />
           </label>
-          <p className="muted boost-note">KSh 250 for 30 days. We’ll send a secure M-PESA prompt to this phone. Enter your PIN only in the M-PESA prompt on your phone — never on this website.</p>
+          <p className="muted boost-note">KSh 250 for 30 days. We send a Lipa na M-PESA prompt to this phone. Enter your PIN only on the phone — never on this website.</p>
           {error && <p className="field-error" role="alert">{error}</p>}
           <div className="boost-actions">
             <button type="button" className="btn btn-quiet" onClick={() => setExpanded(false)} disabled={submitting}>Cancel</button>
-            <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? 'Sending prompt…' : 'Pay KSh 250'}</button>
+            <MpesaPayButton type="submit" loading={submitting}>
+              Pay KSh 250
+            </MpesaPayButton>
           </div>
         </form>
       )}
