@@ -19,7 +19,7 @@ export async function onRequest(context: Context): Promise<Response> {
     url.hostname = 'mauamarketplace.eu.cc';
     return Response.redirect(url.toString(), 301);
   }
-  if (context.request.method !== 'GET' || url.search) return context.next();
+  if (context.request.method !== 'GET') return context.next();
   const response = await context.next();
   if (!response.ok || !response.headers.get('content-type')?.includes('text/html')) return response;
   const path = url.pathname.replace(/\/+$/, '') || '/';
