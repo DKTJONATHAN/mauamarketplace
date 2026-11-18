@@ -25,13 +25,6 @@ async function requestPaymentStatus(paymentId: string): Promise<PaymentStatus> {
   return result;
 }
 
-type DarajaQueryResult = {
-  responseCode: string | number | null;
-  responseDescription: string | null;
-  resultCode: string | number | null;
-  resultDescription: string | null;
-};
-
 async function requestLatestPayment(listingId: string): Promise<{ paymentId: string | null }> {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
@@ -44,7 +37,7 @@ async function requestLatestPayment(listingId: string): Promise<{ paymentId: str
   return { paymentId: result.paymentId ?? null };
 }
 
-async function requestDarajaQuery(paymentId: string): Promise<DarajaQueryResult> {
+async function requestDarajaQuery(paymentId: string): Promise<void> {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
   if (!token) throw new Error('Please sign in again.');
@@ -53,9 +46,8 @@ async function requestDarajaQuery(paymentId: string): Promise<DarajaQueryResult>
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'query', paymentId }),
   });
-  const result = await response.json() as DarajaQueryResult & { error?: string };
+  const result = await response.json() as { error?: string };
   if (!response.ok) throw new Error(result.error || 'Could not query Safaricom.');
-  return result;
 }
 
 function formatDate(value: string): string {
@@ -66,37 +58,37 @@ function paymentFeedback(payment?: PaymentStatus): { title: string; message: str
   if (!payment || payment.status === 'initiating' || payment.status === 'pending') {
     return {
       title: 'Waiting for M-PESA confirmation',
-      message: 'A payment prompt has been sent to your phone. Enter your M-PESA PIN on your phone to approve it. We will update this message when Safaricom responds.',
+      message: 'A payment prompt has been sent to your phone. Enter your M-PESA PIN on your phone to approve it.',
     };
   }
 
   if (payment.status === 'paid') {
     return {
-      title: 'Payment confirmed',
-      message: 'Your KSh 250 payment was received successfully. Your listing boost is now active.',
+      title: 'Payment successful',
+      message: 'Your KSh 250 payment was received. Your listing boost is now active.',
     };
   }
 
   switch (Number(payment.resultCode)) {
     case 1:
       return {
-        title: 'Insufficient funds in your M-PESA',
-        message: 'M-PESA could not complete this payment because your balance is too low. Top up your M-PESA account and try again.',
+        title: 'Insufficient funds',
+        message: 'Your M-PESA balance is too low to complete this payment. Top up and try again.',
       };
     case 1038:
       return {
-        title: 'M-PESA prompt timed out',
-        message: 'Safaricom did not receive a response from your phone before the prompt expired. Request a new prompt and approve it on your phone.',
+        title: 'Payment failed',
+        message: 'The M-PESA prompt timed out. Request a new prompt and approve it on your phone.',
       };
     case 1032:
       return {
-        title: 'Payment cancelled',
-        message: 'The M-PESA payment was cancelled on your phone. You can request a new prompt when you are ready.',
+        title: 'Payment failed',
+        message: 'The payment was cancelled on your phone. You can try again when ready.',
       };
     default:
       return {
-        title: 'Payment rejected',
-        message: payment.message || 'Safaricom could not complete this payment. Please try again or contact support if the problem continues.',
+        title: 'Payment failed',
+        message: payment.message || 'The payment could not be completed. Please try again.',
       };
   }
 }
@@ -110,9 +102,6 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [darajaQuery, setDarajaQuery] = useState<DarajaQueryResult | null>(null);
-  const [darajaQueryError, setDarajaQueryError] = useState('');
-  const [queryingDaraja, setQueryingDaraja] = useState(false);
   const [initialLookupDone, setInitialLookupDone] = useState(false);
 
   const statusQuery = useQuery({
@@ -130,11 +119,14 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
     reconciliationAttempts.current = 0;
   }, [paymentId]);
 
-  const reconciliationQuery = useQuery({
+  // Quiet background reconciliation for stuck pending / 4999 without diagnostic UI
+  useQuery({
     queryKey: ['boost-daraja-reconciliation', paymentId],
     queryFn: async () => {
       reconciliationAttempts.current += 1;
-      return requestDarajaQuery(paymentId as string);
+      await requestDarajaQuery(paymentId as string);
+      await statusQuery.refetch();
+      return true;
     },
     enabled: Boolean(paymentId) && (
       statusQuery.data?.status === 'pending' ||
@@ -163,6 +155,7 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
       const result = await response.json() as { paymentId?: string; message?: string; error?: string };
       if (!response.ok || !result.paymentId) throw new Error(result.error || 'Could not send the M-PESA prompt.');
       setPaymentId(result.paymentId);
+      setExpanded(false);
       toast.info('M-PESA prompt sent. Approve it on your phone to complete payment.');
       await queryClient.invalidateQueries({ queryKey: ['boost-payment', result.paymentId] });
     } catch (cause) {
@@ -182,7 +175,7 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
         const latest = await requestLatestPayment(listing.id);
         if (active && latest.paymentId) setPaymentId(latest.paymentId);
       } catch {
-        // Payment history is optional here; the boost form remains available.
+        // optional
       } finally {
         if (active) setInitialLookupDone(true);
       }
@@ -202,21 +195,6 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
     }
   }, [statusQuery.data?.status, queryClient, user?.id]);
 
-  async function querySafaricom() {
-    if (!paymentId) return;
-    setQueryingDaraja(true);
-    setDarajaQueryError('');
-    setDarajaQuery(null);
-    try {
-      setDarajaQuery(await requestDarajaQuery(paymentId));
-      await statusQuery.refetch();
-    } catch (cause) {
-      setDarajaQueryError(cause instanceof Error ? cause.message : 'Could not query Safaricom.');
-    } finally {
-      setQueryingDaraja(false);
-    }
-  }
-
   async function refreshStatus() {
     const result = await statusQuery.refetch();
     if (result.data?.status === 'paid') {
@@ -228,6 +206,15 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
       ]);
     }
   }
+
+  function retryFailed() {
+    setPaymentId(null);
+    setExpanded(true);
+    setError('');
+  }
+
+  const feedback = paymentFeedback(statusQuery.data);
+  const showRetry = statusQuery.data?.status === 'failed' && statusQuery.data.resultCode !== 4999;
 
   return (
     <div className="boost-control">
@@ -264,39 +251,19 @@ export function BoostListingControl({ listing }: { listing: ListingSummary }) {
       )}
       {paymentId && (
         <div className={`boost-payment boost-payment-${statusQuery.data?.status || 'pending'}`} aria-live="polite">
-          <strong>{paymentFeedback(statusQuery.data).title}</strong>
-          <p>{paymentFeedback(statusQuery.data).message}</p>
+          <strong>{feedback.title}</strong>
+          <p>{feedback.message}</p>
           {(statusQuery.data?.status === 'pending' || statusQuery.data?.status === 'initiating' || statusQuery.isError) && (
             <button type="button" className="btn btn-quiet" onClick={() => void refreshStatus()} disabled={statusQuery.isFetching}>
               {statusQuery.isFetching ? 'Checking…' : 'Check payment status'}
             </button>
           )}
-          {(statusQuery.data?.status === 'pending' || statusQuery.data?.status === 'failed') && (
-            <div className="boost-daraja-diagnostic">
-              {((statusQuery.data?.status === 'failed' && statusQuery.data.resultCode !== 4999) || reconciliationAttempts.current >= 8) && (
-                <button type="button" className="btn btn-quiet" onClick={() => void querySafaricom()} disabled={queryingDaraja || reconciliationQuery.isFetching}>
-                  {queryingDaraja || reconciliationQuery.isFetching ? 'Querying Safaricom…' : 'Check transaction with Safaricom'}
-                </button>
-              )}
-              {darajaQueryError && <p className="field-error" role="alert">{darajaQueryError}</p>}
-              {(darajaQuery || reconciliationQuery.data) && (() => {
-                const latest = darajaQuery || reconciliationQuery.data;
-                return latest ? (
-                  <div className="muted" role="status">
-                    <p><strong>Safaricom query response:</strong> {latest.responseDescription || 'No response description returned.'}</p>
-                    {latest.responseCode !== null && <p>Response code: {latest.responseCode}</p>}
-                    {latest.resultCode !== null && <p>Transaction result code: {latest.resultCode}</p>}
-                    {latest.resultDescription && <p>Transaction result: {latest.resultDescription}</p>}
-                    {Number(latest.resultCode) === 4999 && <p>Safaricom returned 4999. We are treating this as still processing and checking again; it is not proof of payment.</p>}
-                    {(statusQuery.data?.status === 'pending' || statusQuery.data?.resultCode === 4999) && <p>We are waiting for the final payment callback. Your listing will not be boosted until payment is verified.</p>}
-                  </div>
-                ) : null;
-              })()}
-              {statusQuery.data?.status === 'pending' && reconciliationQuery.isFetching && <p className="muted">Checking transaction status with Safaricom…</p>}
-              {reconciliationQuery.isError && <p className="field-error">Automatic Safaricom check could not complete. Your payment remains under review.</p>}
-            </div>
+          {showRetry && (
+            <button type="button" className="btn btn-primary" onClick={retryFailed}>
+              Try again
+            </button>
           )}
-          {(statusQuery.data?.status === 'paid' || (statusQuery.data?.status === 'failed' && statusQuery.data.resultCode !== 4999)) && (
+          {statusQuery.data?.status === 'paid' && (
             <button type="button" className="btn btn-quiet" onClick={() => { setPaymentId(null); setExpanded(false); setPhone(''); }}>
               Done
             </button>
