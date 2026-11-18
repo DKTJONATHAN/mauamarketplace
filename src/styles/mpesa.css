@@ -1,0 +1,69 @@
+.mpesa-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  flex: none;
+}
+.mpesa-mark svg {
+  display: block;
+  flex: none;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .08);
+}
+.mpesa-mark-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+  letter-spacing: .02em;
+}
+.mpesa-mark-lipa {
+  font-size: .58rem;
+  font-weight: 800;
+  color: #fff;
+  opacity: .92;
+}
+.mpesa-mark-mpesa {
+  font-size: .78rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: .04em;
+}
+.mpesa-pay-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  min-height: 2.75rem;
+  padding: .65rem 1.1rem;
+  border: 0;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #12b35a 0%, #00a651 55%, #008f46 100%);
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  letter-spacing: .01em;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .25) inset, 0 2px 8px rgba(0, 102, 51, .28);
+  cursor: pointer;
+  transition: filter .15s ease, transform .15s ease;
+}
+.mpesa-pay-btn:hover:not(:disabled) {
+  filter: brightness(1.04);
+}
+.mpesa-pay-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.mpesa-pay-btn:disabled {
+  opacity: .72;
+  cursor: not-allowed;
+}
+.mpesa-pay-btn.is-full {
+  width: 100%;
+}
+.mpesa-pay-label {
+  font-size: .95rem;
+}
+.boost-form .mpesa-pay-btn,
+.advertise-form .mpesa-pay-btn,
+.advertise-payment-state .mpesa-pay-btn {
+  margin-top: .15rem;
+}
