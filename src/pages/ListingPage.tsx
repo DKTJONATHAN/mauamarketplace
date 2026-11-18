@@ -16,7 +16,7 @@ import { fetchContactPhone, fetchListing, startConversation } from '../lib/api';
 import { formatPrice, isNewMember, memberSince, timeAgo } from '../lib/format';
 import { conditionLabels } from '../lib/types';
 import { rememberRecentlyViewed, useSeo, useGoToLogin } from '../hooks';
-import { listingDescription, listingJsonLd, listingPath } from '../lib/seo';
+import { listingDescription, listingJsonLd, listingPath, listingSeoTitle } from '../lib/seo';
 import { mediaUrl } from '../config/site';
 
 export function ListingPage() {
@@ -40,7 +40,7 @@ export function ListingPage() {
   useSeo(
     listing
       ? {
-          title: listing.title,
+          title: listingSeoTitle(listing),
           description: listingDescription(listing),
           path: listingPath(listing.title, listing.id),
           image: listing.images?.[0] ? mediaUrl(listing.images[0]) : undefined,
@@ -99,7 +99,7 @@ export function ListingPage() {
         toast.success('Link copied.');
       }
     } catch {
-      /* the person closed the share sheet */
+      /* closed share sheet */
     }
   }
 
@@ -157,12 +157,7 @@ export function ListingPage() {
               </div>
               {available ? (
                 <div className="stack">
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-block"
-                    onClick={() => (user && !isAnonymous ? message.mutate() : goToLogin())}
-                    disabled={message.isPending}
-                  >
+                  <button type="button" className="btn btn-primary btn-block" onClick={() => (user && !isAnonymous ? message.mutate() : goToLogin())} disabled={message.isPending}>
                     <MessageCircle aria-hidden /> {message.isPending ? 'Opening chat...' : 'Message seller'}
                   </button>
                   <button type="button" className="btn btn-quiet btn-block" onClick={showPhone}>
@@ -189,11 +184,7 @@ export function ListingPage() {
 
       <ReportDialog open={reporting} onClose={() => setReporting(false)} listingId={listing.id} subject="this listing" />
 
-      <Dialog
-        open={phoneStep !== 'closed'}
-        onClose={() => setPhoneStep('closed')}
-        title={phoneStep === 'warn' ? 'Read this before you call' : 'Seller phone number'}
-      >
+      <Dialog open={phoneStep !== 'closed'} onClose={() => setPhoneStep('closed')} title={phoneStep === 'warn' ? 'Read this before you call' : 'Seller phone number'}>
         {phoneStep === 'warn' ? (
           <div className="stack">
             <p>{defaultNotice}</p>
@@ -214,14 +205,7 @@ export function ListingPage() {
               <>
                 <p className="phone-number"><a href={`tel:${phone.data}`}>{phone.data}</a></p>
                 <div className="actions">
-                  <button
-                    type="button"
-                    className="btn btn-quiet"
-                    onClick={() => {
-                      void navigator.clipboard.writeText(phone.data ?? '');
-                      toast.success('Number copied.');
-                    }}
-                  >
+                  <button type="button" className="btn btn-quiet" onClick={() => { void navigator.clipboard.writeText(phone.data ?? ''); toast.success('Number copied.'); }}>
                     <Copy aria-hidden /> Copy
                   </button>
                   <a className="btn btn-primary" href={`tel:${phone.data}`}>Call</a>
