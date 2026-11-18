@@ -10,6 +10,55 @@ import './advertise.css';
 
 const placements: AdPlacement[] = ['homepage_banner', 'category_feature', 'business_spotlight'];
 
+function advertisingFeedback(status?: string, resultCode?: number | null, message?: string, paymentStartError?: string, isLoading?: boolean): { title: string; body: string } {
+  if (status === 'paid') {
+    return {
+      title: 'Payment successful',
+      body: 'Your slot request is paid and awaiting artwork review and scheduling.',
+    };
+  }
+  if (status === 'pending') {
+    return {
+      title: 'Waiting for M-PESA confirmation',
+      body: 'A payment prompt has been sent to your phone. Enter your M-PESA PIN to approve the payment.',
+    };
+  }
+  if (status === 'failed') {
+    if (resultCode === 1) {
+      return {
+        title: 'Insufficient funds',
+        body: 'Your M-PESA balance is too low. Top up and send a new payment prompt.',
+      };
+    }
+    if (resultCode === 1038) {
+      return {
+        title: 'Payment failed',
+        body: 'The M-PESA prompt timed out. Send a new prompt when ready.',
+      };
+    }
+    if (resultCode === 1032) {
+      return {
+        title: 'Payment failed',
+        body: 'The payment was cancelled on your phone. You can try again when ready.',
+      };
+    }
+    return {
+      title: 'Payment failed',
+      body: message || 'The payment could not be completed. Please try again.',
+    };
+  }
+  if (isLoading) {
+    return {
+      title: 'Checking payment',
+      body: 'Your request is saved. We are checking the payment status.',
+    };
+  }
+  return {
+    title: 'Advertising request saved',
+    body: paymentStartError || 'Send the M-PESA prompt to complete payment for this advertising slot.',
+  };
+}
+
 export function AdvertisePage() {
   useSeo({ title: 'Advertise Your Business in Maua and Meru | Maua Marketplace', path: '/advertise', description: 'Promote your business to people browsing Maua Marketplace. Compare homepage, category and business spotlight advertising options with clear KSh pricing.' });
   const { user, isAnonymous } = useAuth();
@@ -26,13 +75,26 @@ export function AdvertisePage() {
   const [submitting, setSubmitting] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [startingPayment, setStartingPayment] = useState(false);
-  const [checkingPayment, setCheckingPayment] = useState(false);
   const [paymentStartError, setPaymentStartError] = useState('');
   const payment = useQuery({
     queryKey: ['advertising-payment', bookingId],
     queryFn: () => fetchAdvertisingPaymentStatus(bookingId as string),
     enabled: Boolean(bookingId),
     refetchInterval: query => query.state.data?.status === 'pending' ? 5000 : false,
+    retry: false,
+  });
+
+  // Quiet background reconciliation while pending
+  useQuery({
+    queryKey: ['advertising-daraja-reconcile', bookingId],
+    queryFn: async () => {
+      await queryAdvertisingPayment(bookingId as string);
+      await payment.refetch();
+      return true;
+    },
+    enabled: Boolean(bookingId) && payment.data?.status === 'pending',
+    refetchInterval: 20000,
+    refetchIntervalInBackground: false,
     retry: false,
   });
 
@@ -46,24 +108,12 @@ export function AdvertisePage() {
     setPaymentStartError('');
     try {
       await startAdvertisingPayment(bookingId, phone);
+      toast.success('M-PESA prompt sent. Approve it on your phone.');
       await payment.refetch();
     } catch (error) {
       setPaymentStartError(error instanceof Error ? error.message : 'Could not start M-PESA payment.');
     } finally {
       setStartingPayment(false);
-    }
-  }
-
-  async function checkSafaricomStatus() {
-    if (!bookingId) return;
-    setCheckingPayment(true);
-    try {
-      await queryAdvertisingPayment(bookingId);
-      await payment.refetch();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not check Safaricom payment status.');
-    } finally {
-      setCheckingPayment(false);
     }
   }
 
@@ -97,6 +147,14 @@ export function AdvertisePage() {
     }
   }
 
+  const feedback = advertisingFeedback(
+    payment.data?.status,
+    payment.data?.resultCode,
+    payment.data?.message,
+    paymentStartError,
+    payment.isLoading,
+  );
+
   return (
     <div className="wrap page advertise-page">
       <header className="advertise-intro">
@@ -121,7 +179,7 @@ export function AdvertisePage() {
           {placements.map((key) => {
             const item = adPackages[key];
             return (
-              <button type="button" key={key} className={placement === key ? 'advertise-package is-selected' : 'advertise-package'} onClick={() => setPlacement(key)} aria-pressed={placement === key}>
+              <button type="button" key={key} className={placement === key ? 'advertise-package is-selected' : 'advertise-package'} onClick={() => setPlacement(key)} aria-pressed={placement === key} disabled={Boolean(bookingId)}>
                 <span className="advertise-package-name">{item.name}</span>
                 <span className="advertise-package-price">KSh {item.weeklyPrice.toLocaleString('en-KE')}<small> / 7 days</small></span>
                 <span className="advertise-package-month">KSh {item.monthlyPrice.toLocaleString('en-KE')} <small>/ 30 days</small></span>
@@ -148,31 +206,40 @@ export function AdvertisePage() {
           <p className="advertise-smallprint">We do not guarantee a specific number of views, clicks or sales. Placement dates depend on availability.</p>
         </div>
 
-        <form className="advertise-form" onSubmit={submit}>
-          <h3>Campaign details</h3>
-          {!user || isAnonymous ? <p className="advertise-signin-note">Sign in to submit and track an advertising request.</p> : null}
-          <label>Business or organisation name<input required minLength={2} maxLength={100} value={businessName} onChange={e => setBusinessName(e.target.value)} placeholder="e.g. Maua Fresh Produce" /></label>
-          <label>M-PESA phone number<input required type="tel" inputMode="tel" autoComplete="tel" maxLength={16} value={phone} onChange={e => setPhone(e.target.value)} placeholder="07XX XXX XXX" disabled={Boolean(bookingId)} /><small className="advertise-optional">We send the payment prompt to this number. Enter your PIN only on your phone.</small></label>
-          <label>Website or social page <span className="advertise-optional">Optional</span><input type="url" value={website} onChange={e => setWebsite(e.target.value)} placeholder="https://" /></label>
-          <div className="advertise-form-row">
-            <label>Campaign length<select value={duration} onChange={e => setDuration(Number(e.target.value) as AdDuration)}><option value={7}>7 days</option><option value={30}>30 days</option></select></label>
-            <label>Preferred start date<input required type="date" min={minimumDate} value={startDate} onChange={e => setStartDate(e.target.value)} /></label>
-          </div>
-          <label>Artwork or image URL <span className="advertise-optional">Optional</span><input type="url" value={creativeUrl} onChange={e => setCreativeUrl(e.target.value)} placeholder="Link to your banner or advert image" /></label>
-          <label>What would you like customers to know? <span className="advertise-optional">Optional</span><textarea rows={3} maxLength={1000} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Describe your offer, service or campaign..." /></label>
-          <button className="btn btn-primary advertise-submit" type="submit" disabled={submitting || Boolean(bookingId)}>{submitting ? 'Submitting request…' : bookingId ? 'Request submitted' : !user || isAnonymous ? 'Sign in to continue' : 'Request this ad slot · KSh ' + price.toLocaleString('en-KE')} <ArrowRight size={16} aria-hidden /></button>
-          <p className="advertise-payment-note">An M-PESA prompt is sent after submission. Your advert is scheduled only after payment is confirmed and the artwork is approved.</p>
-        </form>
-        {bookingId && (
+        {!bookingId ? (
+          <form className="advertise-form" onSubmit={submit}>
+            <h3>Campaign details</h3>
+            {!user || isAnonymous ? <p className="advertise-signin-note">Sign in to submit and track an advertising request.</p> : null}
+            <label>Business or organisation name<input required minLength={2} maxLength={100} value={businessName} onChange={e => setBusinessName(e.target.value)} placeholder="e.g. Maua Fresh Produce" /></label>
+            <label>M-PESA phone number<input required type="tel" inputMode="tel" autoComplete="tel" maxLength={16} value={phone} onChange={e => setPhone(e.target.value)} placeholder="07XX XXX XXX" /><small className="advertise-optional">We send the payment prompt to this number. Enter your PIN only on your phone.</small></label>
+            <label>Website or social page <span className="advertise-optional">Optional</span><input type="url" value={website} onChange={e => setWebsite(e.target.value)} placeholder="https://" /></label>
+            <div className="advertise-form-row">
+              <label>Campaign length<select value={duration} onChange={e => setDuration(Number(e.target.value) as AdDuration)}><option value={7}>7 days</option><option value={30}>30 days</option></select></label>
+              <label>Preferred start date<input required type="date" min={minimumDate} value={startDate} onChange={e => setStartDate(e.target.value)} /></label>
+            </div>
+            <label>Artwork or image URL <span className="advertise-optional">Optional</span><input type="url" value={creativeUrl} onChange={e => setCreativeUrl(e.target.value)} placeholder="Link to your banner or advert image" /></label>
+            <label>What would you like customers to know? <span className="advertise-optional">Optional</span><textarea rows={3} maxLength={1000} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Describe your offer, service or campaign..." /></label>
+            <button className="btn btn-primary advertise-submit" type="submit" disabled={submitting}>{submitting ? 'Submitting request…' : !user || isAnonymous ? 'Sign in to continue' : 'Request this ad slot · KSh ' + price.toLocaleString('en-KE')} <ArrowRight size={16} aria-hidden /></button>
+            <p className="advertise-payment-note">An M-PESA prompt is sent after submission. Your advert is scheduled only after payment is confirmed and the artwork is approved.</p>
+          </form>
+        ) : (
           <div className={payment.data?.status === 'paid' ? 'advertise-payment-state is-paid' : 'advertise-payment-state'} role="status" aria-live="polite">
-            <strong>{payment.data?.status === 'paid' ? 'Payment confirmed' : payment.data?.status === 'pending' ? 'Waiting for M-PESA confirmation' : payment.data?.status === 'failed' ? (payment.data.resultCode === 1 ? 'Insufficient M-PESA funds' : payment.data.resultCode === 1038 ? 'M-PESA prompt timed out' : payment.data.resultCode === 1032 ? 'Payment cancelled' : 'Payment rejected') : payment.isLoading ? 'Checking your payment request' : 'Advertising request saved'}</strong>
-            <p>{payment.data?.status === 'paid' ? 'Your slot request is paid and awaiting artwork review and scheduling.' : payment.data?.status === 'pending' ? 'Check your phone and enter your M-PESA PIN to approve the payment.' : payment.data?.status === 'failed' ? (payment.data.resultCode === 1 ? 'Top up your M-PESA account, then send a new payment prompt.' : payment.data.resultCode === 1038 ? 'The prompt expired without a response. Send a new prompt when ready.' : payment.data.resultCode === 1032 ? 'You cancelled the payment. You can try again when ready.' : payment.data.message || 'Safaricom could not complete the payment. Try again.') : payment.isLoading ? 'Your request is saved. We are checking the payment status.' : paymentStartError || 'Send the M-PESA prompt to complete payment for this advertising slot.'}</p>
+            <strong>{feedback.title}</strong>
+            <p>{feedback.body}</p>
             {paymentStartError && <p className="field-error">{paymentStartError}</p>}
             {(payment.data?.status === 'unpaid' || payment.data?.status === 'failed' || paymentStartError || payment.isError) && (
               <button type="button" className="btn btn-primary" onClick={() => void retryPayment()} disabled={startingPayment || !phone.trim()}>{startingPayment ? 'Sending prompt…' : 'Send M-PESA prompt again'}</button>
             )}
-            {payment.data?.status === 'pending' && <button type="button" className="btn btn-quiet" onClick={() => void checkSafaricomStatus()} disabled={checkingPayment || payment.isFetching}>{checkingPayment || payment.isFetching ? 'Checking with Safaricom…' : 'Check with Safaricom'}</button>}
-            {payment.data?.status === 'paid' && <button type="button" className="btn btn-quiet" onClick={() => { setBookingId(null); setPaymentStartError(''); }}>Book another campaign</button>}
+            {payment.data?.status === 'pending' && (
+              <button type="button" className="btn btn-quiet" onClick={() => void payment.refetch()} disabled={payment.isFetching}>
+                {payment.isFetching ? 'Checking…' : 'Check payment status'}
+              </button>
+            )}
+            {payment.data?.status === 'paid' && (
+              <button type="button" className="btn btn-quiet" onClick={() => { setBookingId(null); setPaymentStartError(''); setPhone(''); }}>
+                Book another campaign
+              </button>
+            )}
           </div>
         )}
       </section>
