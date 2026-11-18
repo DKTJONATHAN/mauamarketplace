@@ -88,7 +88,7 @@ const pages = [
 
 const prerenderedPaths = new Set(pages.map(({ path }) => path));
 function canonicalPath(path) {
-  return path === '/' || !prerenderedPaths.has(path) ? path : `${path}/`;
+  return path;
 }
 
 function escapeHtml(value) {
