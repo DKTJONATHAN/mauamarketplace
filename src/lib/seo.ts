@@ -12,18 +12,12 @@ export function listingPath(title: string, id: string): string {
 }
 
 export interface SeoProps {
-  /** Document title (without site name suffix). Omit for homepage default. */
   title?: string;
   description?: string;
-  /** Absolute or site-relative path for canonical / og:url (clean path, e.g. /listing/id). */
   path?: string;
-  /** Absolute image URL for og:image / twitter:image. */
   image?: string;
-  /** Open Graph type. */
   type?: 'website' | 'article' | 'product';
-  /** noindex for private / utility pages. */
   noindex?: boolean;
-  /** JSON-LD object or array; injected as application/ld+json. */
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
@@ -31,8 +25,6 @@ const META_ATTR = 'data-mm-seo';
 
 function setMeta(attr: 'name' | 'property', key: string, content: string): void {
   if (typeof document === 'undefined') return;
-  // Prefer an existing tag (including static ones in index.html) so crawlers that
-  // read the first match still get updated content after JS runs.
   let el = document.head.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement | null;
   if (!el) {
     el = document.createElement('meta');
@@ -57,8 +49,6 @@ function setLink(rel: string, href: string): void {
 
 function setJsonLd(data: Record<string, unknown> | Record<string, unknown>[] | undefined): void {
   if (typeof document === 'undefined') return;
-  // Keep the website and organization identity available on every route, then add
-  // route-specific structured data such as Product for an individual listing.
   document.head.querySelectorAll('script[type="application/ld+json"]').forEach((n) => n.remove());
   const pageData = data ? (Array.isArray(data) ? data : [data]) : [];
   const includesSiteIdentity = pageData.some((entry) => entry['@type'] === 'WebSite' || entry['@type'] === 'Organization');
@@ -70,7 +60,6 @@ function setJsonLd(data: Record<string, unknown> | Record<string, unknown>[] | u
   document.head.appendChild(el);
 }
 
-/** Apply full SEO head tags. Call from useEffect; never throws into the React tree. */
 export function applySeo(props: SeoProps = {}): void {
   try {
     const title = props.title
@@ -116,12 +105,10 @@ export function applySeo(props: SeoProps = {}): void {
     setLink('canonical', url);
     setJsonLd(props.jsonLd);
   } catch (err) {
-    // Never let SEO side-effects take down the UI.
     console.warn('SEO update failed', err);
   }
 }
 
-/** Build JSON-LD for the organization / website (homepage). */
 export function websiteJsonLd(): Record<string, unknown>[] {
   const url = siteUrl();
   return [
@@ -156,7 +143,6 @@ export function websiteJsonLd(): Record<string, unknown>[] {
   ];
 }
 
-/** Build Product / Offer JSON-LD for a public listing. */
 export function listingJsonLd(listing: Listing): Record<string, unknown> {
   const category = getCategory(listing.category);
   const image =
@@ -212,11 +198,22 @@ function conditionToSchema(c: string): string {
   }
 }
 
-/** Short social-friendly description for a listing. */
+/** Social / meta description: title, price, place first so previews are scannable. */
 export function listingDescription(listing: Listing): string {
   const price = formatPrice(listing.price, listing.negotiable ? ' (negotiable)' : '');
   const cat = getCategory(listing.category).label;
   const loc = listing.location || site.place;
-  const base = listing.description?.trim().slice(0, 120) || listing.title;
-  return `${base} — ${price} · ${cat} · ${loc}. On ${site.name}.`;
+  const detail = listing.description?.trim().replace(/\s+/g, ' ').slice(0, 90);
+  const lead = `${listing.title} — ${price}`;
+  return detail
+    ? `${lead} · ${loc} · ${cat}. ${detail}`
+    : `${lead} · ${cat} · ${loc}. Listed on ${site.name}.`;
+}
+
+/** Document title for a listing page (includes price when available). */
+export function listingSeoTitle(listing: Listing): string {
+  const price = listing.price != null && listing.price > 0
+    ? formatPrice(listing.price)
+    : null;
+  return price ? `${listing.title} · ${price}` : listing.title;
 }
