@@ -81,22 +81,36 @@ export function renderListingCards(listings: Listing[]): string {
   }).join('')}</ul>`;
 }
 
-export function buildHead(title: string, description: string, path: string, robots: string, image: string, jsonLd: unknown): string {
+export function buildHead(
+  title: string,
+  description: string,
+  path: string,
+  robots: string,
+  image: string,
+  jsonLd: unknown,
+  social: { type?: 'website' | 'product'; imageAlt?: string } = {},
+): string {
   const canonical = `${SITE_ORIGIN}${path === '/' ? '/' : path}`;
+  const imageAlt = social.imageAlt || 'Maua Marketplace';
   return `<title>${escapeHtml(title)}</title>
 <meta name="description" content="${escapeHtml(description)}">
 <meta name="robots" content="${escapeHtml(robots)}">
+<meta name="googlebot" content="${escapeHtml(robots)}">
 <link rel="canonical" href="${escapeHtml(canonical)}">
 <meta property="og:site_name" content="Maua Marketplace">
-<meta property="og:type" content="website">
+<meta property="og:locale" content="en_KE">
+<meta property="og:type" content="${social.type || 'website'}">
 <meta property="og:title" content="${escapeHtml(title)}">
 <meta property="og:description" content="${escapeHtml(description)}">
 <meta property="og:url" content="${escapeHtml(canonical)}">
 <meta property="og:image" content="${escapeHtml(image)}">
+<meta property="og:image:secure_url" content="${escapeHtml(image)}">
+<meta property="og:image:alt" content="${escapeHtml(imageAlt)}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${escapeHtml(title)}">
 <meta name="twitter:description" content="${escapeHtml(description)}">
 <meta name="twitter:image" content="${escapeHtml(image)}">
+<meta name="twitter:image:alt" content="${escapeHtml(imageAlt)}">
 <script type="application/ld+json">${safeJson(jsonLd)}</script>`;
 }
 
