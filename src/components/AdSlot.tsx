@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { mediaUrl } from '../config/site';
 import { supabase } from '../lib/supabase';
 import './ad-slot.css';
 
@@ -13,11 +14,31 @@ interface Advertisement {
   creative_url: string | null;
 }
 
-function safeExternalUrl(value: string | null): string | null {
+function resolveCreative(value: string | null): string | null {
   if (!value) return null;
+  if (value.startsWith('http://') || value.startsWith('https://')) {
+    try {
+      const url = new URL(value);
+      return url.protocol === 'https:' ? url.href : null;
+    } catch {
+      return null;
+    }
+  }
+  // Uploaded R2 / storage path from the advert form
+  return mediaUrl(value);
+}
+
+function resolveDestination(value: string | null): { href: string; external: boolean } | null {
+  if (!value) return null;
+  if (value.startsWith('/')) return { href: value, external: false };
   try {
     const url = new URL(value);
-    return url.protocol === 'https:' ? url.href : null;
+    if (url.protocol !== 'https:') return null;
+    // Same-site listing deep links can open in-app
+    if (typeof window !== 'undefined' && url.origin === window.location.origin) {
+      return { href: `${url.pathname}${url.search}${url.hash}`, external: false };
+    }
+    return { href: url.href, external: true };
   } catch {
     return null;
   }
@@ -54,8 +75,8 @@ export function AdSlot({ placement }: { placement: AdPlacement }) {
       {ads.length ? (
         <div className="marketplace-ad-grid">
           {ads.map((ad) => {
-            const website = safeExternalUrl(ad.website_url);
-            const creative = safeExternalUrl(ad.creative_url);
+            const destination = resolveDestination(ad.website_url);
+            const creative = resolveCreative(ad.creative_url);
             return (
               <article className="marketplace-ad" key={ad.id}>
                 {creative && <img src={creative} alt="" loading="lazy" />}
@@ -63,7 +84,12 @@ export function AdSlot({ placement }: { placement: AdPlacement }) {
                   <span className="marketplace-ad-label">Sponsored</span>
                   <h2>{ad.headline || ad.business_name}</h2>
                   {ad.body && <p>{ad.body}</p>}
-                  {website && <a href={website} target="_blank" rel="noopener noreferrer">Visit business <span aria-hidden>↗</span></a>}
+                  {destination && destination.external && (
+                    <a href={destination.href} target="_blank" rel="noopener noreferrer">Visit business <span aria-hidden>↗</span></a>
+                  )}
+                  {destination && !destination.external && (
+                    <Link to={destination.href}>View listing <span aria-hidden>→</span></Link>
+                  )}
                 </div>
               </article>
             );
