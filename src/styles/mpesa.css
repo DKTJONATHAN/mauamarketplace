@@ -1,14 +1,26 @@
 .mpesa-mark {
   display: inline-flex;
   align-items: center;
-  gap: .4rem;
+  gap: .55rem;
   flex: none;
 }
-.mpesa-mark svg {
-  display: block;
+.mpesa-mark-badge {
+  display: grid;
+  place-items: center;
   flex: none;
-  border-radius: 3px;
+  min-width: 4.4rem;
+  height: 1.85rem;
+  padding: .12rem .35rem;
+  border-radius: 4px;
+  background: #fff;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, .08);
+}
+.mpesa-mark-logo {
+  display: block;
+  width: auto;
+  height: 1.35rem;
+  max-width: 4.1rem;
+  object-fit: contain;
 }
 .mpesa-mark-text {
   display: flex;
@@ -33,7 +45,7 @@
   align-items: center;
   justify-content: center;
   gap: .75rem;
-  min-height: 2.75rem;
+  min-height: 2.85rem;
   padding: .65rem 1.1rem;
   border: 0;
   border-radius: 6px;
@@ -66,4 +78,9 @@
 .advertise-form .mpesa-pay-btn,
 .advertise-payment-state .mpesa-pay-btn {
   margin-top: .15rem;
+}
+@media (max-width: 420px) {
+  .mpesa-mark-text {
+    display: none;
+  }
 }

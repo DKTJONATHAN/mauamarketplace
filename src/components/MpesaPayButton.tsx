@@ -1,13 +1,22 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
-/** Official-style Lipa na M-PESA payment button (green Safaricom/M-PESA treatment). */
+/** M-PESA wordmark from Wikimedia Commons (File:M-PESA_LOGO-01.svg). */
+const MPESA_LOGO_SRC = `${import.meta.env.BASE_URL}mpesa-logo.svg`.replace(/\/\/+/g, '/');
+
+/** Official M-PESA mark used on all Lipa na M-PESA payment buttons. */
 export function MpesaMark({ className = '' }: { className?: string }) {
   return (
     <span className={`mpesa-mark ${className}`.trim()} aria-hidden>
-      <svg viewBox="0 0 24 24" width="18" height="18" focusable="false">
-        <rect x="3" y="2" width="18" height="20" rx="3" fill="#fff" />
-        <path d="M7 7h10v2.2H9.6V17H7V7zm4.2 4.2H17V13h-3.2v4H11.2v-5.8z" fill="#00A651" />
-      </svg>
+      <span className="mpesa-mark-badge">
+        <img
+          className="mpesa-mark-logo"
+          src={MPESA_LOGO_SRC}
+          alt=""
+          width={72}
+          height={38}
+          decoding="async"
+        />
+      </span>
       <span className="mpesa-mark-text">
         <span className="mpesa-mark-lipa">LIPA NA</span>
         <span className="mpesa-mark-mpesa">M-PESA</span>
