@@ -110,7 +110,7 @@ export async function renderPublicPage(path: string, html: string, env: Env): Pr
       };
       schema = [pageJsonLd(title, description, path, ['Home', categoryLabel(listing.category), listing.title])[0], product, pageJsonLd(title, description, path, ['Home', categoryLabel(listing.category), listing.title])[2], pageJsonLd(title, description, path, ['Home', categoryLabel(listing.category), listing.title])[3]].filter(Boolean);
     }
-    if (!hasPrice || !hasImage || wordCount(body) < 120) robots = 'noindex,follow';
+    if ((listing.description || '').trim().length < 40 || wordCount(body) < 80) robots = 'noindex,follow';
   } else {
     const staticPages = STATIC_PAGES;
     const page = staticPages[path];
@@ -119,7 +119,12 @@ export async function renderPublicPage(path: string, html: string, env: Env): Pr
     schema = pageJsonLd(title, description, path, path === '/' ? [] : ['Home', title]);
   }
 
-  const tags = buildHead(title, description, path, robots, image, schema || pageJsonLd(title, description, path));
+  const isListing = path.startsWith('/listing/');
+  const listingImageAlt = isListing ? `${title.split(' · ')[0]} product photo on Maua Marketplace` : 'Maua Marketplace';
+  const tags = buildHead(title, description, path, robots, image, schema || pageJsonLd(title, description, path), {
+    type: isListing ? 'product' : 'website',
+    imageAlt: listingImageAlt,
+  });
   const updated = replaceRoot(replaceHead(html, tags), body);
   return new Response(updated, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=60, s-maxage=60' } });
 }
