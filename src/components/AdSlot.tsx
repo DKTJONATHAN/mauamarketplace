@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { mediaUrl } from '../config/site';
+import { rotateAds } from '../lib/adInventory';
 import { supabase } from '../lib/supabase';
 import './ad-slot.css';
 
@@ -24,7 +25,6 @@ function resolveCreative(value: string | null): string | null {
       return null;
     }
   }
-  // Uploaded R2 / storage path from the advert form
   return mediaUrl(value);
 }
 
@@ -34,7 +34,6 @@ function resolveDestination(value: string | null): { href: string; external: boo
   try {
     const url = new URL(value);
     if (url.protocol !== 'https:') return null;
-    // Same-site listing deep links can open in-app
     if (typeof window !== 'undefined' && url.origin === window.location.origin) {
       return { href: `${url.pathname}${url.search}${url.hash}`, external: false };
     }
@@ -57,7 +56,7 @@ export function AdSlot({ placement }: { placement: AdPlacement }) {
         .lte('start_date', today)
         .gte('end_date', today)
         .order('created_at', { ascending: false })
-        .limit(2);
+        .limit(12);
       if (error) throw new Error(error.message || 'Could not load sponsored placements.');
       return (data ?? []) as Advertisement[];
     },
@@ -66,7 +65,7 @@ export function AdSlot({ placement }: { placement: AdPlacement }) {
   });
 
   if (query.isLoading) return null;
-  const ads = query.data ?? [];
+  const ads = rotateAds(query.data ?? [], 2);
   const label = placement === 'homepage_banner' ? 'Homepage advertising' :
     placement === 'category_feature' ? 'Category advertising' : 'Business spotlight';
 
