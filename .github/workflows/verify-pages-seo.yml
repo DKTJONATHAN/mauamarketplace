@@ -1,0 +1,47 @@
+name: Verify Maua public sitemap
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "public/_routes.json"
+      - "functions/sitemap.xml.ts"
+      - ".github/workflows/verify-pages-seo.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Allow Cloudflare Pages to deploy
+        if: github.event_name == 'push'
+        run: sleep 90
+
+      - name: Verify the live sitemap is XML and contains public routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://mauamarketplace.eu.cc/sitemap.xml"
+          status="000"
+          for attempt in 1 2 3 4 5 6; do
+            status="$(curl --connect-timeout 15 --max-time 30 -A 'Mozilla/5.0 (compatible; MauaSEOCheck/1.0)' -sSL -D /tmp/sitemap.headers -o /tmp/sitemap.xml -w '%{http_code}' "$url" || true)"
+            if [[ "$status" == "200" ]] && grep -q '<urlset' /tmp/sitemap.xml; then
+              break
+            fi
+            echo "Attempt $attempt: sitemap returned HTTP $status or no XML urlset; retrying."
+            sleep 15
+          done
+
+          test "$status" = "200"
+          grep -qi '^content-type: application/xml' /tmp/sitemap.headers
+          grep -q '<urlset' /tmp/sitemap.xml
+          grep -q '<loc>https://mauamarketplace.eu.cc/</loc>' /tmp/sitemap.xml
+          grep -q '<loc>https://mauamarketplace.eu.cc/browse</loc>' /tmp/sitemap.xml
+          grep -q '<loc>https://mauamarketplace.eu.cc/categories</loc>' /tmp/sitemap.xml
+
+          count="$(grep -o '<loc>' /tmp/sitemap.xml | wc -l | tr -d ' ')"
+          test "$count" -ge 9
+          echo "Verified live XML sitemap: HTTP $status, $count URLs, root/browse/categories present."
