@@ -1,5 +1,23 @@
 {
   "version": 1,
-  "include": ["/api/*"],
+  "include": [
+    "/",
+    "/api/*",
+    "/sitemap.xml",
+    "/categories",
+    "/categories/",
+    "/safety",
+    "/safety/",
+    "/rules",
+    "/rules/",
+    "/privacy",
+    "/privacy/",
+    "/terms",
+    "/terms/",
+    "/refund-policy",
+    "/refund-policy/",
+    "/category/*",
+    "/listing/*"
+  ],
   "exclude": []
 }
